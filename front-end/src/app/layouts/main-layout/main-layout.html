@@ -20,8 +20,8 @@
   <div class="area-trabalho">
     <header class="cabecalho-portal">
       <button class="alternar-menu" type="button" aria-controls="menu-portal" [attr.aria-expanded]="menuAberto()" (click)="menuAberto.set(!menuAberto())"><span aria-hidden="true">☰</span><span class="sr-only">{{menuAberto()?'Fechar menu':'Abrir menu'}}</span></button>
-      <a class="marca-portal" [routerLink]="auth.usuario()?.perfil==='aluno'?'/aluno/provas':'/dashboard'" (click)="fecharMenu()" aria-label="ESFINORA — início"><img src="favicon-esfinora-blue.png" alt="" width="30" height="30" /><span>ESFINORA</span></a>
-      <div class="titulo-portal"><span class="sobretitulo">PORTAL ESFINORA</span><h1>Avaliação e gestão educacional</h1></div>
+      <a class="marca-portal" [routerLink]="auth.usuario()?.perfil==='aluno'?'/aluno/provas':'/dashboard'" (click)="fecharMenu()" aria-label="ESFÍNORA — início"><img src="favicon-esfinge.png" alt="" width="30" height="30" /><span>ESFÍNORA</span></a>
+      <div class="titulo-portal"><span class="sobretitulo">PORTAL ESFÍNORA</span><h1>Avaliação e gestão educacional</h1></div>
       <div class="conta-cabecalho">
         <div class="acoes-conta">
           <span class="boas-vindas-conta">Bem-vindo, <strong>{{ auth.usuario()?.nome }}</strong></span>
@@ -33,6 +33,6 @@
     <main id="conteudo-principal" class="conteudo-portal" tabindex="-1">
       <router-outlet />
     </main>
-    <footer class="rodape-portal"><span>ESFINORA</span><span>Aprender transforma.</span></footer>
+    <footer class="rodape-portal"><span>ESFÍNORA</span><span>Aprender transforma.</span></footer>
   </div>
 </div>

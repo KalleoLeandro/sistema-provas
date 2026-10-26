@@ -13,7 +13,7 @@
  @if(modo==='resultados'&&turmaId&&!loading()&&!provas().length&&!erro()){<p>Nenhuma prova disponível para esta turma.</p>}
  </div>
  @if(carregado()&&!loading()&&!erro()){
- <div class="report-document"><header class="report-heading"><strong>ESFINORA</strong><h3>{{modo==='alunos'?'Lista de alunos — 2026':'Resultados da prova'}}</h3>
+ <div class="report-document"><header class="report-heading"><strong>ESFÍNORA</strong><h3>{{modo==='alunos'?'Lista de alunos — 2026':'Resultados da prova'}}</h3>
  @if(turma;as t){<p>{{t.ensino==='F'?'Ensino fundamental':'Ensino médio'}} — {{t.ano}}º ano {{t.letra}}</p>}
  @if(modo==='resultados'){@if(prova;as p){<p><strong>{{p.titulo}}</strong> · {{p.materia}} · Professor(a): {{p.professor}}</p><p>Disponibilidade: {{p.disponivelEm|date:'dd/MM/yyyy HH:mm'}} a {{p.encerraEm|date:'dd/MM/yyyy HH:mm'}}</p>}}
  <p>Gerado em {{geradoEm|date:'dd/MM/yyyy HH:mm'}}</p></header>

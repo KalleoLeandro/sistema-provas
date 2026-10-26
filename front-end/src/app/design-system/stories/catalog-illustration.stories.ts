@@ -5,7 +5,7 @@ const meta = {
   id: "componentes-illustration", title: "Componentes/Ilustração",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [
@@ -18,6 +18,6 @@ export const Default: StoryObj = {
   render: () => ({
     props: { ...{} },
     template:
-      '<figure class="ds-figure"><img src="branding/esfinora-logo-blue.svg" width="360" alt="ESFINORA: esfinge e conhecimento" /><figcaption>Identidade visual do ESFINORA</figcaption></figure>',
+      '<figure class="ds-figure"><img src="branding/esfinora-logo-blue.svg" width="360" alt="ESFÍNORA: esfinge e conhecimento" /><figcaption>Identidade visual do ESFÍNORA</figcaption></figure>',
   }),
 };

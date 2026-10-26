@@ -6,7 +6,7 @@ const meta = {
   id: "componentes-filter", title: "Componentes/Filtro",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [

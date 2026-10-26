@@ -6,7 +6,7 @@ const meta = {
   id: "componentes-progress-bar", title: "Componentes/Barra de progresso",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [

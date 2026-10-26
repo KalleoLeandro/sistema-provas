@@ -6,7 +6,7 @@ const meta = {
   id: "componentes-image", title: "Componentes/Imagem",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [
@@ -21,6 +21,6 @@ export const Default: StoryObj = {
   render: () => ({
     props: { ...{} },
     template:
-      '<img nz-image width="360" nzSrc="branding/esfinora-logo-blue.svg" nzAlt="Logo ESFINORA" />',
+      '<img nz-image width="360" nzSrc="branding/esfinora-logo-blue.svg" nzAlt="Logo ESFÍNORA" />',
   }),
 };

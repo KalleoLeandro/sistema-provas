@@ -6,7 +6,7 @@ const meta = {
   id: "componentes-rating", title: "Componentes/Avaliação por estrelas",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [

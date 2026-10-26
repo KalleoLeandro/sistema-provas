@@ -17,8 +17,8 @@ export class RelatoriosComponent implements OnInit,OnDestroy {
  readonly loading=signal(false);readonly erro=signal('');readonly carregado=signal(false);
  readonly abas=[{id:'alunos',label:'Lista de alunos'},{id:'resultados',label:'Resultados das provas'}];
  formato='pdf';
- readonly camposAlunos=[{id:'numero',label:'Número'},{id:'nome',label:'Aluno'},{id:'cgm',label:'CGM'},{id:'status',label:'Matrícula'},{id:'turma',label:'Turma'}];
- readonly camposResultados=[...this.camposAlunos,{id:'prova',label:'Prova'},{id:'materia',label:'Matéria'},{id:'professor',label:'Professor(a)'},{id:'situacao',label:'Situação da prova'},{id:'entregueEm',label:'Entregue em'},{id:'nota',label:'Nota / 10'}];
+ readonly camposAlunos=[{id:'numero',label:'Número'},{id:'nome',label:'Aluno'},{id:'cgm',label:'CGM'},{id:'status',label:'Matrícula'}];
+ readonly camposResultados=[...this.camposAlunos,{id:'situacao',label:'Situação da prova'},{id:'entregueEm',label:'Entregue em'},{id:'nota',label:'Nota'}];
  selecionados:Record<string,boolean>={numero:true,nome:true,cgm:true,status:true,turma:false,prova:false,materia:false,professor:false,situacao:true,entregueEm:true,nota:true};
  get campos(){return this.modo==='alunos'?this.camposAlunos:this.camposResultados;}
  get colunas(){return this.campos.filter(c=>this.selecionados[c.id]);}

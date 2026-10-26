@@ -6,7 +6,7 @@ const meta = {
   id: "componentes-selection-buttons", title: "Componentes/Botões de seleção",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [

@@ -6,7 +6,7 @@ const meta = {
   id: "componentes-date-field", title: "Componentes/Campo de data",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [

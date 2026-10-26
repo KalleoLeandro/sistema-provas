@@ -5,7 +5,7 @@ const meta = {
   id: "componentes-text-field", title: "Componentes/Campo de texto",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [

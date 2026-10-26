@@ -1,4 +1,4 @@
-# Design system ESFINORA
+# Design system ESFÍNORA
 
 Catálogo Storybook dos componentes reutilizáveis do portal, incluindo os itens identificáveis nas imagens de referência. Os exemplos usam dados fictícios e não chamam a API.
 

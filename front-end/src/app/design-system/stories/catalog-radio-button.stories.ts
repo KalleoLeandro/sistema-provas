@@ -6,7 +6,7 @@ const meta = {
   id: "componentes-radio-button", title: "Componentes/Botão de opção",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [

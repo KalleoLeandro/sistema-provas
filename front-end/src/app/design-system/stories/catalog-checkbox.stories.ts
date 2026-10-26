@@ -6,7 +6,7 @@ const meta = {
   id: "componentes-checkbox", title: "Componentes/Caixa de seleção",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [

@@ -25,7 +25,7 @@ export class SectionTitleComponent {
     '<footer class="ds-footer"><span>{{brand}}</span><span>{{message}}</span><ng-content /></footer>',
 })
 export class FooterComponent {
-  @Input() brand = 'ESFINORA';
+  @Input() brand = 'ESFÍNORA';
   @Input() message = 'Aprender transforma.';
 }
 @Component({
@@ -34,7 +34,7 @@ export class FooterComponent {
     '<header class="ds-navbar"><strong>{{brand}}</strong><div class="ds-row"><ng-content /></div></header>',
 })
 export class NavbarComponent {
-  @Input() brand = 'ESFINORA';
+  @Input() brand = 'ESFÍNORA';
 }
 @Component({
   selector: 'visual-read-only',

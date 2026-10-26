@@ -1,4 +1,4 @@
-# Identidade visual ESFINORA
+# Identidade visual ESFÍNORA
 
 A logo azul combina o símbolo da esfinge e livro com a tipografia Poppins, alinhada ao tema Gradient Able.
 

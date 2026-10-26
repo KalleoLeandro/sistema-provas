@@ -5,7 +5,7 @@ const meta = {
   id: "componentes-link-nav", title: "Componentes/Link de navegação",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [

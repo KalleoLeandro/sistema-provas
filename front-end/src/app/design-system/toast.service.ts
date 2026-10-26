@@ -13,10 +13,10 @@ export class ToastService {
    *
    * @param message Mensagem definida pelo fluxo chamador.
    * @param type Tipo visual da notificação; informativo por padrão.
-   * @param title Título exibido; ESFINORA por padrão.
+   * @param title Título exibido; ESFÍNORA por padrão.
    * @returns Referência da notificação criada.
    */
-  show(message: string, type: 'success' | 'info' | 'warning' | 'error' = 'info', title = 'ESFINORA') {
+  show(message: string, type: 'success' | 'info' | 'warning' | 'error' = 'info', title = 'ESFÍNORA') {
     /*
      * O feedback permanece visível por cinco segundos. Exibir uma notificação
      * não conclui nem desfaz a operação: o resultado de negócio já deve ter

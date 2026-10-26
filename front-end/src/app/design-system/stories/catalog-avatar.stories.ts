@@ -6,7 +6,7 @@ const meta = {
   title: "Componentes/Avatar",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [
@@ -21,6 +21,6 @@ export const Default: StoryObj = {
   render: () => ({
     props: { ...{} },
     template:
-      '<div class="ds-row"><nz-avatar nzText="AD" nzSize="large" /><nz-avatar nzIcon="user" /><nz-avatar nzSrc="favicon-esfinora-blue.png" /></div>',
+      '<div class="ds-row"><nz-avatar nzText="AD" nzSize="large" /><nz-avatar nzIcon="user" /><nz-avatar nzSrc="favicon-esfinge.png" /></div>',
   }),
 };

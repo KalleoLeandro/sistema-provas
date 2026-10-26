@@ -7,6 +7,6 @@
  .report-page .report-document{border:0;border-radius:0;padding:0;box-shadow:none;color:#000}
  .report-page .tabela-visual,.report-page visual-table-scroll{display:block;overflow:visible!important;max-height:none!important;max-width:none!important}
  .report-page table{width:100%!important;min-width:0!important;border-collapse:collapse;table-layout:auto}
- .report-page th,.report-page td{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;padding:7px!important;color:#000!important;border-bottom:1px solid #888!important}
+ .report-page th,.report-page td{white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important;overflow:visible!important;text-overflow:clip!important;padding:5px!important;font-size:9pt!important;min-width:0!important;color:#000!important;border-bottom:1px solid #888!important}
  .report-page thead{display:table-header-group}.report-page tr{break-inside:avoid}.report-page .report-heading{break-after:avoid}.report-page .report-note{font-size:9pt}
 }

@@ -38,5 +38,5 @@ export const rotas: Routes = [
             { path: 'aluno/provas', data: { perfis: ['aluno'] }, loadComponent: () => import('./pages/aluno/provas/provas').then(modulo => modulo.ProvasAlunoComponent) }
         ]
     },
-    { path: '**', title: 'Página não encontrada | ESFINORA', loadComponent: () => import('./pages/nao-encontrada/nao-encontrada').then(modulo => modulo.NaoEncontradaComponent) }
+    { path: '**', title: 'Página não encontrada | ESFÍNORA', loadComponent: () => import('./pages/nao-encontrada/nao-encontrada').then(modulo => modulo.NaoEncontradaComponent) }
 ];

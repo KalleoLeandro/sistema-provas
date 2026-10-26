@@ -12,7 +12,7 @@
   {
     "name": "Área de texto",
     "story": "catalog-textarea.stories.ts",
-    "implementation": "Composição dos componentes e estilos ESFINORA"
+    "implementation": "Composição dos componentes e estilos ESFÍNORA"
   },
   {
     "name": "Árvore de navegação",
@@ -92,7 +92,7 @@
   {
     "name": "Campo de pesquisa",
     "story": "catalog-search-field.stories.ts",
-    "implementation": "Composição dos componentes e estilos ESFINORA"
+    "implementation": "Composição dos componentes e estilos ESFÍNORA"
   },
   {
     "name": "Campo de seleção",
@@ -107,7 +107,7 @@
   {
     "name": "Campo de texto",
     "story": "catalog-text-field.stories.ts",
-    "implementation": "Composição dos componentes e estilos ESFINORA"
+    "implementation": "Composição dos componentes e estilos ESFÍNORA"
   },
   {
     "name": "Campo monetário",
@@ -127,7 +127,7 @@
   {
     "name": "Cartão",
     "story": "catalog-card.stories.ts",
-    "implementation": "Composição dos componentes e estilos ESFINORA"
+    "implementation": "Composição dos componentes e estilos ESFÍNORA"
   },
   {
     "name": "Conjunto de campos",
@@ -202,7 +202,7 @@
   {
     "name": "Ilustração",
     "story": "catalog-illustration.stories.ts",
-    "implementation": "Composição dos componentes e estilos ESFINORA"
+    "implementation": "Composição dos componentes e estilos ESFÍNORA"
   },
   {
     "name": "Imagem",
@@ -242,7 +242,7 @@
   {
     "name": "Link de navegação",
     "story": "catalog-link-nav.stories.ts",
-    "implementation": "Composição dos componentes e estilos ESFINORA"
+    "implementation": "Composição dos componentes e estilos ESFÍNORA"
   },
   {
     "name": "Lista de transferência",
@@ -277,7 +277,7 @@
   {
     "name": "Notificação",
     "story": "catalog-toast.stories.ts",
-    "implementation": "Composição dos componentes e estilos ESFINORA"
+    "implementation": "Composição dos componentes e estilos ESFÍNORA"
   },
   {
     "name": "Orientação contextual",
@@ -307,7 +307,7 @@
   {
     "name": "Sistema de grade",
     "story": "catalog-sistema-de-grid.stories.ts",
-    "implementation": "Composição dos componentes e estilos ESFINORA"
+    "implementation": "Composição dos componentes e estilos ESFÍNORA"
   },
   {
     "name": "Somente leitura",
@@ -337,7 +337,7 @@
   {
     "name": "Utilidades CSS",
     "story": "catalog-utilidades-css.stories.ts",
-    "implementation": "Composição dos componentes e estilos ESFINORA"
+    "implementation": "Composição dos componentes e estilos ESFÍNORA"
   },
   {
     "name": "Visualizador de PDF",

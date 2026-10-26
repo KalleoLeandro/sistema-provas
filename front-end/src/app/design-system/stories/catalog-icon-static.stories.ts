@@ -6,7 +6,7 @@ const meta = {
   id: "componentes-icon-static", title: "Componentes/Ícone estático",
   parameters: {
     docs: {
-      description: { component: 'Componente reutilizável com a identidade visual do ESFINORA.' },
+      description: { component: 'Componente reutilizável com a identidade visual do ESFÍNORA.' },
     },
   },
   decorators: [
