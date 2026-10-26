@@ -73,3 +73,9 @@ Matéria exige nome até 120 caracteres; turma exige ensino F/M, ano inteiro de 
 O editor de texto permite selecionar uma figura com um clique para ajustar largura proporcional (16 a 3.000 px), texto alternativo, restaurar tamanho original, substituir ou remover. As operações usam o modelo e o histórico do Quill; os atributos width/alt permanecem no HTML ao salvar e reabrir. O exemplo do Storybook permite inserir figuras locais.
 
 Ao selecionar a figura, quatro alças permitem redimensionar por arraste (mouse, caneta ou toque). A largura é limitada ao espaço do editor e a proporção é mantida. Setas nas alças também ajustam o tamanho; Shift usa passos de 1 px. Um único desfazer reverte cada gesto. As alças não integram o HTML salvo.
+
+## Tema Gradient Able
+
+A interface adota como referência visual o [Gradient Able React Free, da CodedThemes](https://codedthemes.com/demos/admin-templates/gradient-able/react/free/app/dashboard/analytics). A implementação permanece nos componentes Angular existentes: barra superior azul, menu branco, cards em gradiente e superfícies compactas. Não são importadas funcionalidades, dados demonstrativos ou dependências React do template.
+
+`tokens.css` centraliza a paleta; `gradient-theme.css` integra os componentes próprios, NG-ZORRO, editor e relatórios. Poppins (400/500/600/700) é servida localmente em `public/fonts`, com licença OFL no mesmo diretório. Portal e histórias do Storybook compartilham o tema.

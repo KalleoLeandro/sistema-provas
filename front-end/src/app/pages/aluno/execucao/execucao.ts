@@ -3,12 +3,13 @@ import { DatePipe } from '@angular/common';
 import { ActivatedRoute,Router,RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AlertComponent,ButtonDirective,CardComponent,FieldComponent,InputDirective } from '../../../design-system/components';
+import { ProgressComponent } from '../../../design-system/progress';
 import { ConfirmDialogComponent } from '../../../design-system/confirm-dialog';
 import { QuestionNavigationComponent } from '../../../design-system/question-navigation';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
 import { RegrasProva,TentativaProva } from '../../../models/execucao-prova';
-@Component({selector:'app-execucao-prova',imports:[DatePipe,FormsModule,RouterLink,AlertComponent,ButtonDirective,CardComponent,FieldComponent,InputDirective,ConfirmDialogComponent,QuestionNavigationComponent],templateUrl:'./execucao.html',styleUrl:'../../../design-system/exam-execution.css'})
+@Component({selector:'app-execucao-prova',imports:[ProgressComponent,DatePipe,FormsModule,RouterLink,AlertComponent,ButtonDirective,CardComponent,FieldComponent,InputDirective,ConfirmDialogComponent,QuestionNavigationComponent],templateUrl:'./execucao.html',styleUrl:'../../../design-system/exam-execution.css'})
 export class ExecucaoProvaComponent implements OnInit,OnDestroy {
  private readonly api=inject(ApiService);private readonly auth=inject(AuthService);private readonly router=inject(Router);private readonly route=inject(ActivatedRoute);
  readonly rules=signal<RegrasProva|null>(null);readonly attempt=signal<TentativaProva|null>(null);readonly loading=signal(true);readonly error=signal('');

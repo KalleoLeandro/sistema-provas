@@ -23,4 +23,10 @@ class CorrecaoServiceTest {
  @Test void objectiveGradeAndBlankZeroArePreserved(){setup();var items=request("1").questoes();var wrong=new SalvarCorrecaoProvaRequest.Item(1,new CorrigirQuestaoRequest(BigDecimal.ZERO,null,0L));assertThrows(DefaultErrorException.class,()->service.save(7L,1L,new SalvarCorrecaoProvaRequest(List.of(wrong,items.get(1)))));var blank=new QuestaoCorrecaoResponse(2,"discursiva",new BigDecimal("1.5"),"Texto",Map.of(),null,null,BigDecimal.ZERO,null,0,null);when(repository.questions(7L,1L)).thenReturn(List.of(objetiva,blank));assertThrows(DefaultErrorException.class,()->service.save(7L,1L,request("0.5")));}
  @Test void otherTeacherIsRejected(){assertEquals(org.springframework.http.HttpStatus.NOT_FOUND,assertThrows(DefaultErrorException.class,()->service.get(8L,1L)).getStatus());}
  @Test void nestedValidationReportsInvalidGrade(){try(var factory=jakarta.validation.Validation.buildDefaultValidatorFactory()){var invalid=new SalvarCorrecaoProvaRequest(List.of(new SalvarCorrecaoProvaRequest.Item(1,new CorrigirQuestaoRequest(new BigDecimal("0.123"),null,0L))));assertFalse(factory.getValidator().validate(invalid).isEmpty());}}
+ @Test void completedCorrectionCanBeRevised(){
+  var completed=new ProvaCorrecaoResumoResponse(1L,3L,"Prova","Matemática","Ana","001",5L,"F",1,"A",now,0,new BigDecimal("1.5"));
+  var graded=new QuestaoCorrecaoResponse(2,"discursiva",new BigDecimal("1.5"),"Texto",Map.of(),null,"Resposta",BigDecimal.ONE,"Feedback anterior",2,now.minusSeconds(60));
+  when(repository.findById(7L,1L)).thenReturn(Optional.of(completed));when(repository.questions(7L,1L)).thenReturn(List.of(objetiva,graded));when(repository.update(eq(7L),eq(1L),anyInt(),any(),eq(now))).thenReturn(true);
+  var updated=new CorrigirQuestaoRequest(new BigDecimal("0.75"),"Feedback revisado",2L);var items=List.of(request("1").questoes().get(0),new SalvarCorrecaoProvaRequest.Item(2,updated));service.save(7L,1L,new SalvarCorrecaoProvaRequest(items));verify(repository).update(7L,1L,2,updated,now);
+ }
 }

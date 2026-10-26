@@ -1,13 +1,13 @@
-.campo-visual { display:block; width:100%; min-height:var(--altura-controle); margin:0; padding:13px 15px; border:1px solid var(--cor-borda); border-radius:var(--raio-padrao); background:var(--cor-superficie); color:var(--cor-texto); font:inherit; }
+.campo-visual { display:block; width:100%; min-height:var(--altura-controle); margin:0; padding:10px 13px; border:1px solid var(--cor-borda); border-radius:var(--raio-padrao); background:var(--cor-superficie); color:var(--cor-texto); font:inherit; }
 .campo-visual::placeholder { color:var(--cor-placeholder); }
-.campo-visual:focus { outline:2px solid var(--cor-primaria); outline-offset:2px; }
+.campo-visual:focus { outline:none; border-color:#80bdff; box-shadow:0 0 0 3px #4099ff1f; }
 .campo-visual:disabled { opacity:.65; cursor:not-allowed; }
 .campo-visual[aria-invalid="true"] { border-color:var(--cor-erro); }
 
-.botao-visual { display:inline-flex; align-items:center; justify-content:center; gap:12px; min-height:var(--altura-controle); padding:13px 20px; border:1px solid transparent; border-radius:var(--raio-padrao); background:var(--cor-primaria); color:var(--cor-superficie); font:600 14px var(--fonte-padrao); text-decoration:none; cursor:pointer; transition:background-color .15s,border-color .15s; }
+.botao-visual { display:inline-flex; align-items:center; justify-content:center; gap:12px; min-height:var(--altura-controle); padding:10px 18px; border:1px solid transparent; border-radius:var(--raio-padrao); background:var(--cor-primaria); color:var(--cor-superficie); font:400 13px var(--fonte-padrao); text-decoration:none; cursor:pointer; transition:background-color .15s,border-color .15s; }
 .botao-visual:hover:not(:disabled) { background:var(--azul-escuro-institucional); filter:none; }
 .botao-visual:focus-visible { outline:3px solid var(--cor-primaria); outline-offset:3px; }
-.botao-compacto { min-width:100px; min-height:var(--altura-botao-compacto); height:var(--altura-botao-compacto); padding:0 14px; border-radius:8px; line-height:1; }
+.botao-compacto { min-width:76px; min-height:var(--altura-botao-compacto); height:var(--altura-botao-compacto); padding:0 14px; border-radius:var(--raio-padrao); line-height:1; }
 
 .botao-secundario { background:var(--cor-superficie); color:var(--cor-acao-neutra); border-color:var(--cor-acao-neutra-borda); }
 .botao-secundario:hover:not(:disabled) { background:var(--cor-acao-neutra-hover); }

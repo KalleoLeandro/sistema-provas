@@ -21,6 +21,6 @@ export const Default: StoryObj = {
   render: () => ({
     props: { ...{} },
     template:
-      '<img nz-image width="360" nzSrc="branding/esfinora-logo-conceito.png" nzAlt="Logo ESFINORA" />',
+      '<img nz-image width="360" nzSrc="branding/esfinora-logo-blue.svg" nzAlt="Logo ESFINORA" />',
   }),
 };

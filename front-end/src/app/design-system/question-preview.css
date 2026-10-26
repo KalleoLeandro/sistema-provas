@@ -2,6 +2,6 @@
 .previa-questao { border: 1px solid var(--cor-borda); border-radius: var(--raio-padrao); padding: 20px; background: var(--cor-superficie); color: var(--cor-texto); overflow-wrap: anywhere; }
 header { font-size: 13px; font-weight: 700; margin-bottom: 16px; color: var(--cor-primaria); }
 .alternativas { display: grid; gap: 12px; padding: 0; list-style: none; }
-li { display: flex; gap: 12px; align-items: baseline; border: 1px solid var(--cor-borda); border-radius: 8px; padding: 10px; }
+li { display: flex; gap: 12px; align-items: baseline; border: 1px solid var(--cor-borda); border-radius: var(--raio-padrao); padding: 10px; }
 .orientacao { color: var(--cor-texto-suave); font-size: 13px; }
 .resposta-escrita { min-height: 140px; border: 1px dashed var(--cor-borda); padding: 16px; color: var(--cor-texto-suave); margin-top: 20px; }

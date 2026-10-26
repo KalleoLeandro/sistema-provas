@@ -52,6 +52,7 @@ public class CorrecaoService {
   */
  @Transactional
  public ProvaCorrecaoResponse save(Long professor,Long id,SalvarCorrecaoProvaRequest request){
+  /* Correções concluídas continuam revisáveis pelo autor, respeitando os limites e a revisão otimista. */
   var prova=get(professor,id);
   /* Exige exatamente as questões da cópia entregue, sem omissões ou números repetidos. */
   var itens=new java.util.HashMap<Integer,CorrigirQuestaoRequest>();

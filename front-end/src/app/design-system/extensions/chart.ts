@@ -29,8 +29,8 @@ export class ChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   private render() {
     this.chart?.destroy();
     const styles = getComputedStyle(this.canvas.nativeElement);
-    const primary=styles.getPropertyValue('--cor-primaria').trim()||'#007d9c';
-    const palette=[primary,'#547c30','#66529c','#a95c23','#28628c','#a44265','#58735e','#8b6b19','#396b76','#775c3d'];
+    const primary=styles.getPropertyValue('--cor-primaria').trim()||'#4099ff';
+    const palette=['#4099ff','#2ed8b6','#ffb64d','#ff5370','#7759de','#00acc1','#90c26d','#e88754','#5476c9','#ce71c6'];
     this.chart = new Chart(this.canvas.nativeElement, {
       type: this.type,
       data: {
@@ -43,7 +43,7 @@ export class ChartComponent implements AfterViewInit, OnChanges, OnDestroy {
           },
         ],
       },
-      options: { responsive: true, maintainAspectRatio: false, animation: false,
+      options: { responsive: true, maintainAspectRatio: false, animation: false,font:{family:styles.getPropertyValue('--fonte-padrao').trim()},
         plugins:{legend:{display:this.type==='pie'||this.type==='doughnut',position:'bottom'}},
         ...(['bar','line'].includes(this.type)?{scales:{y:{beginAtZero:true,max:this.maximum}}}:{}),
       },

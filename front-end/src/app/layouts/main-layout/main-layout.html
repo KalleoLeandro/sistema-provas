@@ -1,16 +1,8 @@
 <div class="estrutura-portal">
   <a class="pular-conteudo" href="#conteudo-principal">Ir para o conteúdo</a>
-  <button class="alternar-menu" type="button" aria-controls="menu-portal"
-    [attr.aria-expanded]="menuAberto()" (click)="menuAberto.set(!menuAberto())">
-    <span class="marca-mobile"><img src="favicon-esfinge.png" alt="" width="32" height="32" />ESFINORA</span><span>{{ menuAberto() ? 'Fechar menu ×' : 'Abrir menu ☰' }}</span>
-  </button>
+
 
   <aside cdkScrollable id="menu-portal" class="barra-lateral" [class.aberta]="menuAberto()">
-    <a class="marca-portal" [routerLink]="auth.usuario()?.perfil === 'aluno' ? '/aluno/provas' : '/dashboard'" (click)="fecharMenu()" aria-label="ESFINORA — início">
-      <img class="logo-esfinora" src="branding/esfinora-logo-conceito.png" alt="ESFINORA" width="2073" height="758" />
-    </a>
-    <p class="descricao-portal">Sistema de Avaliação e Gestão Educacional</p>
-
     <nav class="navegacao" aria-label="Menu principal">
       <span class="rotulo-menu">PRINCIPAL</span>
       <a [routerLink]="auth.usuario()?.perfil === 'aluno' ? '/aluno/provas' : '/dashboard'" routerLinkActive="ativo" [routerLinkActiveOptions]="{ exact: true }"
@@ -27,6 +19,8 @@
 
   <div class="area-trabalho">
     <header class="cabecalho-portal">
+      <button class="alternar-menu" type="button" aria-controls="menu-portal" [attr.aria-expanded]="menuAberto()" (click)="menuAberto.set(!menuAberto())"><span aria-hidden="true">☰</span><span class="sr-only">{{menuAberto()?'Fechar menu':'Abrir menu'}}</span></button>
+      <a class="marca-portal" [routerLink]="auth.usuario()?.perfil==='aluno'?'/aluno/provas':'/dashboard'" (click)="fecharMenu()" aria-label="ESFINORA — início"><img src="favicon-esfinora-blue.png" alt="" width="30" height="30" /><span>ESFINORA</span></a>
       <div class="titulo-portal"><span class="sobretitulo">PORTAL ESFINORA</span><h1>Avaliação e gestão educacional</h1></div>
       <div class="conta-cabecalho">
         <div class="acoes-conta">

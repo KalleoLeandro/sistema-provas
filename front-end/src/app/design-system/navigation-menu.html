@@ -3,7 +3,7 @@
     <div class="navigation-entry" cdkOverlayOrigin #origin="cdkOverlayOrigin">
       @if(item.children?.length) {
         <button type="button" [id]="idPrefix+'-trigger-'+item.id" [class.active]="active(item)" [class.open]="openId()===item.id" [attr.aria-expanded]="openId()===item.id" [attr.aria-controls]="idPrefix+'-panel-'+item.id" (click)="toggle(item)" (keydown)="keydown($event,item,index)">
-          <span>{{item.label}}</span><span class="navigation-chevron" aria-hidden="true">›</span>
+          <span class="navigation-label"><svg class="navigation-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path [attr.d]="item.id==='relatorios'?'M4 20V4M4 20h16M8 16v-4m5 4V8m5 8V5':item.id==='perfil'?'M20 21v-2a7 7 0 0 0-14 0v2M17 7a5 5 0 1 1-10 0 5 5 0 0 1 10 0':item.id==='provas'?'M6 3h9l4 4v14H6zM14 3v5h5M9 12h7m-7 4h7':item.id==='alunos'||item.id==='cadastros'?'M16 21v-2a6 6 0 0 0-12 0v2M14 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0M17 4a4 4 0 0 1 0 8m1 3a5 5 0 0 1 3 5': 'M5 4h14v16H5zM8 8h8m-8 4h8m-8 4h5'" /></svg><span>{{item.label}}</span></span><span class="navigation-chevron" aria-hidden="true">›</span>
         </button>
         <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="origin" [cdkConnectedOverlayOpen]="openId()===item.id" [cdkConnectedOverlayPositions]="positions" [cdkConnectedOverlayWidth]="232" [cdkConnectedOverlayViewportMargin]="8" [cdkConnectedOverlayPush]="true" (overlayOutsideClick)="outside($event)">
           <div class="navigation-panel" [id]="idPrefix+'-panel-'+item.id" role="group" [attr.aria-label]="'Submenu de '+item.label">
@@ -12,7 +12,7 @@
           </div>
         </ng-template>
       } @else {
-        <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="select()" (keydown)="keydown($event,item,index)">{{item.label}}</a>
+        <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="select()" (keydown)="keydown($event,item,index)"><span class="navigation-label"><svg class="navigation-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path [attr.d]="item.id==='relatorios'?'M4 20V4M4 20h16M8 16v-4m5 4V8m5 8V5':item.id==='perfil'?'M20 21v-2a7 7 0 0 0-14 0v2M17 7a5 5 0 1 1-10 0 5 5 0 0 1 10 0':item.id==='provas'?'M6 3h9l4 4v14H6zM14 3v5h5M9 12h7m-7 4h7':item.id==='alunos'||item.id==='cadastros'?'M16 21v-2a6 6 0 0 0-12 0v2M14 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0M17 4a4 4 0 0 1 0 8m1 3a5 5 0 0 1 3 5': 'M5 4h14v16H5zM8 8h8m-8 4h8m-8 4h5'" /></svg><span>{{item.label}}</span></span></a>
       }
     </div>
   }

@@ -16,6 +16,18 @@ public class ProvaAlunoService {
     private final ExecucaoProvaService execution;
     public ProvaAlunoService(ProvaAlunoRepository repository,Clock clock,ExecucaoProvaService execution){this.repository=repository;this.clock=clock;this.execution=execution;}
     /**
+     * Consulta o progresso após a confirmação persistida da entrega.
+     * @param alunoId identidade obtida da sessão que será encerrada
+     * @return totais com o mesmo escopo da lista de provas, incluindo a entrega atual
+     */
+    @Transactional(readOnly=true)
+    public ProgressoProvasResponse progresso(Long alunoId){
+        /* A entrega já foi confirmada antes desta consulta. Não inicia provas nem altera outras tentativas;
+           conta todas as páginas e usa o mesmo instante para os totais, sem expor notas ao aluno. */
+        var agora=clock.instant();
+        return new ProgressoProvasResponse(repository.countAvailable(alunoId,agora),repository.countCompleted(alunoId,agora));
+    }
+    /**
      * Lista liberações vigentes e resume o progresso do aluno.
      * @param alunoId identidade obtida exclusivamente da sessão
      * @param pagina página iniciando em um

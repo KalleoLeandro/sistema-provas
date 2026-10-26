@@ -1,9 +1,9 @@
 .question-form {
   display: grid;
   gap: 16px;
-  --campo-rotulo-tamanho: 16px;
-  --campo-rotulo-peso: 700;
-  --campo-rotulo-cor: #173e52;
+  --campo-rotulo-tamanho: 14px;
+  --campo-rotulo-peso: 600;
+  --campo-rotulo-cor: var(--cor-texto);
   --campo-rotulo-espaco: 10px;
 }
 .question-form h2 { margin: 8px 0 0; font-size: 28px; }
@@ -15,16 +15,16 @@
 .question-columns { display: grid; gap: 24px; min-width: 0; }
 .question-columns > * { min-width: 0; }
 .question-columns.with-preview { grid-template-columns: minmax(0, 1fr) minmax(280px, .8fr); }
-.question-preview { position: sticky; top: 10px; align-self: start; display: grid; gap: 12px; }
+.question-preview { position: sticky; top: 80px; align-self: start; display: grid; gap: 12px; }
 @media(max-width:1100px) { .question-columns.with-preview { grid-template-columns: 1fr; } .question-preview { position: static; } }
 @media(max-width:600px) { .question-settings { grid-template-columns: 1fr; } }
 
-.question-info-card { padding: 18px; border-radius: 12px; box-shadow: none; }
+.question-info-card { padding: 18px; border-radius: var(--raio-padrao); box-shadow: none; }
 .question-info-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr); gap: 16px; align-items: start; }
 .question-info-grid > * { min-width: 0; }
 .question-saved { display: grid; gap: 10px; min-width: 0; }
 .question-saved-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .question-saved-heading h3 { font-size: 18px; }
-.question-saved-count { padding: 5px 10px; border-radius: 20px; background: var(--cor-info-fundo); color: var(--cor-texto); font-size: 13px; font-weight: 600; }
+.question-saved-count { padding: 5px 10px; border-radius: var(--raio-padrao); background: var(--cor-info-fundo); color: var(--cor-texto); font-size: 13px; font-weight: 600; }
 @media(max-width:900px) { .question-info-grid { grid-template-columns: 1fr 1fr; } .question-info-grid > :nth-child(3) { grid-column: 1 / -1; } }
 @media(max-width:600px) { .question-info-grid { grid-template-columns: 1fr; } .question-info-grid > :nth-child(3) { grid-column: auto; } }

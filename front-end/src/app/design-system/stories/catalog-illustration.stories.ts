@@ -18,6 +18,6 @@ export const Default: StoryObj = {
   render: () => ({
     props: { ...{} },
     template:
-      '<figure class="ds-figure"><img src="branding/esfinora-logo-conceito.png" width="360" alt="ESFINORA: esfinge e conhecimento" /><figcaption>Identidade visual do ESFINORA</figcaption></figure>',
+      '<figure class="ds-figure"><img src="branding/esfinora-logo-blue.svg" width="360" alt="ESFINORA: esfinge e conhecimento" /><figcaption>Identidade visual do ESFINORA</figcaption></figure>',
   }),
 };

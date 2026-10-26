@@ -1,27 +1,16 @@
-:root{--azul-institucional:#007a9f;--azul-escuro-institucional:#265971;--verde-lima-institucional:#c3d552;--verde-claro-institucional:#98c455;--verde-institucional:#83bc56;--cinza-institucional:#cad4e1;--cor-primaria:var(--azul-institucional);--cor-texto:var(--azul-escuro-institucional);--cor-texto-suave:#526875;--cor-borda:var(--cinza-institucional);--cor-fundo:#f4f7fa;--raio-padrao:12px;--fonte-padrao:'Segoe UI',Arial,sans-serif;--espaco-2:8px;--espaco-4:16px;--espaco-6:24px;--espaco-8:32px}
-:root{--cor-superficie:#fff;--cor-erro:#a52626;--cor-erro-fundo:#fff2f2;--cor-erro-hover:#fbe0e0;--cor-erro-borda:#edc7c8;--cor-sucesso:#22683b;--cor-sucesso-fundo:#eff9f1;--cor-sucesso-hover:#daf0df;--cor-info:#006782;--cor-info-fundo:#edf7fb;--cor-info-hover:#d9eef6;--cor-neutra:#555;--cor-neutra-fundo:#f0f0f0;--cor-placeholder:#647784;--cor-sidebar:var(--azul-escuro-institucional);--cor-sidebar-texto:#fff;--cor-sidebar-descricao:#e2edf3;--cor-sidebar-rotulo:#d1e1ea;--cor-sidebar-borda:#ffffff30;--cor-sidebar-hover:#ffffff14;--sombra-cartao:0 16px 60px #2659710d;--sombra-ilustracao:8px 12px 0 #e5edf3;--altura-controle:50px;--altura-botao-compacto:40px}
-
-:root{--cor-aviso:#946200}
-
-:root{--largura-formulario:640px}
-
-:root{--cor-tabela-cabecalho-fundo:var(--cor-info-fundo);--cor-tabela-cabecalho-texto:var(--cor-texto);--cor-tabela-cabecalho-borda:var(--cor-primaria)}
-
-:root{--cor-sobreposicao:#152e3dcc}
-
-/* Cores semânticas de ações e superfícies, independentes da identidade institucional. */
-:root {
-  --cor-acao-neutra: #475569;
-  --cor-acao-neutra-borda: #b8c3cf;
-  --cor-acao-neutra-hover: #f1f5f9;
-  --cor-edicao: #805300;
-  --cor-edicao-fundo: #fff8e6;
-  --cor-edicao-hover: #ffefc2;
-  --cor-edicao-borda: #d8b86b;
-  --cor-desabilitado-fundo: #e8edf2;
-  --cor-desabilitado-texto: #647183;
-  --cor-desabilitado-borda: #d5dde6;
-  --cor-cartao-borda: #dce3eb;
-  --cor-cartao-titulo: #253447;
-  --cor-cartao-descricao: #526174;
+:root{
+ --azul-institucional:#4099ff;--azul-escuro-institucional:#287bd8;--verde-lima-institucional:#2ed8b6;--verde-claro-institucional:#59e0c5;--verde-institucional:#1aa98d;--cinza-institucional:#e2e5e8;
+ --cor-primaria:#287bd8;--cor-texto:#373a3c;--cor-texto-suave:#66727e;--cor-borda:#dce1e6;--cor-fundo:#f6f7fb;--cor-superficie:#fff;--cor-placeholder:#78838e;
+ --raio-padrao:4px;--fonte-padrao:'Poppins','Segoe UI',Arial,sans-serif;--espaco-2:8px;--espaco-4:16px;--espaco-6:24px;--espaco-8:32px;--altura-controle:42px;--altura-botao-compacto:34px;--largura-formulario:640px;
+ --cor-erro:#c63c5b;--cor-erro-fundo:#fff0f3;--cor-erro-hover:#ffe1e8;--cor-erro-borda:#f1bcc9;
+ --cor-sucesso:#13846e;--cor-sucesso-fundo:#e6faf5;--cor-sucesso-hover:#d2f5eb;--cor-info:#287bd8;--cor-info-fundo:#edf5ff;--cor-info-hover:#dfedff;--cor-aviso:#a66b10;
+ --cor-neutra:#68737d;--cor-neutra-fundo:#f0f2f5;--cor-sidebar:#fff;--cor-sidebar-texto:#646d75;--cor-sidebar-descricao:#7a858f;--cor-sidebar-rotulo:#343a40;--cor-sidebar-borda:#e2e5e8;--cor-sidebar-hover:#f0f2f5;
+ --sombra-cartao:0 1px 3px #455a6426;--sombra-ilustracao:0 10px 30px #1c69c22b;--cor-sobreposicao:#172d4c80;
+ --cor-tabela-cabecalho-fundo:#f6f7fb;--cor-tabela-cabecalho-texto:#373a3c;--cor-tabela-cabecalho-borda:#e2e5e8;
+ --cor-acao-neutra:#5d6873;--cor-acao-neutra-borda:#cbd2d9;--cor-acao-neutra-hover:#f1f3f5;
+ --cor-edicao:#287bd8;--cor-edicao-fundo:#edf5ff;--cor-edicao-hover:#dcecff;--cor-edicao-borda:#b3d4fa;
+ --cor-desabilitado-fundo:#edf0f3;--cor-desabilitado-texto:#78838d;--cor-desabilitado-borda:#e0e4e8;
+ --cor-cartao-borda:#e2e5e8;--cor-cartao-titulo:#222;--cor-cartao-descricao:#66727e;
+ --gradiente-azul:linear-gradient(110deg,#4099ff,#73b4ff);--gradiente-verde:linear-gradient(110deg,#20c6a7,#59e0c5);--gradiente-laranja:linear-gradient(110deg,#ffb64d,#ffcb80);--gradiente-rosa:linear-gradient(110deg,#ff5370,#ff869a);
+ --cor-tooltip-fundo:#343a40;--cor-tooltip-texto:#fff;
 }

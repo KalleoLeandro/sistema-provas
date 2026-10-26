@@ -23,5 +23,8 @@
   @if(!readonly){<button botaoVisual type="button" [disabled]="finishing()||saving()" (click)="requestSubmit()">{{finishing()?'Enviando prova…':'Enviar prova'}}</button>}
  }
  <visual-confirm-dialog [open]="confirmOpen()" (openChange)="confirmOpen.set($event)" title="Confirmar entrega da prova" [message]="missing ? 'Faltam '+missing+' questões a responder. As questões em branco ficarão sem ponto. Deseja entregar mesmo assim?' : 'Deseja entregar sua prova? Após confirmar, suas respostas não poderão ser alteradas.'" confirmLabel="Sim, entregar" cancelLabel="Não, continuar prova" busyLabel="Enviando…" confirmVariant="primary" [busy]="finishing()" (confirmed)="submit(missing>0)" />
- <visual-confirm-dialog [open]="deliveryOpen()" (openChange)="!$event&&acknowledgeDelivery()" title="Prova entregue com sucesso" message="Sua prova foi entregue. Aguarde a correção do professor. Ao clicar em OK ou fechar este aviso, você será direcionado ao login." confirmLabel="OK" busyLabel="Saindo…" confirmVariant="primary" [showCancel]="false" [showClose]="true" [busy]="acknowledging()" (confirmed)="acknowledgeDelivery()" />
+ <visual-confirm-dialog [open]="deliveryOpen()" (openChange)="!$event&&acknowledgeDelivery()" title="Prova entregue com sucesso" message="Sua prova foi entregue. Aguarde a correção do professor. Ao clicar em OK ou fechar este aviso, você será direcionado ao login." confirmLabel="OK" busyLabel="Saindo…" confirmVariant="primary" [showCancel]="false" [showClose]="true" [busy]="acknowledging()" (confirmed)="acknowledgeDelivery()">
+  @if(attempt()?.progresso;as p){<div class="exam-delivery-progress"><visual-progress label="Provas concluídas" [total]="p.total" [completed]="p.concluidas" /><p>{{p.concluidas}} de {{p.total}} provas concluídas</p></div>}
+  @else{<p class="exam-delivery-progress">Não foi possível carregar o progresso das provas. Sua entrega está confirmada.</p>}
+ </visual-confirm-dialog>
 </section>

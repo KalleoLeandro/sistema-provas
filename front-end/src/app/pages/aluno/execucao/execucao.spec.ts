@@ -24,6 +24,11 @@ describe('Execução da prova do aluno',()=>{
   const f=TestBed.createComponent(ExecucaoProvaComponent);await f.whenStable();const c=f.componentInstance;c.token='Token123';c.accepted=true;await c.start();await c.requestSubmit();expect(c.confirmOpen()).toBe(true);expect(c.missing).toBe(2);
   post.mockResolvedValue({...attempt,situacao:'submetida',enviadaAgora:true});await c.submit(true);expect(post).toHaveBeenLastCalledWith('/aluno/provas/5/submeter',{confirmarIncompleta:true});expect(c.deliveryOpen()).toBe(true);expect(logout).not.toHaveBeenCalled();expect(TestBed.inject(Router).navigateByUrl).not.toHaveBeenCalled();await c.acknowledgeDelivery();expect(logout).toHaveBeenCalled();expect(TestBed.inject(Router).navigateByUrl).toHaveBeenCalledWith('/login');
  });
+ it('exibe no recibo o progresso atualizado recebido na entrega sem consultar após o logout',async()=>{
+  const f=TestBed.createComponent(ExecucaoProvaComponent);await f.whenStable();const c=f.componentInstance;c.token='Token123';c.accepted=true;await c.start();get.mockClear();
+  post.mockResolvedValue({...attempt,situacao:'submetida',enviadaAgora:true,progresso:{total:20,concluidas:4}});await c.submit(true);await f.whenStable();
+  const dialog=f.nativeElement.querySelector('dialog.with-close');expect(dialog.textContent).toContain('4 de 20 provas concluídas');expect(dialog.querySelector('progress').max).toBe(20);expect(dialog.querySelector('progress').value).toBe(4);expect(get).not.toHaveBeenCalled();expect(logout).not.toHaveBeenCalled();
+ });
  it('preserva a resposta pendente e impede navegação se o salvamento falhar',async()=>{
   const f=TestBed.createComponent(ExecucaoProvaComponent);await f.whenStable();const c=f.componentInstance;c.token='Token123';c.accepted=true;await c.start();put.mockRejectedValue({error:{mensagem:'Redis indisponível'}});c.answers[1]='B';c.change(1,true);await c.flush();expect(c.answers[1]).toBe('B');expect(c.pendingCount()).toBe(1);expect(await c.tryLeave()).toBe(false);
  });

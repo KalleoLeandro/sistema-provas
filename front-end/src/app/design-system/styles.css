@@ -1,4 +1,5 @@
 @import '@angular/cdk/overlay-prebuilt.css';
+@import './fonts.css';
 @import './tokens.css';
 @import 'quill/dist/quill.snow.css';
 @import './controls.css';
@@ -12,4 +13,5 @@
 
 @import './date-controls.css';
 
+@import './gradient-theme.css';
 @import './print.css';

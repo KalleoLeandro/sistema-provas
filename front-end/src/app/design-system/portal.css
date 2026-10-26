@@ -1,34 +1,15 @@
-:host { display: block; color: var(--cor-texto); }
-.estrutura-portal { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100dvh; }
-.barra-lateral { position: sticky; top: 0; height: 100dvh; overflow-y: auto; display: flex; flex-direction: column; padding: 32px 20px 24px; background: var(--azul-escuro-institucional); color: var(--cor-superficie); }
-.marca-portal { display: flex; align-items: center; gap: 12px; padding: 0; color: inherit; text-decoration: none; }
-.marca-portal .logo-esfinora { width:100%;padding:12px;background:var(--cor-superficie);border-radius:12px; }
-.marca-mobile{display:flex;align-items:center;gap:10px;font-weight:600}.marca-mobile img{object-fit:contain;flex-shrink:0}
-.descricao-portal { margin: 18px 12px 0; padding-bottom: 28px; border-bottom: 1px solid var(--cor-sidebar-borda); color: var(--cor-sidebar-descricao); font-size: 13px; line-height: 1.7; }
-.navegacao { display: grid; gap: 8px; padding: 28px 0; }
-.rotulo-menu { padding: 0 16px 8px; color: var(--cor-sidebar-rotulo); font-size: 10px; letter-spacing: 1.6px; }
-.navegacao a { display: flex; align-items: center; gap: 12px; border-left: 3px solid transparent; padding: 14px 16px; color: var(--cor-superficie); text-decoration: none; font-size: 14px; font-weight: 600; border-radius: var(--raio-padrao); }
-.navegacao a:hover { background: var(--cor-sidebar-hover); }
-.navegacao a.ativo { background: var(--cor-superficie); color: var(--azul-escuro-institucional); border-left-color: var(--verde-lima-institucional); }
-.navegacao a span { font-size: 21px; }
-.area-trabalho { min-width: 0; display: flex; flex-direction: column; background: var(--cor-fundo); }
-.cabecalho-portal { display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; background: var(--cor-superficie); border-bottom: 1px solid var(--cor-borda); padding: 28px 32px; }
-.cabecalho-portal h1 { font-size: 24px; letter-spacing: -.6px; font-weight: 600; margin: 10px 0 0; line-height: 1.3; }
-.conteudo-portal { width: 100%; min-width: 0; margin: 0; padding: 10px; flex: 1; }
-.rodape-portal { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding: 24px 32px; color: var(--cor-texto-suave); font-size: 12px; }
-.alternar-menu { display: none; }
-a:focus-visible { outline: 3px solid var(--verde-lima-institucional); outline-offset: 3px; }
-.pular-conteudo { position: fixed; top: 8px; left: 8px; transform: translateY(-160%); padding: 12px; background: var(--cor-superficie); color: var(--cor-texto); z-index: 2; }
-.pular-conteudo:focus { transform: none; }
-@media (max-width: 800px) {
-  .estrutura-portal { display: flex; flex-direction: column; }
-  .alternar-menu { display: flex; justify-content: space-between; gap: 16px; border: 0; padding: 18px 24px; background: var(--azul-escuro-institucional); color: var(--cor-superficie); }
-  .barra-lateral { display: none; position: static; height: auto; padding: 24px 20px; }
-  .barra-lateral.aberta { display: flex; }
-  .area-trabalho { flex: 1; }
-  .cabecalho-portal { padding: 24px; }
-  .cabecalho-portal h1 { font-size: 21px; }
-  .conteudo-portal { padding: 10px; }
-  .rodape-portal { padding: 24px 16px; }
-}
-.titulo-portal{min-width:0}.conta-cabecalho{margin-left:auto;max-width:100%}.acoes-conta{display:flex;align-items:center;justify-content:flex-end;gap:16px}.boas-vindas-conta{font-size:14px;color:var(--cor-texto-suave);overflow-wrap:anywhere}.boas-vindas-conta strong{color:var(--cor-texto)}.conta-cabecalho p{font-size:12px;color:var(--cor-erro);margin:8px 0 0}
+:host{display:block;color:var(--cor-texto)}
+.estrutura-portal{display:grid;grid-template-columns:235px minmax(0,1fr);min-height:100dvh;padding-top:56px}
+.barra-lateral{position:sticky;top:56px;height:calc(100dvh - 56px);overflow-y:auto;display:flex;flex-direction:column;padding:20px 0;background:var(--cor-sidebar);color:var(--cor-sidebar-texto);border-right:1px solid var(--cor-borda);box-shadow:1px 0 4px #455a640d}
+.navegacao{display:grid;gap:4px;padding:0}.rotulo-menu{padding:0 16px 12px;color:var(--cor-sidebar-rotulo);font-size:11px;font-weight:600;letter-spacing:.8px}
+.navegacao>a{display:flex;align-items:center;gap:14px;padding:13px 22px;border-left:4px solid transparent;color:var(--cor-sidebar-texto);font-size:13px;font-weight:500;text-decoration:none}.navegacao>a.ativo{background:#f0f0f0;border-left-color:#4099ff;color:#474d53}.navegacao>a:hover{background:var(--cor-sidebar-hover)}.navegacao>a span{font-size:20px}
+.area-trabalho{min-width:0;display:flex;flex-direction:column;background:var(--cor-fundo)}
+.cabecalho-portal{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;display:flex;align-items:center;gap:24px;padding:0 26px;color:#fff;background:var(--gradiente-azul);box-shadow:0 2px 4px #455a641a}
+.marca-portal{display:flex;align-items:center;gap:10px;width:209px;flex-shrink:0;color:#fff;text-decoration:none;font-size:20px;font-weight:500;letter-spacing:.5px}.marca-portal img{width:30px;height:30px;object-fit:contain;border-radius:6px;background:#fff;padding:2px}
+.titulo-portal{min-width:0}.titulo-portal .sobretitulo{color:#e8f3ff;letter-spacing:1px;font-size:9px}.cabecalho-portal h1{color:#fff;font-size:12px;font-weight:400;letter-spacing:0;margin:2px 0;line-height:1.4}
+.conta-cabecalho{margin-left:auto;max-width:100%}.acoes-conta{display:flex;align-items:center;justify-content:flex-end;gap:14px}.boas-vindas-conta{font-size:12px;color:#fff;overflow-wrap:anywhere}.boas-vindas-conta strong{color:#fff;font-weight:500}.conta-cabecalho p{font-size:12px;margin:8px 0 0;color:var(--cor-erro)}.cabecalho-portal .botao-visual{background:#ffffff16;color:#fff;border:1px solid #ffffff80;min-width:auto;padding:0 14px}.cabecalho-portal .botao-visual:hover{background:#ffffff30}
+.conteudo-portal{width:100%;min-width:0;margin:0;padding:24px;flex:1}.rodape-portal{display:flex;justify-content:space-between;gap:12px;padding:20px 24px;color:var(--cor-texto-suave);font-size:11px;border-top:1px solid var(--cor-borda)}
+.alternar-menu{display:none}.pular-conteudo{position:fixed;top:4px;left:4px;transform:translateY(-160%);padding:12px;background:#fff;z-index:200;color:var(--cor-primaria)}.pular-conteudo:focus{transform:none}a:focus-visible{outline:2px solid var(--cor-primaria);outline-offset:3px}
+@media(max-width:1000px){.titulo-portal{display:none}}
+@media(max-width:800px){.estrutura-portal{display:flex;flex-direction:column}.cabecalho-portal{padding:0 14px;gap:10px}.marca-portal{width:auto;font-size:17px}.marca-portal img{width:26px;height:26px}.alternar-menu{display:grid;place-items:center;width:32px;height:32px;padding:0;background:transparent;border:0;color:#fff;font-size:23px}.barra-lateral{display:none;position:relative;top:0;height:auto;max-height:65vh;border-bottom:1px solid var(--cor-borda)}.barra-lateral.aberta{display:flex}.conteudo-portal{padding:16px 10px}.boas-vindas-conta{font-size:11px}.acoes-conta{gap:8px}.rodape-portal{padding:18px 12px}}
+@media(max-width:500px){.boas-vindas-conta{max-width:125px}.marca-portal{font-size:14px;gap:5px}.cabecalho-portal{gap:5px;padding:0 8px}}

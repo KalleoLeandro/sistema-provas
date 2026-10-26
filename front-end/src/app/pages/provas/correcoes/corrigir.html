@@ -1,5 +1,5 @@
 <section class="form-visual" aria-labelledby="corrigir-title">
- <div class="list-heading"><h2 id="corrigir-title">Corrigir prova <visual-info-tooltip text="Atribua pontuação às discursivas respondidas, de zero até o peso da questão. As objetivas mantêm a correção automática. O feedback pode ser registrado em qualquer questão. Notas e feedbacks ainda não são publicados para o aluno." /></h2><div class="form-actions"><a botaoVisual variant="secondary" routerLink="/provas" [queryParams]="{aba:'correcoes'}">Voltar às correções</a><button botaoVisual type="button" variant="secondary" [disabled]="loading()||saving()" (click)="load()">Atualizar</button></div></div>
+ <div class="list-heading"><h2 id="corrigir-title">{{dados()&&dados()!.prova.pendentes===0?'Revisar correção':'Corrigir prova'}} <visual-info-tooltip text="Notas discursivas e feedbacks podem ser alterados mesmo após a prova estar corrigida. A pontuação deve ficar entre zero e o peso da questão. As objetivas mantêm a correção automática e questões não respondidas permanecem com zero. Notas e feedbacks ainda não são publicados para o aluno." /></h2><div class="form-actions"><a botaoVisual variant="secondary" routerLink="/provas" [queryParams]="{aba:'correcoes'}">Voltar às correções</a><button botaoVisual type="button" variant="secondary" [disabled]="loading()||saving()" (click)="load()">Atualizar</button></div></div>
  @if(erro()){<visual-aviso>{{erro()}}</visual-aviso>}@if(loading()){<p role="status">Carregando prova entregue…</p>}
  @if(dados();as d){
   <visual-cartao density="compact"><h3>{{d.prova.titulo}}</h3><p><strong>{{d.prova.aluno}}</strong> · CGM {{d.prova.cgm}} · {{d.prova.ensino==='F'?'Fundamental':'Médio'}} — {{d.prova.ano}}º ano {{d.prova.letra}}</p><p>{{d.prova.materia}} · Entregue em {{d.prova.entregueEm|date:'dd/MM/yyyy HH:mm'}}</p><p><strong>{{d.prova.pendentes?'Nota parcial':'Nota total'}}: {{d.prova.notaParcial|number:'1.2-2':'pt'}} / 10</strong> · {{d.prova.pendentes}} discursiva(s) aguardando correção.</p></visual-cartao>
@@ -9,14 +9,14 @@
    @else{<h4>Resposta do aluno</h4><p class="correction-answer">{{q.resposta||'Não respondida.'}}</p>}
    @if(!q.resposta){<p>Não respondida. Pontuação zero.</p>}
    <div class="form-visual correction-form">
-    <visual-campo [rotulo]="canGrade(q)?'Pontuação atribuída':'Pontuação automática'" [identificador]="'correcao-nota-'+q.numero" [erro]="notaControl|validationMessage:form.submitted"><input campoVisual [id]="'correcao-nota-'+q.numero" [name]="'pontuacao-'+q.numero" type="number" [(ngModel)]="drafts[q.numero].pontuacao" #notaControl="ngModel" required min="0" [max]="q.peso" step="0.01" pattern="[0-9]+([.][0-9]{1,2})?" [readOnly]="!canGrade(q)" [disabled]="saving()" /></visual-campo>
-    <visual-campo rotulo="Feedback da questão" [identificador]="'correcao-feedback-'+q.numero" [erro]="feedbackControl|validationMessage:form.submitted"><textarea campoVisual [id]="'correcao-feedback-'+q.numero" [name]="'feedback-'+q.numero" [(ngModel)]="drafts[q.numero].feedback" #feedbackControl="ngModel" maxlength="3000" rows="4" [disabled]="saving()"></textarea></visual-campo>
+    <visual-campo [rotulo]="canGrade(q)?'Pontuação atribuída':'Pontuação automática'" [identificador]="'correcao-nota-'+q.numero" [erro]="notaControl|validationMessage:form.submitted"><input campoVisual [id]="'correcao-nota-'+q.numero" [name]="'pontuacao-'+q.numero" type="number" [(ngModel)]="drafts[q.numero].pontuacao" (ngModelChange)="saved.set(false)" #notaControl="ngModel" required min="0" [max]="q.peso" step="0.01" pattern="[0-9]+([.][0-9]{1,2})?" [readOnly]="!canGrade(q)" [disabled]="saving()" /></visual-campo>
+    <visual-campo rotulo="Feedback da questão" [identificador]="'correcao-feedback-'+q.numero" [erro]="feedbackControl|validationMessage:form.submitted"><textarea campoVisual [id]="'correcao-feedback-'+q.numero" [name]="'feedback-'+q.numero" [(ngModel)]="drafts[q.numero].feedback" (ngModelChange)="saved.set(false)" #feedbackControl="ngModel" maxlength="3000" rows="4" [disabled]="saving()"></textarea></visual-campo>
     @if(q.corrigidaEm){<span>Salvo em {{q.corrigidaEm|date:'dd/MM/yyyy HH:mm'}}</span>}
    </div>
   </section></visual-cartao>}
   @if(erro()){<visual-aviso>{{erro()}}</visual-aviso>}
   @if(saved()){<p class="form-feedback" role="status">Correção da prova salva com sucesso.</p>}
-  <div class="form-actions"><button id="salvar-correcao" botaoVisual type="submit" [disabled]="saving()||!!form.invalid">{{saving()?'Salvando…':'Salvar correção'}}</button></div>
+  <div class="form-actions"><button id="salvar-correcao" botaoVisual type="submit" [disabled]="saving()||!!form.invalid">{{saving()?'Salvando…':d.prova.pendentes?'Salvar correção':'Salvar alterações'}}</button></div>
   </form>
  }
 </section>

@@ -1,10 +1,4 @@
-:host { display: block; min-width: 0; }
-.metric-card { display: block; overflow: hidden; color: var(--cor-cartao-titulo); background: var(--cor-superficie); border: 1px solid var(--cor-cartao-borda); border-left: 5px solid var(--cor-cartao-borda); border-radius: 10px; text-decoration: none; box-shadow: 0 3px 14px rgb(38 89 113 / 8%); transition: box-shadow .15s, border-color .15s; }
-.metric-card:hover { border-color: var(--cor-primaria); box-shadow: 0 5px 20px rgb(38 89 113 / 16%); }
-.metric-card:focus-visible { outline: 3px solid var(--cor-primaria); outline-offset: 4px; }
-.metric-card-content { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 24px; }
-.metric-card-description { display: block; color: var(--cor-cartao-descricao); font-size: 13px; font-weight: 700; line-height: 1.5; }
-.metric-card-value { display: block; margin-top: 8px; font-size: 40px; line-height: 1.1; font-weight: 700; font-variant-numeric: tabular-nums; }
-.metric-card-icon { width: 44px; height: 44px; flex-shrink: 0; color: var(--cor-acao-neutra-borda); }
-.metric-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 20px; border-top: 1px solid var(--cor-cartao-borda); background: var(--cor-fundo); color: var(--cor-primaria); font-size: 13px; font-weight: 600; }
-@media(prefers-reduced-motion:reduce) { .metric-card { transition: none; } }
+:host{display:block;min-width:0;--metric-gradient:var(--gradiente-azul)}:host(:nth-child(4n+2)){--metric-gradient:var(--gradiente-verde)}:host(:nth-child(4n+3)){--metric-gradient:var(--gradiente-laranja)}:host(:nth-child(4n+4)){--metric-gradient:var(--gradiente-rosa)}
+.metric-card{display:block;overflow:hidden;color:#fff;background:var(--metric-gradient);border:0;border-radius:5px;text-decoration:none;box-shadow:0 2px 4px #455a6433;transition:transform .15s,box-shadow .15s}.metric-card:hover{transform:translateY(-2px);box-shadow:0 5px 12px #455a6433}.metric-card:focus-visible{outline:3px solid var(--cor-primaria);outline-offset:3px}.metric-card-content{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:22px 24px 12px}.metric-card-content>div{flex:1;min-width:0}.metric-card-description{display:block;font-size:13px;font-weight:500;line-height:1.5;color:#fff}.metric-card-value{display:block;margin-top:9px;text-align:right;font-size:32px;font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums;color:#fff}.metric-card-icon{width:33px;height:33px;flex-shrink:0;color:#fff;order:-1;margin-top:24px}.metric-card-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 24px 20px;font-size:12px;font-weight:400;color:#fff;background:transparent;border:0}@media(prefers-reduced-motion:reduce){.metric-card{transition:none}}
+
+.metric-card{height:100%;display:flex;flex-direction:column}.metric-card-content{flex:1}.metric-card-description{min-height:38px}

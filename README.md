@@ -181,3 +181,11 @@ A massa local está documentada em [database/seeds/README.md](database/seeds/REA
 O frontend publica a porta `${PORTA_FRONTEND:-4200}` em `${HOST_FRONTEND:-0.0.0.0}`. Em outra máquina da mesma rede, acesse `http://IP-DO-SERVIDOR:4200`; `0.0.0.0` é o endereço de escuta, não o endereço para abrir no navegador. Para limitar novamente ao computador local, defina `HOST_FRONTEND=127.0.0.1` no .env e recrie o frontend com `docker compose up -d front-end`.
 
 O navegador usa `/api` no mesmo endereço do frontend. O Nginx encaminha ao backend pela rede Docker e preserva o Host com a porta original, permitindo validar corretamente a origem das requisições. Não é necessário publicar o MySQL ou o backend na rede para acessar o portal. Se o acesso remoto não chegar ao frontend, confira conectividade da rede e permissão de entrada TCP na porta 4200 no firewall do servidor.
+
+### Interface Gradient Able
+
+O frontend e o catálogo de componentes adotam uma interface inspirada no [Gradient Able React Free](https://codedthemes.com/demos/admin-templates/gradient-able/react/free/app/dashboard/analytics), implementada nos componentes Angular existentes. O tema usa Poppins local, cabeçalho em gradiente azul, navegação branca, cards em gradientes e superfícies com bordas discretas. Tokens e estilos globais ficam no design system; as regras de negócio, rotas, serviços, dados e permissões permanecem nos fluxos existentes.
+
+O recibo de entrega do aluno também apresenta o progresso total das provas, incluindo a entrega atual, pelo componente visual-progress do design system. O backend envia total/concluídas na própria resposta de entrega antes de invalidar a sessão, tanto no envio manual quanto no automático. Não há consulta autenticada posterior ao logout. Falha na consulta do resumo mantém a entrega confirmada e o encerramento da sessão; o modal informa a indisponibilidade do progresso.
+
+Provas já corrigidas continuam revisáveis pelo professor autor. A tela apresenta Revisar correção e Salvar alterações; notas discursivas e feedbacks podem ser atualizados, preservando o controle de revisão e o salvamento único. Objetivas e respostas em branco mantêm a pontuação automática. Alterar um campo remove a mensagem anterior de salvamento até a nova confirmação.

@@ -21,6 +21,6 @@ export const Default: StoryObj = {
   render: () => ({
     props: { ...{} },
     template:
-      '<div class="ds-row"><nz-avatar nzText="AD" nzSize="large" /><nz-avatar nzIcon="user" /><nz-avatar nzSrc="favicon-esfinge.png" /></div>',
+      '<div class="ds-row"><nz-avatar nzText="AD" nzSize="large" /><nz-avatar nzIcon="user" /><nz-avatar nzSrc="favicon-esfinora-blue.png" /></div>',
   }),
 };
