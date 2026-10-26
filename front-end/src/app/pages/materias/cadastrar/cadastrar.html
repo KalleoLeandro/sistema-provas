@@ -1,0 +1,11 @@
+<section class="form-page" aria-labelledby="materia-title"><span class="sobretitulo">CADASTRO</span>
+    <h2 id="materia-title">Cadastrar matéria</h2>
+    <visual-cartao><form class="form-visual" #form="ngForm" (ngSubmit)="save(form)" autocomplete="off" [attr.aria-busy]="busy()">
+      <visual-campo rotulo="Nome da matéria" identificador="materia-nome" [erro]="nomeControl | validationMessage:form.submitted">
+        <input campoVisual id="materia-nome" name="nome" [(ngModel)]="nome" #nomeControl="ngModel" required notBlank maxlength="120"
+          placeholder="Ex.: Matemática" [disabled]="busy()" aria-describedby="materia-nome-erro" [attr.aria-invalid]="(nomeControl | validationMessage:form.submitted) ? 'true' : null" />
+      </visual-campo>
+      @if (erro()) { <visual-aviso>{{ erro() }}</visual-aviso> }
+      @if (mensagem()) { <p class="form-feedback" role="status">{{ mensagem() }}</p> }
+      <visual-form-actions [busy]="busy()" [invalid]="!!form.invalid || !nome.trim()" (clear)="reset(form)" (saveAndContinue)="save(form, true)" />
+    </form></visual-cartao></section>

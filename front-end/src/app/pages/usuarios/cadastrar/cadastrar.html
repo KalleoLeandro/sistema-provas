@@ -1,0 +1,94 @@
+﻿<section class="form-page" [class.form-page-wide]="perfil === 'aluno' && modoAluno === 'csv'" aria-labelledby="cadastro-title">
+  <span class="sobretitulo">CADASTRO</span>
+  <h2 id="cadastro-title">Cadastrar usuário</h2>
+  <p class="descricao">Selecione o perfil do usuário para continuar.</p>
+  <visual-cartao>
+    <form class="form-visual" #form="ngForm" (ngSubmit)="save(form)" autocomplete="off" [attr.aria-busy]="busy()">
+      <visual-campo rotulo="Perfil" identificador="usuario-perfil" [erro]="perfilControl | validationMessage:form.submitted">
+        <select campoVisual id="usuario-perfil" name="perfil" [(ngModel)]="perfil" #perfilControl="ngModel" required [allowedValues]="['administrador', 'professor', 'aluno']" aria-describedby="usuario-perfil-erro" [attr.aria-invalid]="(perfilControl | validationMessage:form.submitted) ? 'true' : null" (change)="changeProfile(form)" [disabled]="busy()">
+          <option value="administrador">Administrador</option><option value="professor">Professor</option><option value="aluno">Aluno</option>
+        </select>
+      </visual-campo>
+      @if (perfil !== 'aluno') {
+        @if (perfil === 'professor') {
+          <visual-campo rotulo="Nome" identificador="professor-nome" [erro]="nomeControl | validationMessage:form.submitted">
+            <input campoVisual id="professor-nome" name="nome" [(ngModel)]="nome" #nomeControl="ngModel" required notBlank maxlength="120" placeholder="Nome do professor" [disabled]="busy()"
+              [attr.aria-invalid]="(nomeControl | validationMessage:form.submitted) ? 'true' : null" aria-describedby="professor-nome-erro" />
+          </visual-campo>
+        }
+        <visual-campo rotulo="Login" identificador="administrador-login" orientacao="De 3 a 120 caracteres."
+          [erro]="loginControl | validationMessage:form.submitted">
+          <input campoVisual id="administrador-login" name="login" [(ngModel)]="login" #loginControl="ngModel" required notBlank [trimmedMinlength]="3" minlength="3" maxlength="120"
+            placeholder="Digite o login" aria-describedby="administrador-login-orientacao administrador-login-erro" [disabled]="busy()"
+            [attr.aria-invalid]="(loginControl | validationMessage:form.submitted) ? 'true' : null" />
+        </visual-campo>
+        <visual-campo rotulo="Senha" identificador="administrador-senha" orientacao="De 8 a 128 caracteres."
+          [erro]="senhaControl | validationMessage:form.submitted">
+          <input campoVisual id="administrador-senha" name="senha" type="password" [(ngModel)]="senha" #senhaControl="ngModel" required notBlank minlength="8" maxlength="128"
+            placeholder="Digite a senha" aria-describedby="administrador-senha-orientacao administrador-senha-erro" [disabled]="busy()"
+            [attr.aria-invalid]="(senhaControl | validationMessage:form.submitted) ? 'true' : null" />
+        </visual-campo>
+        @if (perfil === 'professor') {
+          <fieldset class="form-group-visual">
+            <legend>Matérias e turmas</legend>
+            <p class="form-hint-visual">Digite para buscar e selecione as matérias. Depois, escolha as turmas de cada matéria.</p>
+            @if (loadingCatalogos()) { <p role="status">Carregando matérias e turmas…</p> }
+            @else if (turmasDisponiveis() === null || materiasDisponiveis() === null) {
+              <button botaoVisual variant="secondary" type="button" (click)="loadCatalogos()">Tentar carregar matérias e turmas novamente</button>
+            } @else {
+              <div class="form-visual">
+                <visual-campo rotulo="Matérias" identificador="professor-materias" [erro]="materiasControl | validationMessage:form.submitted" orientacao="Selecione pelo menos uma matéria.">
+                  <visual-chip-select inputId="professor-materias" name="materias" #materiasControl="ngModel" [invalid]="!!(materiasControl | validationMessage:form.submitted)" label="Matérias do professor" placeholder="Digite o nome da matéria"
+                    [options]="opcoesMaterias()" [ngModel]="materias" (ngModelChange)="changeMaterias($event)" required [disabled]="busy()"
+                    emptyMessage="Nenhuma matéria encontrada ou todas já selecionadas." />
+                </visual-campo>
+                @for (materiaId of materias; track materiaId) {
+                  <visual-campo [rotulo]="'Turmas de ' + materiaNome(materiaId)" [identificador]="'professor-turmas-' + materiaId" orientacao="Opcional. Selecione as turmas em que esta matéria será ministrada.">
+                    <visual-chip-select [inputId]="'professor-turmas-' + materiaId" [name]="'turmas-' + materiaId" [label]="'Turmas de ' + materiaNome(materiaId)"
+                      placeholder="Digite o ensino, ano ou letra da turma" [options]="opcoesTurmas()" [(ngModel)]="turmasPorMateria[materiaId]" [disabled]="busy()"
+                      emptyMessage="Nenhuma turma encontrada ou todas já selecionadas." />
+                  </visual-campo>
+                }
+              </div>
+            }
+          </fieldset>
+        }
+        @if (erro()) { <visual-aviso>{{ erro() }}</visual-aviso> }
+        @if (mensagem()) { <p class="form-feedback" role="status">{{ mensagem() }}</p> }
+        <visual-form-actions [busy]="busy()" [invalid]="!!form.invalid || login.trim().length < 3 || !senha.trim() || (perfil === 'professor' && (!nome.trim() || !materias.length || loadingCatalogos() || turmasDisponiveis() === null || materiasDisponiveis() === null))"
+          (clear)="reset(form)" (saveAndContinue)="save(form, true)" />
+      } @else {
+        <visual-tabs idPrefix="aluno-cadastro" label="Forma de cadastro dos alunos" [tabs]="modosAluno" [selected]="modoAluno" (selectedChange)="changeAlunoMode($event,form)" />
+        @if(modoAluno==='csv'){
+          <app-importar-alunos [disabled]="busy()" (busyChange)="busy.set($event)" />
+        } @else {
+        <visual-campo rotulo="Nome" identificador="aluno-nome" [erro]="alunoNome | validationMessage:form.submitted">
+          <input campoVisual id="aluno-nome" name="nome" [(ngModel)]="nome" #alunoNome="ngModel" required notBlank maxlength="120" placeholder="Nome do aluno" [disabled]="busy()" aria-describedby="aluno-nome-erro" [attr.aria-invalid]="!!(alunoNome | validationMessage:form.submitted)" />
+        </visual-campo>
+        <visual-campo rotulo="Número (opcional)" identificador="aluno-numero" [erro]="alunoNumero | validationMessage:form.submitted">
+          <input campoVisual id="aluno-numero" name="numero" type="number" inputmode="numeric" [(ngModel)]="numero" #alunoNumero="ngModel" min="1" max="2147483647" step="1" pattern="[0-9]+" placeholder="Número de chamada" [disabled]="busy()" aria-describedby="aluno-numero-erro" [attr.aria-invalid]="!!(alunoNumero | validationMessage:form.submitted)" />
+        </visual-campo>
+        <visual-campo rotulo="CGM" identificador="aluno-cgm" [erro]="alunoCgm | validationMessage:form.submitted">
+          <input campoVisual id="aluno-cgm" name="cgm" inputmode="numeric" [(ngModel)]="cgm" #alunoCgm="ngModel" required notBlank maxlength="30" pattern="[0-9]+" placeholder="CGM do aluno" [disabled]="busy()" aria-describedby="aluno-cgm-erro" [attr.aria-invalid]="!!(alunoCgm | validationMessage:form.submitted)" />
+        </visual-campo>
+        <visual-campo rotulo="Status" identificador="aluno-status" [erro]="alunoStatus | validationMessage:form.submitted">
+          <select campoVisual id="aluno-status" name="statusAluno" [(ngModel)]="statusAluno" #alunoStatus="ngModel" required [allowedValues]="['M','T']" [disabled]="busy()" aria-describedby="aluno-status-erro" [attr.aria-invalid]="!!(alunoStatus | validationMessage:form.submitted)">
+            <option value="M">Matriculado</option><option value="T">Transferido</option>
+          </select>
+        </visual-campo>
+        @if (loadingCatalogos()) { <p role="status">Carregando turmas…</p> }
+        <visual-campo rotulo="Turma" identificador="aluno-turma" [erro]="alunoTurma | validationMessage:form.submitted">
+          <select campoVisual id="aluno-turma" name="turmaId" [(ngModel)]="turmaId" #alunoTurma="ngModel" required [disabled]="busy() || loadingCatalogos()" aria-describedby="aluno-turma-erro" [attr.aria-invalid]="!!(alunoTurma | validationMessage:form.submitted)">
+            <option [ngValue]="null" disabled>Selecione a turma</option>
+            @for(t of turmasDisponiveis() ?? [];track t.id) { <option [ngValue]="t.id">{{t.ensino === 'F' ? 'Fundamental' : 'Médio'}} — {{t.ano}}º ano {{t.letra}}</option> }
+          </select>
+        </visual-campo>
+        @if(turmasDisponiveis() === null && !loadingCatalogos()) { <button botaoVisual variant="secondary" type="button" (click)="loadTurmas()">Carregar turmas novamente</button> }
+        @if(erro()) { <visual-aviso>{{erro()}}</visual-aviso> }
+        @if(mensagem()) { <p class="form-feedback" role="status">{{mensagem()}}</p> }
+        <visual-form-actions [busy]="busy()" [invalid]="!!form.invalid || loadingCatalogos() || turmasDisponiveis() === null" (clear)="reset(form)" (saveAndContinue)="save(form,true)" />
+        }
+      }
+    </form>
+  </visual-cartao>
+</section>

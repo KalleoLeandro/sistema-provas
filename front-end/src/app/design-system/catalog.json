@@ -1,0 +1,347 @@
+[
+  {
+    "name": "Abas",
+    "story": "catalog-tabs.stories.ts",
+    "implementation": "NzTabsModule"
+  },
+  {
+    "name": "Acordeão",
+    "story": "catalog-accordion.stories.ts",
+    "implementation": "NzCollapseModule"
+  },
+  {
+    "name": "Área de texto",
+    "story": "catalog-textarea.stories.ts",
+    "implementation": "Composição dos componentes e estilos ESFINORA"
+  },
+  {
+    "name": "Árvore de navegação",
+    "story": "catalog-treeview.stories.ts",
+    "implementation": "NzTreeModule"
+  },
+  {
+    "name": "Avaliação por estrelas",
+    "story": "catalog-rating.stories.ts",
+    "implementation": "NzRateModule"
+  },
+  {
+    "name": "Avatar",
+    "story": "catalog-avatar.stories.ts",
+    "implementation": "NzAvatarModule"
+  },
+  {
+    "name": "Barra de navegação",
+    "story": "catalog-navbar-header.stories.ts",
+    "implementation": "NavbarComponent"
+  },
+  {
+    "name": "Barra de progresso",
+    "story": "catalog-progress-bar.stories.ts",
+    "implementation": "NzProgressModule"
+  },
+  {
+    "name": "Botão",
+    "story": "buttons.stories.ts",
+    "implementation": "ButtonDirective"
+  },
+  {
+    "name": "Botão com ícone",
+    "story": "catalog-icon-action.stories.ts",
+    "implementation": "IconActionComponent"
+  },
+  {
+    "name": "Botão de opção",
+    "story": "catalog-radio-button.stories.ts",
+    "implementation": "NzRadioModule"
+  },
+  {
+    "name": "Botões de seleção",
+    "story": "catalog-selection-buttons.stories.ts",
+    "implementation": "NzRadioModule"
+  },
+  {
+    "name": "Caixa de seleção",
+    "story": "catalog-checkbox.stories.ts",
+    "implementation": "NzCheckboxModule"
+  },
+  {
+    "name": "Calendário",
+    "story": "catalog-calendar.stories.ts",
+    "implementation": "NzCalendarModule"
+  },
+  {
+    "name": "Campo com prefixo e sufixo",
+    "story": "catalog-modular-text-field.stories.ts",
+    "implementation": "ModularFieldComponent"
+  },
+  {
+    "name": "Campo de data",
+    "story": "catalog-date-field.stories.ts",
+    "implementation": "NzDatePickerModule"
+  },
+  {
+    "name": "Campo de etiquetas",
+    "story": "catalog-tag-field.stories.ts",
+    "implementation": "TagFieldComponent"
+  },
+  {
+    "name": "Campo de horário",
+    "story": "catalog-time-field.stories.ts",
+    "implementation": "NzTimePickerModule"
+  },
+  {
+    "name": "Campo de pesquisa",
+    "story": "catalog-search-field.stories.ts",
+    "implementation": "Composição dos componentes e estilos ESFINORA"
+  },
+  {
+    "name": "Campo de seleção",
+    "story": "catalog-select-field.stories.ts",
+    "implementation": "NzSelectModule"
+  },
+  {
+    "name": "Campo de senha",
+    "story": "catalog-password-field.stories.ts",
+    "implementation": "PasswordFieldComponent"
+  },
+  {
+    "name": "Campo de texto",
+    "story": "catalog-text-field.stories.ts",
+    "implementation": "Composição dos componentes e estilos ESFINORA"
+  },
+  {
+    "name": "Campo monetário",
+    "story": "catalog-money-field.stories.ts",
+    "implementation": "NzInputNumberModule"
+  },
+  {
+    "name": "Campo numérico",
+    "story": "catalog-number-field.stories.ts",
+    "implementation": "NzInputNumberModule"
+  },
+  {
+    "name": "Carrossel",
+    "story": "catalog-carousel.stories.ts",
+    "implementation": "NzCarouselModule"
+  },
+  {
+    "name": "Cartão",
+    "story": "catalog-card.stories.ts",
+    "implementation": "Composição dos componentes e estilos ESFINORA"
+  },
+  {
+    "name": "Conjunto de campos",
+    "story": "catalog-fieldset.stories.ts",
+    "implementation": "FieldsetComponent"
+  },
+  {
+    "name": "Controle deslizante",
+    "story": "catalog-slider.stories.ts",
+    "implementation": "NzSliderModule"
+  },
+  {
+    "name": "Dica de contexto",
+    "story": "catalog-tooltip.stories.ts",
+    "implementation": "NzTooltipModule"
+  },
+  {
+    "name": "Editor de texto formatado",
+    "story": "catalog-rich-text-editor.stories.ts",
+    "implementation": "RichTextEditorComponent"
+  },
+  {
+    "name": "Envio de arquivos",
+    "story": "catalog-file-upload.stories.ts",
+    "implementation": "FileUploadComponent"
+  },
+  {
+    "name": "Esqueleto de carregamento",
+    "story": "catalog-skeleton.stories.ts",
+    "implementation": "NzSkeletonModule"
+  },
+  {
+    "name": "Etapas",
+    "story": "catalog-stepper.stories.ts",
+    "implementation": "NzStepsModule"
+  },
+  {
+    "name": "Etiqueta",
+    "story": "catalog-tag.stories.ts",
+    "implementation": "NzTagModule"
+  },
+  {
+    "name": "Etiqueta removível",
+    "story": "catalog-text-chip.stories.ts",
+    "implementation": "NzTagModule"
+  },
+  {
+    "name": "Exibição de valores",
+    "story": "catalog-value-display.stories.ts",
+    "implementation": "NzStatisticModule"
+  },
+  {
+    "name": "Filtro",
+    "story": "catalog-filter.stories.ts",
+    "implementation": "NzSelectModule"
+  },
+  {
+    "name": "Gráfico",
+    "story": "catalog-chart.stories.ts",
+    "implementation": "ChartComponent"
+  },
+  {
+    "name": "Ícone",
+    "story": "catalog-icon.stories.ts",
+    "implementation": "NzIconModule"
+  },
+  {
+    "name": "Ícone estático",
+    "story": "catalog-icon-static.stories.ts",
+    "implementation": "NzIconModule"
+  },
+  {
+    "name": "Ilustração",
+    "story": "catalog-illustration.stories.ts",
+    "implementation": "Composição dos componentes e estilos ESFINORA"
+  },
+  {
+    "name": "Imagem",
+    "story": "catalog-image.stories.ts",
+    "implementation": "NzImageModule"
+  },
+  {
+    "name": "Indicador",
+    "story": "catalog-badge.stories.ts",
+    "implementation": "NzBadgeModule, NzAvatarModule"
+  },
+  {
+    "name": "Indicador de carregamento",
+    "story": "catalog-spinner.stories.ts",
+    "implementation": "NzSpinModule"
+  },
+  {
+    "name": "Interruptor",
+    "story": "catalog-switch-button.stories.ts",
+    "implementation": "NzSwitchModule"
+  },
+  {
+    "name": "Janela modal",
+    "story": "catalog-modal.stories.ts",
+    "implementation": "NzModalModule"
+  },
+  {
+    "name": "Linha de conteúdo",
+    "story": "catalog-content-line.stories.ts",
+    "implementation": "ContentLineComponent"
+  },
+  {
+    "name": "Linha do tempo",
+    "story": "catalog-timeline.stories.ts",
+    "implementation": "NzTimelineModule"
+  },
+  {
+    "name": "Link de navegação",
+    "story": "catalog-link-nav.stories.ts",
+    "implementation": "Composição dos componentes e estilos ESFINORA"
+  },
+  {
+    "name": "Lista de transferência",
+    "story": "catalog-picklist.stories.ts",
+    "implementation": "NzTransferModule"
+  },
+  {
+    "name": "Markdown",
+    "story": "catalog-markdown.stories.ts",
+    "implementation": "MarkdownComponent"
+  },
+  {
+    "name": "Mensagem em linha",
+    "story": "catalog-inline-message.stories.ts",
+    "implementation": "NzAlertModule"
+  },
+  {
+    "name": "Menu",
+    "story": "catalog-menu.stories.ts",
+    "implementation": "NzDropdownModule, NzMenuModule"
+  },
+  {
+    "name": "Menu lateral",
+    "story": "catalog-sidebar-menu.stories.ts",
+    "implementation": "NzMenuModule"
+  },
+  {
+    "name": "Menu suspenso",
+    "story": "catalog-dropdown.stories.ts",
+    "implementation": "NzDropdownModule, NzMenuModule"
+  },
+  {
+    "name": "Notificação",
+    "story": "catalog-toast.stories.ts",
+    "implementation": "Composição dos componentes e estilos ESFINORA"
+  },
+  {
+    "name": "Orientação contextual",
+    "story": "catalog-coachmark.stories.ts",
+    "implementation": "NzPopoverModule"
+  },
+  {
+    "name": "Paginação",
+    "story": "catalog-paginator.stories.ts",
+    "implementation": "NzPaginationModule"
+  },
+  {
+    "name": "Painel lateral",
+    "story": "catalog-sheet.stories.ts",
+    "implementation": "NzDrawerModule"
+  },
+  {
+    "name": "Rodapé",
+    "story": "catalog-footer.stories.ts",
+    "implementation": "FooterComponent"
+  },
+  {
+    "name": "Rolagem infinita",
+    "story": "catalog-infinite-scroll.stories.ts",
+    "implementation": "InfiniteScrollComponent"
+  },
+  {
+    "name": "Sistema de grade",
+    "story": "catalog-sistema-de-grid.stories.ts",
+    "implementation": "Composição dos componentes e estilos ESFINORA"
+  },
+  {
+    "name": "Somente leitura",
+    "story": "catalog-read-only.stories.ts",
+    "implementation": "ReadOnlyComponent"
+  },
+  {
+    "name": "Tabela",
+    "story": "catalog-table.stories.ts",
+    "implementation": "NzTableModule"
+  },
+  {
+    "name": "Tipografia",
+    "story": "catalog-typography.stories.ts",
+    "implementation": "NzTypographyModule"
+  },
+  {
+    "name": "Título de seção",
+    "story": "catalog-section-title.stories.ts",
+    "implementation": "SectionTitleComponent"
+  },
+  {
+    "name": "Trilha de navegação",
+    "story": "catalog-breadcrumbs.stories.ts",
+    "implementation": "NzBreadCrumbModule"
+  },
+  {
+    "name": "Utilidades CSS",
+    "story": "catalog-utilidades-css.stories.ts",
+    "implementation": "Composição dos componentes e estilos ESFINORA"
+  },
+  {
+    "name": "Visualizador de PDF",
+    "story": "catalog-pdf-viewer.stories.ts",
+    "implementation": "PdfViewerComponent"
+  }
+]

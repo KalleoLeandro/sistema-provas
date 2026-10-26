@@ -1,0 +1,11 @@
+
+    :host{display:grid;gap:8px;min-width:0}
+    summary,a{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;border-radius:var(--raio-padrao);border-left:3px solid transparent;color:var(--cor-superficie);font-size:14px;font-weight:600;text-decoration:none;cursor:pointer}
+    summary{list-style:none}summary::-webkit-details-marker{display:none}
+    summary:hover,a:hover,.grupo-ativo>summary{background:var(--cor-sidebar-hover)}
+    summary:focus-visible,a:focus-visible{outline:3px solid var(--verde-lima-institucional);outline-offset:2px}
+    details[open]>summary>span{transform:rotate(180deg)}
+    .submenus,.links{display:grid;gap:4px;margin:6px 0 6px 12px;padding-left:8px;border-left:1px solid var(--cor-sidebar-borda)}
+    .links a{font-size:12px;font-weight:400;padding:12px 8px;line-height:1.5}
+    a.ativo{background:var(--cor-superficie);color:var(--azul-escuro-institucional);border-left-color:var(--verde-lima-institucional)}
+  

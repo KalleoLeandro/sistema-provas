@@ -1,0 +1,8 @@
+.tabela-visual .table-detail-row > td { padding: 0 12px 16px; background: var(--cor-fundo); }
+.table-detail-content { padding: 16px; border-left: 3px solid var(--cor-primaria); background: var(--cor-superficie); overflow-wrap: anywhere; }
+.table-detail-answer { margin: 16px 0 0; color: var(--cor-texto); }
+
+.question-summary { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; max-width: 400px; overflow: hidden; white-space: normal; overflow-wrap: anywhere; }
+.tabela-visual.tabela-rolagem .table-detail-row > td { white-space: normal; overflow-wrap: anywhere; }
+:host { display: block; min-width: 0; }
+.form-visual { min-width: 0; }

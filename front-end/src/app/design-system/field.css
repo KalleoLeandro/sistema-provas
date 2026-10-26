@@ -1,0 +1,2 @@
+:host{display:block}label{display:block;font-size:var(--campo-rotulo-tamanho,14px);font-weight:var(--campo-rotulo-peso,600);line-height:1.5;color:var(--campo-rotulo-cor,var(--cor-texto));margin-bottom:var(--campo-rotulo-espaco,8px)}small{display:block;color:var(--cor-texto-suave);font-size:12px;line-height:1.5;margin:7px 0 0}small:empty{display:none}
+.campo-erro{color:var(--cor-erro);font-weight:600}

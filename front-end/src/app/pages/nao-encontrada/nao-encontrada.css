@@ -1,0 +1,26 @@
+main {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+}
+
+section {
+  text-align: center;
+}
+
+h1 {
+  color: var(--cor-primaria);
+  font-size: clamp(120px, 28vw, 320px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  margin: 0 0 16px;
+}
+
+p {
+  color: var(--cor-texto);
+  font-size: clamp(20px, 4vw, 32px);
+  font-weight: 600;
+  margin: 0 0 32px;
+}

@@ -1,0 +1,60 @@
+<section class="form-visual" aria-labelledby="provas-title">
+  <div class="list-heading"><h2 id="provas-title">Provas <visual-info-tooltip text="Libere a prova para toda a turma e consulte as liberações na relação de alunos. Os horários usam o fuso do seu dispositivo. No instante do encerramento, o prazo termina. As questões são sorteadas quando o aluno confirma o início com o token. As situações são atualizadas a cada 30 segundos." /></h2></div>
+  <visual-tabs idPrefix="provas-abas" label="Área de provas" [tabs]="abas" [selected]="modo" (selectedChange)="changeMode($event)" />
+  @if(modo==='turmas'){
+    <div class="list-filters"><visual-campo rotulo="Turma" identificador="provas-turma-liberacao"><select campoVisual id="provas-turma-liberacao" [(ngModel)]="turmaLiberacaoId" (ngModelChange)="changeReleaseClass()" [disabled]="busy()"><option [ngValue]="null">Selecione a turma</option>@for(t of turmas();track t.id){<option [ngValue]="t.id">{{t.ensino==='F'?'Fundamental':'Médio'}} — {{t.ano}}º ano {{t.letra}}</option>}</select></visual-campo></div>
+    @if(erro()){<visual-aviso>{{erro()}}</visual-aviso><button botaoVisual type="button" variant="secondary" (click)="init()">Tentar novamente</button>}
+    @if(turmaLiberacaoId){<visual-cartao density="compact">
+      <div class="list-heading"><h3>Liberações para a turma</h3><div class="form-actions"><button botaoVisual type="button" size="compact" [disabled]="busy()||editingBusy()" (click)="newRelease()">Nova liberação</button><button botaoVisual type="button" variant="secondary" size="compact" [disabled]="busy()||loadingProvas()" (click)="loadProvas()">Atualizar</button></div></div>
+      @if(erroProvas()){<visual-aviso>{{erroProvas()}}</visual-aviso>}
+      @if(mensagem()){<p class="form-feedback" role="status">{{mensagem()}}</p>}
+      @if(loadingProvas()){<p role="status">Atualizando liberações…</p>}
+      <visual-table-scroll>            <div class="tabela-visual"><table><caption class="sr-only">Liberações deste professor para a turma selecionada</caption><thead><tr><th scope="col">Prova</th><th scope="col">Matéria</th><th scope="col">Disponível a partir de</th><th scope="col">Prazo até</th><th scope="col">Situação</th>@if(modo==='turmas'){<th scope="col">Ações</th>}</tr></thead>
+              <tbody>@for(p of provas();track p.id){<tr><th nomeRegistro scope="row">{{p.titulo}}</th><td>{{p.materia}}</td><td>{{p.disponivelEm|date:'dd/MM/yyyy HH:mm'}}</td><td>{{p.encerraEm|date:'dd/MM/yyyy HH:mm'}}</td><td><span class="exam-status" [class.exam-status-open]="p.situacao==='disponivel'" [class.exam-status-closed]="p.situacao==='encerrada'">{{p.situacao==='agendada'?'Agendada':p.situacao==='disponivel'?'Disponível':'Prazo encerrado'}}</span></td>@if(modo==='turmas'){<td><button botaoVisual type="button" variant="edit" size="compact" [disabled]="busy()||editingBusy()" (click)="edit(p)">Editar</button></td>}</tr>}
+              @empty{<tr><td [attr.colspan]="modo==='turmas'?6:5">Nenhuma liberação registrada por você para esta turma.</td></tr>}</tbody>
+            </table></div>
+            <visual-pagination inputId="provas-turma-tamanho" [total]="totalProvas" [page]="paginaProvas" [pageSize]="tamanhoProvas" [busy]="loadingProvas()||busy()" (pageChange)="changeProofPage($event)" (pageSizeChange)="changeProofSize($event)" /></visual-table-scroll>
+      @if(editingBusy()){<p role="status">Carregando dados da liberação…</p>}
+      @if(formOpen()){<h3>{{editingId ? "Editar liberação" : "Liberar prova para a turma"}}</h3><form #form="ngForm" class="form-visual exam-release-form" (ngSubmit)="release(form)" autocomplete="off" [attr.aria-busy]="busy()">
+                <visual-campo rotulo="Título da prova" identificador="prova-titulo" [erro]="tituloControl|validationMessage:form.submitted"><input campoVisual id="prova-titulo" name="titulo" [(ngModel)]="titulo" #tituloControl="ngModel" required notBlank maxlength="120" [disabled]="busy()" /></visual-campo>
+                <visual-campo rotulo="Matéria" identificador="prova-materia" [erro]="materiaControl|validationMessage:form.submitted"><select campoVisual id="prova-materia" name="materiaId" [(ngModel)]="materiaId" #materiaControl="ngModel" required [disabled]="busy()"><option [ngValue]="null">Selecione a matéria</option>@for(m of materiasTurma;track m.materiaId){<option [ngValue]="m.materiaId">{{m.nome}}</option>}</select></visual-campo>
+                <visual-campo rotulo="Disponível a partir de" identificador="prova-inicio" [erro]="inicioControl|validationMessage:form.submitted"><visual-date-field inputId="prova-inicio" name="disponivelEm" [(ngModel)]="disponivelEm" #inicioControl="ngModel" [showTime]="true" placeholder="Selecione data e horário" required [invalid]="!!(inicioControl|validationMessage:form.submitted)" [disabled]="busy()" /></visual-campo>
+                <visual-campo rotulo="Prazo até" identificador="prova-fim" [erro]="fimControl|validationMessage:form.submitted"><visual-date-field inputId="prova-fim" name="encerraEm" [(ngModel)]="encerraEm" #fimControl="ngModel" [showTime]="true" placeholder="Selecione data e horário" required [invalid]="!!(fimControl|validationMessage:form.submitted)" [disabled]="busy()" /></visual-campo>
+                <visual-campo rotulo="Duração (minutos)" identificador="prova-duracao" [erro]="duracaoControl|validationMessage:form.submitted"><input campoVisual id="prova-duracao" name="duracaoMinutos" type="number" [(ngModel)]="duracaoMinutos" #duracaoControl="ngModel" required min="1" max="480" step="1" [disabled]="busy()" /></visual-campo>
+                <visual-campo rotulo="Token de início" identificador="prova-token" [orientacao]="tokenIndisponivel?'O token anterior não pode ser recuperado. Defina um novo token.':'Forneça este token aos alunos para iniciarem a prova.'" [erro]="tokenControl|validationMessage:form.submitted"><input campoVisual id="prova-token" name="token" type="text" [(ngModel)]="token" #tokenControl="ngModel" [required]="!editingId||tokenIndisponivel" minlength="4" maxlength="64" [disabled]="busy()" /></visual-campo>
+                @if(disponivelEm&&encerraEm&&!periodoValido){<p class="exam-period-error" role="alert">O encerramento deve estar no futuro e ser posterior ao início.</p>}
+                <div class="form-actions"><button botaoVisual variant="secondary" type="button" [disabled]="busy()" (click)="cancelEditor()">Cancelar</button>@if(!editingId){<button botaoVisual variant="secondary" type="button" [disabled]="busy()" (click)="reset(form)">Limpar</button>}<button botaoVisual type="submit" [disabled]="busy()||!!form.invalid||!titulo.trim()||!periodoValido">{{busy()?'Registrando…':editingId?'Salvar alterações':'Liberar para a turma'}}</button></div>
+              </form>}
+    </visual-cartao>}
+  }@else if(modo==='correcoes'){<app-correcoes />}@else{
+  <div class="list-filters"><visual-campo rotulo="Turma" identificador="provas-turma"><select campoVisual id="provas-turma" [(ngModel)]="turmaId" (ngModelChange)="changeTurma()" [disabled]="loading()||busy()">
+    <option [ngValue]="null">Todas as minhas turmas</option>@for(t of turmas();track t.id){<option [ngValue]="t.id">{{t.ensino==='F'?'Fundamental':'Médio'}} — {{t.ano}}º ano {{t.letra}}</option>}
+  </select></visual-campo></div>
+  @if(erro()){<visual-aviso>{{erro()}}</visual-aviso><button botaoVisual type="button" variant="secondary" (click)="init()">Tentar novamente</button>}
+  <visual-cartao density="compact">
+    @if(loading()){<p role="status">Carregando alunos…</p>}
+    @else if(!erro()){
+      <visual-table-scroll><div class="tabela-visual"><table><caption class="sr-only">Alunos e suas liberações de provas</caption>
+        <thead><tr><th scope="col">Aluno</th><th scope="col">Número</th><th scope="col">CGM</th><th scope="col">Turma</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
+        <tbody>@for(a of alunos();track a.id){
+          <tr><th nomeRegistro scope="row">{{a.nome}}</th><td>{{a.numero??'—'}}</td><td>{{a.cgm}}</td><td>{{a.ensino==='F'?'Fundamental':'Médio'}} — {{a.ano}}º ano {{a.letra}}</td><td>{{a.status==='M'?'Matriculado':'Transferido'}}</td>
+            <td><button botaoVisual type="button" variant="secondary" size="compact" [disabled]="busy()" [attr.aria-expanded]="selecionado()?.id===a.id" [attr.aria-controls]="'provas-aluno-'+a.id" (click)="toggle(a)">{{selecionado()?.id===a.id?'Recolher':'Ver provas'}}</button></td></tr>
+          @if(selecionado()?.id===a.id){<tr><td colspan="6" class="exam-detail-cell"><section class="exam-details" [id]="'provas-aluno-'+a.id" [attr.aria-label]="'Provas de '+a.nome">
+            <div class="list-heading"><h3>Liberações de {{a.nome}}</h3><button botaoVisual type="button" size="compact" variant="secondary" [disabled]="loadingProvas()||busy()" (click)="loadProvas()">Atualizar</button></div>
+            @if(erroProvas()){<visual-aviso>{{erroProvas()}}</visual-aviso>}
+            @if(mensagem()){<p class="form-feedback" role="status">{{mensagem()}}</p>}
+            @if(loadingProvas()){<p role="status">Atualizando liberações…</p>}
+            <div class="tabela-visual"><table><caption class="sr-only">Liberações deste professor para o aluno selecionado</caption><thead><tr><th scope="col">Prova</th><th scope="col">Matéria</th><th scope="col">Disponível a partir de</th><th scope="col">Prazo até</th><th scope="col">Situação</th></tr></thead>
+              <tbody>@for(p of provas();track p.id){<tr><th nomeRegistro scope="row">{{p.titulo}}</th><td>{{p.materia}}</td><td>{{p.disponivelEm|date:'dd/MM/yyyy HH:mm'}}</td><td>{{p.encerraEm|date:'dd/MM/yyyy HH:mm'}}</td><td><span class="exam-status" [class.exam-status-open]="p.situacao==='disponivel'" [class.exam-status-closed]="p.situacao==='encerrada'">{{p.situacao==='agendada'?'Agendada':p.situacao==='disponivel'?'Disponível':'Prazo encerrado'}}</span></td></tr>}
+              @empty{<tr><td colspan="5">Nenhuma liberação registrada por você para este aluno.</td></tr>}</tbody>
+            </table></div>
+            <visual-pagination inputId="provas-liberacoes-tamanho" [total]="totalProvas" [page]="paginaProvas" [pageSize]="tamanhoProvas" [busy]="loadingProvas()||busy()" (pageChange)="changeProofPage($event)" (pageSizeChange)="changeProofSize($event)" />
+
+          </section></td></tr>}
+        }@empty{<tr><td colspan="6">Nenhum aluno encontrado nas suas turmas.</td></tr>}</tbody>
+      </table></div></visual-table-scroll>
+    }
+  </visual-cartao>
+  <visual-pagination inputId="provas-alunos-tamanho" [total]="total" [page]="pagina" [pageSize]="tamanhoPagina" [busy]="loading()||busy()" (pageChange)="changePage($event)" (pageSizeChange)="changeSize($event)" />
+  }
+</section>

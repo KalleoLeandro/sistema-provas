@@ -1,0 +1,11 @@
+<div class="opcoes" role="group" [attr.aria-label]="label" [attr.aria-disabled]="disabled">
+  @for (option of options; track option.value) {
+    <label class="opcao" [class.desabilitada]="disabled">
+      <input type="checkbox" [checked]="value.includes(option.value)" [disabled]="disabled"
+        (change)="toggle(option.value)" (blur)="onTouched()" autocomplete="off" />
+      <span>{{ option.label }}</span>
+    </label>
+  } @empty {
+    <p role="status">{{ emptyMessage }}</p>
+  }
+</div>

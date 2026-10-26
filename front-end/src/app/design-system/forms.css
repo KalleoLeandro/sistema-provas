@@ -1,0 +1,5 @@
+.form-page{width:100%;max-width:var(--largura-formulario);margin-inline:auto}
+.form-group-visual{border:0;padding:0;margin:0;min-width:0}.form-group-visual legend{font-size:14px;font-weight:600;color:var(--cor-texto);padding:0}.form-hint-visual{font-size:13px;color:var(--cor-texto-suave);margin:8px 0 12px}
+.form-visual{display:grid;gap:24px}.form-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.form-actions-end{justify-content:flex-end}.form-feedback{margin:0;color:var(--cor-sucesso);background:var(--cor-sucesso-fundo);border:1px solid var(--cor-sucesso);border-radius:var(--raio-padrao);padding:14px 16px}.filtro-visual{display:grid;gap:8px;max-width:280px;margin-bottom:10px}.filtro-visual label{font-size:14px;font-weight:600}@media(max-width:480px){visual-form-actions .botao-visual{width:100%}}
+
+.form-page.form-page-wide { max-width:1120px; }

@@ -1,0 +1,23 @@
+.campo-visual { display:block; width:100%; min-height:var(--altura-controle); margin:0; padding:13px 15px; border:1px solid var(--cor-borda); border-radius:var(--raio-padrao); background:var(--cor-superficie); color:var(--cor-texto); font:inherit; }
+.campo-visual::placeholder { color:var(--cor-placeholder); }
+.campo-visual:focus { outline:2px solid var(--cor-primaria); outline-offset:2px; }
+.campo-visual:disabled { opacity:.65; cursor:not-allowed; }
+.campo-visual[aria-invalid="true"] { border-color:var(--cor-erro); }
+
+.botao-visual { display:inline-flex; align-items:center; justify-content:center; gap:12px; min-height:var(--altura-controle); padding:13px 20px; border:1px solid transparent; border-radius:var(--raio-padrao); background:var(--cor-primaria); color:var(--cor-superficie); font:600 14px var(--fonte-padrao); text-decoration:none; cursor:pointer; transition:background-color .15s,border-color .15s; }
+.botao-visual:hover:not(:disabled) { background:var(--azul-escuro-institucional); filter:none; }
+.botao-visual:focus-visible { outline:3px solid var(--cor-primaria); outline-offset:3px; }
+.botao-compacto { min-width:100px; min-height:var(--altura-botao-compacto); height:var(--altura-botao-compacto); padding:0 14px; border-radius:8px; line-height:1; }
+
+.botao-secundario { background:var(--cor-superficie); color:var(--cor-acao-neutra); border-color:var(--cor-acao-neutra-borda); }
+.botao-secundario:hover:not(:disabled) { background:var(--cor-acao-neutra-hover); }
+.botao-editar { color:var(--cor-edicao); background:var(--cor-edicao-fundo); border-color:var(--cor-edicao-borda); }
+.botao-editar:hover:not(:disabled) { background:var(--cor-edicao-hover); }
+.botao-continuar { color:var(--cor-primaria); background:var(--cor-superficie); border-color:var(--cor-primaria); }
+.botao-continuar:hover:not(:disabled) { background:var(--cor-info-fundo); }
+.botao-perigo { color:var(--cor-erro); background:var(--cor-erro-fundo); border-color:var(--cor-erro-borda); }
+.botao-perigo:hover:not(:disabled) { background:var(--cor-erro-hover); }
+.botao-sucesso { color:var(--cor-sucesso); background:var(--cor-sucesso-fundo); border-color:var(--cor-sucesso); }
+.botao-sucesso:hover:not(:disabled) { background:var(--cor-sucesso-hover); }
+.botao-visual:disabled { opacity:1; color:var(--cor-desabilitado-texto); background:var(--cor-desabilitado-fundo); border-color:var(--cor-desabilitado-borda); cursor:not-allowed; }
+@media(prefers-reduced-motion:reduce) { .botao-visual { transition:none; } }

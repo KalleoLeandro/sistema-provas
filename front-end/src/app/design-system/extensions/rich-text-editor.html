@@ -1,0 +1,49 @@
+<div #frame class="visual-rich-editor">
+  <div #editor></div>
+  @if(selectedImage && imageBox;as box){
+    <div class="rich-image-selection" [style.left.px]="box.left" [style.top.px]="box.top" [style.width.px]="box.width" [style.height.px]="box.height">
+      @for(corner of imageCorners;track corner){<button type="button" class="rich-image-handle" [class]="'rich-image-handle '+corner" aria-label="Redimensionar figura" title="Arraste para redimensionar ou use as setas" [disabled]="isDisabled" (pointerdown)="startImageDrag($event,corner)" (keydown)="imageResizeKey($event)" (keydown.escape)="closeImage()"></button>}
+    </div>
+  }
+  <div class="rich-math-tools" (keydown.escape)="symbolsOpen=false">
+    <button type="button" class="rich-symbol-toggle" [disabled]="isDisabled" [attr.aria-expanded]="symbolsOpen"
+      (mousedown)="$event.preventDefault()" (click)="symbolsOpen=!symbolsOpen">Ω Símbolos matemáticos</button>
+    @if (symbolsOpen) {
+      <div class="rich-symbol-panel" role="group" aria-label="Inserir símbolo matemático">
+        <button type="button" [disabled]="isDisabled" aria-label="Raiz quadrada" title="Raiz quadrada"
+          (mousedown)="$event.preventDefault()" (click)="insertRoot('2')">√</button>
+        <button type="button" [disabled]="isDisabled" aria-label="Raiz cúbica" title="Raiz cúbica"
+          (mousedown)="$event.preventDefault()" (click)="insertRoot('3')">³√</button>
+        <label class="rich-root-degree">Índice da raiz <input #rootDegree type="text" value="n" maxlength="3" autocomplete="off"
+          aria-label="Índice da raiz" [disabled]="isDisabled" /></label>
+        <button type="button" [disabled]="isDisabled" aria-label="Inserir raiz enésima"
+          (mousedown)="$event.preventDefault()" (click)="insertRoot(rootDegree.value)">ⁿ√ Inserir raiz</button>
+        @for (symbol of symbols; track symbol.text) {
+          <button type="button" [disabled]="isDisabled" [attr.aria-label]="symbol.label" [title]="symbol.label"
+            (mousedown)="$event.preventDefault()" (click)="insertSymbol(symbol)">{{symbol.text}}</button>
+        }
+        @if (rootError) { <p class="rich-editor-error" role="alert">{{rootError}}</p> }
+        <p>Após inserir uma raiz, digite o radicando: a barra termina ao digitar um espaço. O índice pode ser de 2 a 999 ou n.</p>
+        <p>Use sobrescrito (x²) para potências e subscrito (x₂) para bases. Exemplo: log₂(8), x² e √(9).</p>
+      </div>
+    }
+  </div>
+  @if (allowImages) {
+    <p class="rich-image-hint">Clique na figura e arraste uma alça nos cantos para ajustar o tamanho.</p>
+    <input #imageInput type="file" accept="image/png,image/jpeg" hidden (change)="insertLocalImage($event)" />
+    @if (selectedImage) {
+      <div class="rich-image-tools" role="group" aria-label="Editar figura" (keydown.escape)="closeImage()">
+        <strong>Editar figura</strong>
+        <label>Largura (px)<input type="number" min="16" max="3000" step="1" autocomplete="off" [value]="imageWidth" (input)="imageWidth=$any($event.target).value" [disabled]="isDisabled" /></label>
+        <label>Texto alternativo<input type="text" maxlength="300" autocomplete="off" [value]="imageAlt" (input)="imageAlt=$any($event.target).value" [disabled]="isDisabled" /></label>
+        <button type="button" [disabled]="isDisabled" (click)="applyImage()">Aplicar ajustes</button>
+        <button type="button" [disabled]="isDisabled" (click)="applyImage(true)">Tamanho original</button>
+        <button type="button" [disabled]="isDisabled" (click)="replaceImage()">Substituir figura</button>
+        <button type="button" class="rich-image-remove" [disabled]="isDisabled" (click)="removeImage()">Remover figura</button>
+        <button type="button" (click)="closeImage()">Fechar</button>
+        <p>A proporção é mantida. Em telas menores, a figura se ajusta ao espaço disponível.</p>
+      </div>
+    }
+  }
+  @if (imageError) { <p class="rich-editor-error" role="alert">{{ imageError }}</p> }
+</div>

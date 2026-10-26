@@ -1,0 +1,12 @@
+import { FormsModule } from '@angular/forms';
+import { moduleMetadata, type Meta, type StoryObj } from '@storybook/angular-vite';
+import { FieldComponent, InputDirective, CardComponent } from '../components';
+import { FormActionsComponent } from '../form-actions';
+type StoryArgs = { busy: boolean; invalid: boolean };
+const meta = { title: 'Design system/Formulários', decorators: [moduleMetadata({ imports: [FormsModule, FieldComponent, InputDirective, CardComponent, FormActionsComponent] })], args: { busy: false, invalid: false } } satisfies Meta<StoryArgs>;
+export default meta;
+type Story = StoryObj<StoryArgs>;
+export const Actions: Story = { name: "Ações", render: (args: StoryArgs) => ({ props: args, template: '<visual-form-actions [busy]="busy" [invalid]="invalid" />' }) };
+export const Busy: Story = { ...Actions, name: "Carregando", args: { busy: true } };
+export const Invalid: Story = { ...Actions, name: "Inválido", args: { invalid: true } };
+export const Registration: Story = { name: "Cadastro", render: () => ({ template: '<section class="form-page"><h2>Cadastro centralizado</h2><visual-cartao><form class="form-visual" #form="ngForm" (ngSubmit)="form.resetForm()" autocomplete="off"><visual-campo rotulo="Nome da matéria" identificador="nome-materia"><input campoVisual id="nome-materia" name="nome" ngModel required maxlength="120" placeholder="Ex.: Matemática" /></visual-campo><visual-form-actions [invalid]="!!form.invalid" (clear)="form.resetForm()" (saveAndContinue)="form.resetForm()" /></form></visual-cartao></section>' }) };

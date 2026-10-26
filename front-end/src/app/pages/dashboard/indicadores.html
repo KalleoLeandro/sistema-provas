@@ -1,0 +1,16 @@
+<section class="dashboard-indicators" aria-labelledby="indicadores-title">
+ <div class="list-heading"><h3 id="indicadores-title">Provas e desempenho <visual-info-tooltip text="Considera alunos matriculados e provas já disponibilizadas. Cada aluno é contado uma vez em cada card: quem entregou alguma prova e quem ainda deve alguma prova podem se sobrepor. Médias usam apenas provas entregues com correção concluída, na escala de 0 a 10. Professores veem somente suas provas e vínculos ativos; administradores veem toda a escola. O gráfico de situação conta avaliações por aluno, não alunos distintos." /></h3><button botaoVisual type="button" variant="secondary" size="compact" [disabled]="loading()" (click)="load()">Atualizar indicadores</button></div>
+ @if(loading()){<p role="status">Carregando indicadores…</p>}
+ @if(erro()){<visual-aviso>{{erro()}}</visual-aviso>}
+ @if(!loading()&&!erro()){@if(dados();as d){
+ <div class="dashboard-metrics" [class.with-questions]="showQuestions">
+  <visual-metric-card [value]="d.alunosFizeram" description="Alunos que fizeram provas" link="/relatorios" actionLabel="Ver relatórios" />
+  <visual-metric-card [value]="d.alunosPendentes" description="Alunos com provas por fazer" link="/relatorios" actionLabel="Ver relatórios" />
+  <visual-metric-card [value]="d.mediaGeral===null?'—':((d.mediaGeral|number:'1.2-2':'pt')??'—')" description="Média geral das notas" link="/relatorios" actionLabel="Ver resultados" />
+ @if(showQuestions){@if(pendenciasErro()){<visual-aviso>{{pendenciasErro()}}</visual-aviso>}@else{<visual-metric-card [value]="totalFaltantes()" description="Questões a cadastrar faltando" link="/questoes/listar" actionLabel="Ver questões" />}}
+ </div>
+ <div class="dashboard-charts">
+  <visual-cartao><h3>Média de notas por turma</h3>@if(d.mediasTurmas.length){<visual-chart label="Média de notas (0 a 10)" [labels]="turmas" [values]="medias" type="bar" [maximum]="10" /><p class="dashboard-chart-note">Turmas sem provas corrigidas aparecem sem nota.</p>}@else{<p>Nenhuma prova disponibilizada para calcular as médias.</p>}</visual-cartao>
+  <visual-cartao><h3>Situação das provas</h3>@if(total){<visual-chart label="Avaliações por situação" [labels]="situacoes" [values]="quantidades" type="doughnut" />}@else{<p>Nenhuma prova disponibilizada até o momento.</p>}</visual-cartao>
+ </div>
+ }}</section>

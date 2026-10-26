@@ -1,0 +1,6 @@
+<button #trigger class="info-trigger" type="button" [attr.aria-label]="label" [attr.aria-describedby]="visible() ? tooltipId : null" (focus)="focus()" (blur)="blur()" (click)="show()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r=".9" fill="currentColor" stroke="none"/></svg>
+</button>
+@if (visible()) {
+  <div class="info-tooltip" role="tooltip" [id]="tooltipId" [style.left.px]="left" [style.top.px]="top" [style.width.px]="width" [class.above]="above">{{ text }}</div>
+}

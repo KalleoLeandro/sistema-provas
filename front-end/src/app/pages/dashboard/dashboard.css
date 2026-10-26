@@ -1,0 +1,5 @@
+h2 { font-size: 28px; margin: 10px 0 24px; }
+h3 { font-size: 20px; margin: 0 0 12px; }
+p { margin: 0; color: var(--cor-texto-suave); }
+.materias { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+ul { padding-left: 20px; margin-bottom: 0; color: var(--cor-texto); line-height: 1.8; }

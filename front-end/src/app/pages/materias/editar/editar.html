@@ -1,0 +1,38 @@
+<section class="form-page">
+    <h2 class="ds-title">Editar matéria</h2>
+    @if (erro()) {
+      <visual-aviso>{{ erro() }}</visual-aviso>
+    }
+    @if (loading()) {
+      <p role="status">Carregando matéria…</p>
+    } @else if (loaded()) {
+      <visual-cartao
+        ><form
+          class="form-visual"
+          #form="ngForm"
+          (ngSubmit)="save(form)"
+          autocomplete="off"
+          [attr.aria-busy]="busy()"
+        >
+          <visual-campo rotulo="Nome da matéria" identificador="editar-materia-nome"
+            ><input
+              campoVisual
+              id="editar-materia-nome"
+              name="nome"
+              [(ngModel)]="nome"
+              required
+              maxlength="120"
+              [disabled]="busy()"
+          /></visual-campo>
+          <div class="form-actions form-actions-end">
+            <a botaoVisual variant="secondary" routerLink="/cadastro/materias/listar">Cancelar</a
+            ><button botaoVisual type="submit" [disabled]="busy() || form.invalid || !nome.trim()">
+              {{ busy() ? 'Salvando…' : 'Salvar alterações' }}
+            </button>
+          </div>
+        </form></visual-cartao
+      >
+    } @else {
+      <a routerLink="/cadastro/materias/listar">Voltar à lista</a>
+    }
+  </section>

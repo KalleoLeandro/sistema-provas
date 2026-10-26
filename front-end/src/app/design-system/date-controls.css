@@ -1,0 +1,10 @@
+@import '../../../node_modules/ng-zorro-antd/date-picker/style/index.min.css';
+@import '../../../node_modules/ng-zorro-antd/time-picker/style/index.min.css';
+/* Cores do calendário e do relógio alinhadas aos controles do portal. */
+.ant-picker-dropdown{font-family:var(--fonte-padrao);color:var(--cor-texto)}
+.ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner,.ant-picker-ok .ant-btn-primary{background:var(--cor-primaria);border-color:var(--cor-primaria)}
+.ant-picker-today-btn,.ant-picker-now-btn{color:var(--cor-primaria)}
+.ant-picker-cell-in-view.ant-picker-cell-today .ant-picker-cell-inner:before{border-color:var(--cor-primaria)}
+.ant-picker-input>input{font-family:var(--fonte-padrao);color:var(--cor-texto)}
+
+.ant-picker-ok button{border:1px solid var(--cor-primaria);border-radius:4px;padding:3px 12px;color:white;background:var(--cor-primaria)}

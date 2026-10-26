@@ -1,0 +1,13 @@
+<section class="form-page"><h2>Editar usuário</h2><p>Perfil: Administrador</p>
+    @if (erro()) { <visual-aviso>{{ erro() }}</visual-aviso> }
+    @if (loading()) { <p role="status">Carregando usuário…</p> }
+    @else if (loaded()) {
+      <visual-cartao><form class="form-visual" #form="ngForm" (ngSubmit)="save(form)" autocomplete="off" [attr.aria-busy]="busy()">
+        <visual-campo rotulo="Login" identificador="editar-login"><input campoVisual id="editar-login" name="login" [(ngModel)]="login" required minlength="3" maxlength="120" [disabled]="busy()" /></visual-campo>
+        <visual-campo rotulo="Nova senha" identificador="editar-senha" orientacao="Deixe em branco para manter a senha atual. Caso altere, use de 8 a 128 caracteres.">
+          <input campoVisual id="editar-senha" name="senha" type="password" [(ngModel)]="senha" minlength="8" maxlength="128" aria-describedby="editar-senha-orientacao" [disabled]="busy()" />
+        </visual-campo>
+        <div class="form-actions form-actions-end"><a botaoVisual variant="secondary" routerLink="/cadastro/usuarios/listar">Cancelar</a><button botaoVisual type="submit" [disabled]="busy() || form.invalid || login.trim().length < 3">{{ busy() ? 'Salvando…' : 'Salvar alterações' }}</button></div>
+      </form></visual-cartao>
+    }
+  </section>

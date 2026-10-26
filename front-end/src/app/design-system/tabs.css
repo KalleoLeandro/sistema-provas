@@ -1,0 +1,6 @@
+:host { display: block; min-width: 0; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--cor-borda); overflow-x: auto; }
+button { border: 0; border-bottom: 3px solid transparent; background: transparent; padding: 14px 18px; color: var(--cor-texto-suave); font: 600 15px var(--fonte-padrao); cursor: pointer; white-space: nowrap; }
+button[aria-selected=true] { color: var(--cor-primaria); border-bottom-color: var(--cor-primaria); background: var(--cor-info-fundo); }
+button:hover { color: var(--cor-texto); background: var(--cor-fundo); }
+button:focus-visible { outline: 2px solid var(--cor-primaria); outline-offset: -3px; }

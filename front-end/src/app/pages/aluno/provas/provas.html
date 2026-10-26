@@ -1,0 +1,16 @@
+<section class="form-visual" aria-labelledby="aluno-provas-title">
+  <div class="list-heading"><h2 id="aluno-provas-title">Minhas provas</h2><button botaoVisual type="button" variant="secondary" size="compact" [disabled]="loading()" (click)="load()">Atualizar</button></div>
+  @if(erro()){<visual-aviso>{{erro()}}</visual-aviso>}
+  @if(loading()){<p role="status">Atualizando suas provas…</p>}
+  @if(dados();as d){
+    <visual-cartao density="compact"><visual-progress label="Provas concluídas" [total]="d.total" [completed]="d.concluidas" /><p>{{d.concluidas}} de {{d.total}} provas concluídas</p></visual-cartao>
+    <visual-cartao density="compact"><h3>Provas disponíveis</h3>
+      <visual-table-scroll><div class="tabela-visual"><table><caption class="sr-only">Provas disponíveis para sua turma</caption>
+        <thead><tr><th scope="col">Prova</th><th scope="col">Matéria</th><th scope="col">Professor</th><th scope="col">Disponível desde</th><th scope="col">Prazo até</th><th scope="col">Situação</th><th scope="col">Ações</th></tr></thead>
+        <tbody>@for(p of d.provas.itens;track p.id){<tr><th nomeRegistro scope="row">{{p.titulo}}</th><td>{{p.materia}}</td><td>{{p.professor}}</td><td>{{p.disponivelEm|date:'dd/MM/yyyy HH:mm'}}</td><td>{{p.encerraEm|date:'dd/MM/yyyy HH:mm'}}</td><td>{{p.situacao==='submetida'?'Enviada':p.situacao==='em_andamento'?'Em andamento':'Não iniciada'}}</td><td><a botaoVisual size="compact" [routerLink]="['/aluno/provas',p.id]">{{p.situacao==='submetida'?'Ver respostas':p.situacao==='em_andamento'?'Continuar prova':'Iniciar prova'}}</a></td></tr>}
+        @empty{<tr><td colspan="7">Você não possui provas disponíveis no momento.</td></tr>}</tbody>
+      </table></div></visual-table-scroll>
+    </visual-cartao>
+    <visual-pagination inputId="aluno-provas-tamanho" [total]="d.provas.total" [page]="pagina" [pageSize]="tamanho" [busy]="loading()" (pageChange)="changePage($event)" (pageSizeChange)="changeSize($event)" />
+  }
+</section>

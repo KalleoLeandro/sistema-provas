@@ -1,0 +1,69 @@
+<section class="form-page" aria-labelledby="turma-title">
+  <span class="sobretitulo">CADASTRO</span>
+  <h2 class="ds-title" id="turma-title">Cadastrar turma</h2>
+  <visual-cartao
+    ><form
+      class="form-visual"
+      #form="ngForm"
+      (ngSubmit)="save(form)"
+      autocomplete="off"
+      [attr.aria-busy]="busy()"
+    >
+      <visual-campo rotulo="Ensino" identificador="turma-ensino" [erro]="ensinoControl | validationMessage:form.submitted"
+        ><select
+          campoVisual
+          id="turma-ensino"
+          name="ensino"
+          [(ngModel)]="ensino" #ensinoControl="ngModel" [allowedValues]="['F', 'M']" aria-describedby="turma-ensino-erro" [attr.aria-invalid]="(ensinoControl | validationMessage:form.submitted) ? 'true' : null"
+          required
+          [disabled]="busy()"
+        >
+          <option value="" disabled>Selecione o ensino</option>
+          <option value="F">Fundamental</option>
+          <option value="M">Médio</option>
+        </select></visual-campo
+      >
+      <visual-campo rotulo="Ano" identificador="turma-ano" [erro]="anoControl | validationMessage:form.submitted"
+        ><select
+          campoVisual
+          id="turma-ano"
+          name="ano"
+          [(ngModel)]="ano" #anoControl="ngModel" [allowedValues]="anos" aria-describedby="turma-ano-erro" [attr.aria-invalid]="(anoControl | validationMessage:form.submitted) ? 'true' : null"
+          required
+          [disabled]="busy()"
+        >
+          <option [ngValue]="null" disabled>Selecione o ano</option>
+          @for (item of anos; track item) {
+            <option [ngValue]="item">{{ item }}º ano</option>
+          }
+        </select></visual-campo
+      >
+      <visual-campo rotulo="Letra" identificador="turma-letra" [erro]="letraControl | validationMessage:form.submitted"
+        ><select
+          campoVisual
+          id="turma-letra"
+          name="letra"
+          [(ngModel)]="letra" #letraControl="ngModel" [allowedValues]="letras" aria-describedby="turma-letra-erro" [attr.aria-invalid]="(letraControl | validationMessage:form.submitted) ? 'true' : null"
+          required
+          [disabled]="busy()"
+        >
+          <option value="" disabled>Selecione a letra</option>
+          @for (item of letras; track item) {
+            <option [value]="item">{{ item }}</option>
+          }
+        </select></visual-campo
+      >
+      @if (erro()) {
+        <visual-aviso>{{ erro() }}</visual-aviso>
+      }
+      @if (mensagem()) {
+        <p class="form-feedback" role="status">{{ mensagem() }}</p>
+      }
+      <visual-form-actions
+        [busy]="busy()"
+        [invalid]="!!form.invalid"
+        (clear)="reset(form)"
+        (saveAndContinue)="save(form, true)"
+      /></form
+  ></visual-cartao>
+</section>

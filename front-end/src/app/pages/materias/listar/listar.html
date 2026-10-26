@@ -1,0 +1,97 @@
+<section class="list-page-compact" aria-labelledby="materias-title" [attr.aria-busy]="loading()">
+  <div class="list-heading">
+    <h2 id="materias-title">Matérias</h2>
+    <a botaoVisual routerLink="/cadastro/materias/cadastrar">Cadastrar matéria</a>
+  </div>
+  @if (mensagem()) {
+    <p role="status" class="form-feedback">{{ mensagem() }}</p>
+  }
+  <visual-confirm-dialog
+    [open]="!!deleteTarget()"
+    [busy]="deleting()"
+    title="Excluir matéria"
+    [message]="
+      'Deseja excluir a matéria ' +
+      (deleteTarget()?.nome || '') +
+      '? Esta ação não pode ser desfeita.'
+    "
+    (openChange)="closeDelete()"
+    (confirmed)="remove()"
+  >
+    @if (actionError()) {
+      <visual-aviso>{{ actionError() }}</visual-aviso>
+    }
+  </visual-confirm-dialog>
+  <div class="filtro-visual">
+    <label for="materias-search">Pesquisar matéria</label>
+    <input
+      campoVisual
+      id="materias-search"
+      type="search"
+      placeholder="Digite o nome da matéria"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+    />
+  </div>
+  @if (loading()) {
+    <p role="status">Carregando matérias…</p>
+  } @else if (erro()) {
+    <visual-aviso>{{ erro() }}</visual-aviso>
+    <button botaoVisual variant="secondary" type="button" (click)="load()">Tentar novamente</button>
+  } @else {
+    <visual-cartao density="compact">
+      <div class="tabela-visual">
+        <table>
+          <caption class="sr-only">
+            Matérias cadastradas em ordem alfabética
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Nome da matéria</th>
+              <th scope="col">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (materia of filtered(); track materia.id) {
+              <tr>
+                <th nomeRegistro scope="row">{{ materia.nome }}</th>
+                <td>
+                  <div class="acoes-registro">
+                    <a
+                      botaoVisual
+                      variant="edit"
+                      size="compact"
+                      [routerLink]="['/cadastro/materias', materia.id, 'editar']"
+                      [attr.aria-label]="'Editar ' + materia.nome"
+                      >Editar</a
+                    ><button
+                      botaoVisual
+                      variant="danger"
+                      size="compact"
+                      type="button"
+                      [disabled]="deleting()"
+                      [attr.aria-label]="'Excluir ' + materia.nome"
+                      (click)="confirmDelete(materia)"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="2">
+                  {{
+                    materias().length
+                      ? 'Nenhuma matéria encontrada para esta pesquisa.'
+                      : 'Nenhuma matéria cadastrada.'
+                  }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </visual-cartao>
+  }
+</section>

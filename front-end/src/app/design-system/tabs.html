@@ -1,0 +1,5 @@
+<div class="tabs" role="tablist" [attr.aria-label]="label">
+  @for (tab of tabs; track tab.id; let index = $index) {
+    <button type="button" role="tab" [id]="idPrefix + '-tab-' + tab.id" [attr.aria-controls]="idPrefix + '-panel-' + tab.id" [attr.aria-selected]="selected === tab.id" [attr.tabindex]="selected === tab.id ? 0 : -1" (click)="selectedChange.emit(tab.id)" (keydown)="keydown($event,index)">{{ tab.label }}</button>
+  }
+</div>

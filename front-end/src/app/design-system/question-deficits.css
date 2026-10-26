@@ -1,0 +1,6 @@
+.question-deficits { display: grid; gap: 14px; padding-top: 0; margin-top: 0; }
+.question-deficits h3 { margin: 0; font-size: 20px; }
+.question-deficits > p { margin: 0; color: var(--cor-texto-suave); font-size: 14px; line-height: 1.6; }
+.question-deficit { display: block; color: var(--cor-texto); white-space: nowrap; }
+.question-deficit.complete { font-weight: 500; }
+.question-deficits td small { display: block; margin-top: 5px; color: var(--cor-texto-suave); white-space: nowrap; }

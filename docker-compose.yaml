@@ -1,0 +1,70 @@
+name: sistema-provas
+
+services:
+  front-end:
+    build:
+      context: ./front-end
+    ports:
+      - "127.0.0.1:${PORTA_FRONTEND:-4200}:80"
+    restart: unless-stopped
+
+  back-end:
+    build:
+      context: ./back-end
+    environment:
+      APP_SECURITY_KEYS_DIRECTORY: /aplicacao/keys
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_TIMEOUT: 3s
+      SERVER_PORT: 8080
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4200,http://127.0.0.1:4200}
+      SPRING_DATASOURCE_URL: jdbc:mysql://banco:3306/${BANCO_NOME:-sgp}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=America/Sao_Paulo
+      SPRING_DATASOURCE_USERNAME: ${BANCO_USUARIO:-provas}
+      SPRING_DATASOURCE_PASSWORD: ${BANCO_SENHA:?Defina BANCO_SENHA no arquivo .env}
+    volumes:
+      - ./back-end/keys:/aplicacao/keys:ro
+    ports:
+      - "127.0.0.1:${PORTA_BACKEND:-8080}:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+      banco:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:8.2-alpine
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "always", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - dados-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  banco:
+    image: mysql:8.4
+    ports:
+      - "127.0.0.1:${PORTA_BANCO:-3306}:3306"
+    environment:
+      MYSQL_DATABASE: ${BANCO_NOME:-sgp}
+      MYSQL_USER: ${BANCO_USUARIO:-provas}
+      MYSQL_PASSWORD: ${BANCO_SENHA:?Defina BANCO_SENHA no arquivo .env}
+      MYSQL_ROOT_PASSWORD: ${BANCO_SENHA_ROOT:?Defina BANCO_SENHA_ROOT no arquivo .env}
+      TZ: America/Sao_Paulo
+    volumes:
+      - dados-banco:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_PASSWORD\" mysql --protocol=TCP -h 127.0.0.1 -u\"$$MYSQL_USER\" \"$$MYSQL_DATABASE\" -e 'SELECT 1' >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  dados-redis:
+  dados-banco:

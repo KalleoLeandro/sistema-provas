@@ -1,0 +1,5 @@
+/* Estilos adicionais dos componentes de base e do editor. */
+@import 'ng-zorro-antd/ng-zorro-antd.variable.min.css';
+@import 'quill/dist/quill.snow.css';
+
+@import './math.css';

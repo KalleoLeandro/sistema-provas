@@ -1,0 +1,6 @@
+<label [for]="identificador">{{ rotulo }}</label>
+<ng-content />
+<small [id]="identificador + '-orientacao'">{{ orientacao }}</small>
+@if (erro) {
+  <small class="campo-erro" [id]="identificador + '-erro'" role="alert">{{ erro }}</small>
+}

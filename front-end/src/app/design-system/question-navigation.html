@@ -1,0 +1,1 @@
+<nav aria-label="Navegar pelas questões" class="question-navigation">@for(n of numbers;track n){<button type="button" [class.answered]="answered.includes(n)" [attr.aria-label]="'Questão '+n+(answered.includes(n)?', respondida':', sem resposta')" (click)="selected.emit(n)">{{n}}</button>}</nav>

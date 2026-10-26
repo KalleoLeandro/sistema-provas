@@ -1,0 +1,1 @@
+<nz-date-picker class="visual-date-field" [nzId]="inputId" [ngModel]="value" [ngModelOptions]="{standalone:true}" (ngModelChange)="changed($event)" [nzFormat]="format" [nzShowTime]="showTime?{nzFormat:'HH:mm'}:false" [nzDisabled]="disabled" [nzStatus]="invalid?'error':''" [nzPlaceHolder]="placeholder" (nzOnOpenChange)="!$event&&touched()" />

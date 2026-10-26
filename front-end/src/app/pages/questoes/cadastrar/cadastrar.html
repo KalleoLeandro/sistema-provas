@@ -1,0 +1,94 @@
+<section aria-labelledby="questoes-title" class="question-form">
+  <a routerLink="/questoes/listar">Voltar à lista de questões</a>
+  <div class="question-heading">
+    <div><span class="sobretitulo">QUESTÕES</span><div class="screen-title"><h2 id="questoes-title">{{ editId ? 'Editar questão' : 'Cadastrar questões' }}</h2><visual-info-tooltip [text]="editId ? 'Uma nova versão só será criada se a atual já tiver sido usada em uma prova respondida.' : 'As questões são gravadas ao cadastrar. A lista abaixo mostra apenas os cadastros feitos enquanto você permanece nesta tela. Caso você saia, poderá consultar as questões na lista de questões'" /></div></div>
+    <label class="question-toggle"><input type="checkbox" [(ngModel)]="preview" autocomplete="off" /> Exibir prévia das questões</label>
+  </div>
+  @if (loading()) { <p role="status">Carregando matérias e turmas…</p> }
+  @if (erro()) { <visual-aviso>{{ erro() }}</visual-aviso><button botaoVisual variant="secondary" type="button" (click)="load()">Tentar novamente</button> }
+  <form class="form-visual" #form="ngForm" (ngSubmit)="save(form)" autocomplete="off" novalidate>
+    <visual-cartao density="compact" class="question-info-card">
+      <div class="question-info-grid">
+        <visual-campo rotulo="Matéria" identificador="questoes-materia" [erro]="materiaControl | validationMessage:form.submitted">
+          <select campoVisual id="questoes-materia" name="materiaId" [(ngModel)]="materiaId" #materiaControl="ngModel" (ngModelChange)="changeMateria()" required [disabled]="loading() || saving()"
+            aria-describedby="questoes-materia-erro" [attr.aria-invalid]="(materiaControl | validationMessage:form.submitted) ? 'true' : null">
+            <option [ngValue]="null" disabled>Selecione a matéria</option>
+            @for (m of materiasDisponiveis; track m.id) { <option [ngValue]="m.id">{{ m.nome }}</option> }
+          </select>
+        </visual-campo>
+        <visual-campo rotulo="Ensino e ano" identificador="questoes-ano" [erro]="anoControl | validationMessage:form.submitted">
+          <select campoVisual id="questoes-ano" name="anoSelecionado" [(ngModel)]="anoSelecionado" #anoControl="ngModel" (ngModelChange)="changeAno()" required [disabled]="!materiaId || saving()"
+            aria-describedby="questoes-ano-erro" [attr.aria-invalid]="(anoControl | validationMessage:form.submitted) ? 'true' : null">
+            <option value="" disabled>Selecione o ensino e ano</option>
+            @for (ano of anosDisponiveis; track ano.value) { <option [value]="ano.value">{{ ano.label }}</option> }
+          </select>
+        </visual-campo>
+        <visual-campo rotulo="Turmas (opcional)" identificador="questoes-turmas" orientacao="Selecione as turmas por chips. Deixe vazio para todas as suas turmas desta matéria no ensino e ano escolhidos.">
+          <visual-chip-select inputId="questoes-turmas" name="turmas" label="Turmas da questão" placeholder="Digite a letra da turma" [options]="turmasDisponiveis" [(ngModel)]="turmasSelecionadas" [disabled]="!anoAtual || saving()" />
+        </visual-campo>
+        @if (!loading() && !erro() && !destinos().length) { <p>Nenhuma matéria com ano vinculado ao seu cadastro.</p> }
+      </div>
+    </visual-cartao>
+  @if (cadastradas().length) {
+    <section class="question-saved" aria-labelledby="questoes-cadastradas-title">
+      <div class="question-saved-heading"><h3 id="questoes-cadastradas-title">Questões cadastradas</h3><span class="question-saved-count">{{ cadastradas().length }} salva(s)</span></div>
+      @for (item of cadastradas(); track item.questao.id) {
+        <visual-accordion [title]="item.resumo" [description]="item.vinculo">
+          <visual-question-preview [questao]="item.questao" />
+          @if (item.questao.tipo === 'objetiva') { <p>Resposta correta: <strong>{{ item.questao.respostaCorreta }}</strong></p> }
+        </visual-accordion>
+      }
+    </section>
+  }
+    @for (q of questoes; track q.id) {
+      <visual-cartao>
+        <div class="question-heading"><h3>Questão</h3>
+
+        </div>
+        <div class="question-settings">
+          <visual-campo rotulo="Tipo de questão" [identificador]="'tipo-' + q.id">
+            <select campoVisual [id]="'tipo-' + q.id" [name]="'tipo-' + q.id" [ngModel]="q.tipo" (ngModelChange)="updateQuestion(q.id, { tipo: $event })" required [allowedValues]="tipos" [disabled]="saving()">
+              <option value="objetiva">Objetiva</option><option value="discursiva">Discursiva</option>
+            </select>
+          </visual-campo>
+          <visual-campo rotulo="Peso da questão" [identificador]="'peso-' + q.id">
+            <select campoVisual [id]="'peso-' + q.id" [name]="'peso-' + q.id" [ngModel]="q.peso" (ngModelChange)="updateQuestion(q.id, { peso: $event })" required [allowedValues]="pesos" [disabled]="saving()">
+              @for (peso of pesos; track peso) { <option [ngValue]="peso">{{ peso.toFixed(1).replace('.', ',') }}</option> }
+            </select>
+          </visual-campo>
+        </div>
+        <div class="question-columns" [class.with-preview]="preview">
+          <div class="form-visual">
+            <visual-campo rotulo="Enunciado" [identificador]="'enunciado-' + q.id" [erro]="enunciadoControl | validationMessage:form.submitted">
+              <visual-rich-text-editor [inputId]="'enunciado-' + q.id" label="Enunciado da questão" [name]="'enunciado-' + q.id"
+                [ngModel]="q.enunciado" (ngModelChange)="updateQuestion(q.id, { enunciado: $event })" #enunciadoControl="ngModel" richTextRequired [allowImages]="true" [disabled]="saving()" [invalid]="!!(enunciadoControl | validationMessage:form.submitted)" />
+            </visual-campo>
+            @if (q.tipo === 'objetiva') {
+              @for (letra of letras; track letra) {
+                <visual-campo [rotulo]="'Alternativa ' + letra" [identificador]="'alternativa-' + q.id + '-' + letra" [erro]="alternativaControl | validationMessage:form.submitted">
+                  <visual-rich-text-editor [inputId]="'alternativa-' + q.id + '-' + letra" [label]="'Alternativa ' + letra + ' da questão'"
+                    [name]="'alternativa-' + q.id + '-' + letra" [ngModel]="q.alternativas[letra]" (ngModelChange)="updateAlternative(q.id, letra, $event)" #alternativaControl="ngModel" richTextRequired [allowImages]="true" [disabled]="saving()" [invalid]="!!(alternativaControl | validationMessage:form.submitted)" />
+                </visual-campo>
+              }
+              <visual-campo rotulo="Resposta correta" [identificador]="'resposta-' + q.id">
+                <select campoVisual [id]="'resposta-' + q.id" [name]="'resposta-' + q.id" [ngModel]="q.respostaCorreta" (ngModelChange)="updateQuestion(q.id, { respostaCorreta: $event })" required [allowedValues]="letras" [disabled]="saving()">
+                  @for (letra of letras; track letra) { <option [value]="letra">{{ letra }}</option> }
+                </select>
+              </visual-campo>
+            }
+          </div>
+          @if (preview) { <aside class="question-preview"><h4>Prévia — como o aluno verá a questão</h4><visual-question-preview [questao]="q" /></aside> }
+        </div>
+      </visual-cartao>
+    }
+    @if (mensagem()) { <p class="form-feedback" role="status">{{ mensagem() }}</p> }
+    @if (editId) {
+      <div class="form-actions">
+        <a botaoVisual variant="secondary" routerLink="/questoes/listar">Cancelar</a>
+        <button botaoVisual type="submit" [disabled]="saving() || loading()">{{ saving() ? 'Salvando…' : 'Salvar alterações' }}</button>
+      </div>
+    } @else {
+      <visual-form-actions [busy]="saving()" [invalid]="loading()" (clear)="reset(form)" (saveAndContinue)="save(form, true)" />
+    }
+  </form>
+</section>

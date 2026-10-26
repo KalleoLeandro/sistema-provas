@@ -1,0 +1,15 @@
+<article class="previa-questao" aria-label="Prévia da questão">
+  <header>QUESTÃO</header>
+  <div class="conteudo-rico" [innerHTML]="questao.enunciado"></div>
+  @if (!questao.enunciado) { <p class="orientacao">O enunciado aparecerá aqui.</p> }
+  @if (questao.tipo === 'objetiva') {
+    <ol class="alternativas">
+      @for (letra of letras; track letra) {
+        <li><strong>{{ letra }}</strong><div class="conteudo-rico" [innerHTML]="questao.alternativas[letra]"></div>
+          @if (!questao.alternativas[letra]) { <span class="orientacao">Alternativa ainda não preenchida</span> }
+        </li>
+      }
+    </ol>
+  } @else { <div class="resposta-escrita">Espaço para resposta discursiva</div> }
+  <p class="orientacao">Peso: {{ questao.peso.toFixed(1).replace('.', ',') }}</p>
+</article>

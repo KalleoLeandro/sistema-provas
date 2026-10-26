@@ -1,0 +1,13 @@
+<nav class="pagination" aria-label="Paginação da lista">
+  <label [for]="inputId">Itens por página
+    <select campoVisual [id]="inputId" [ngModel]="pageSize" (ngModelChange)="pageSizeChange.emit($event)" [disabled]="busy" autocomplete="off">
+      @for (size of sizes; track size) { <option [ngValue]="size">{{ size }}</option> }
+    </select>
+  </label>
+  <span class="pagination-range" role="status">{{ start }}–{{ end }} de {{ total }}</span>
+  <div class="pagination-actions">
+    <button botaoVisual variant="secondary" size="compact" type="button" [disabled]="busy || page <= 1" (click)="pageChange.emit(page - 1)">Anterior</button>
+    <span>Página {{ page }} de {{ pages }}</span>
+    <button botaoVisual variant="secondary" size="compact" type="button" [disabled]="busy || page >= pages" (click)="pageChange.emit(page + 1)">Próxima</button>
+  </div>
+</nav>

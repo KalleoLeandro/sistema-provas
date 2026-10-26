@@ -1,0 +1,27 @@
+:root{--azul-institucional:#007a9f;--azul-escuro-institucional:#265971;--verde-lima-institucional:#c3d552;--verde-claro-institucional:#98c455;--verde-institucional:#83bc56;--cinza-institucional:#cad4e1;--cor-primaria:var(--azul-institucional);--cor-texto:var(--azul-escuro-institucional);--cor-texto-suave:#526875;--cor-borda:var(--cinza-institucional);--cor-fundo:#f4f7fa;--raio-padrao:12px;--fonte-padrao:'Segoe UI',Arial,sans-serif;--espaco-2:8px;--espaco-4:16px;--espaco-6:24px;--espaco-8:32px}
+:root{--cor-superficie:#fff;--cor-erro:#a52626;--cor-erro-fundo:#fff2f2;--cor-erro-hover:#fbe0e0;--cor-erro-borda:#edc7c8;--cor-sucesso:#22683b;--cor-sucesso-fundo:#eff9f1;--cor-sucesso-hover:#daf0df;--cor-info:#006782;--cor-info-fundo:#edf7fb;--cor-info-hover:#d9eef6;--cor-neutra:#555;--cor-neutra-fundo:#f0f0f0;--cor-placeholder:#647784;--cor-sidebar:var(--azul-escuro-institucional);--cor-sidebar-texto:#fff;--cor-sidebar-descricao:#e2edf3;--cor-sidebar-rotulo:#d1e1ea;--cor-sidebar-borda:#ffffff30;--cor-sidebar-hover:#ffffff14;--sombra-cartao:0 16px 60px #2659710d;--sombra-ilustracao:8px 12px 0 #e5edf3;--altura-controle:50px;--altura-botao-compacto:40px}
+
+:root{--cor-aviso:#946200}
+
+:root{--largura-formulario:640px}
+
+:root{--cor-tabela-cabecalho-fundo:var(--cor-info-fundo);--cor-tabela-cabecalho-texto:var(--cor-texto);--cor-tabela-cabecalho-borda:var(--cor-primaria)}
+
+:root{--cor-sobreposicao:#152e3dcc}
+
+/* Cores semânticas de ações e superfícies, independentes da identidade institucional. */
+:root {
+  --cor-acao-neutra: #475569;
+  --cor-acao-neutra-borda: #b8c3cf;
+  --cor-acao-neutra-hover: #f1f5f9;
+  --cor-edicao: #805300;
+  --cor-edicao-fundo: #fff8e6;
+  --cor-edicao-hover: #ffefc2;
+  --cor-edicao-borda: #d8b86b;
+  --cor-desabilitado-fundo: #e8edf2;
+  --cor-desabilitado-texto: #647183;
+  --cor-desabilitado-borda: #d5dde6;
+  --cor-cartao-borda: #dce3eb;
+  --cor-cartao-titulo: #253447;
+  --cor-cartao-descricao: #526174;
+}

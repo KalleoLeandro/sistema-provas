@@ -1,0 +1,15 @@
+main {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+h1 {
+  font-size: 28px;
+  letter-spacing: normal;
+  margin: 0 0 16px;
+}
+p {
+  color: var(--cor-texto-suave);
+  margin-bottom: 24px;
+}

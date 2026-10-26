@@ -1,0 +1,19 @@
+<div class="navigation-items" [class.panel-mode]="mode === 'panel'">
+  @for(item of items; track item.id; let index=$index) {
+    <div class="navigation-entry" cdkOverlayOrigin #origin="cdkOverlayOrigin">
+      @if(item.children?.length) {
+        <button type="button" [id]="idPrefix+'-trigger-'+item.id" [class.active]="active(item)" [class.open]="openId()===item.id" [attr.aria-expanded]="openId()===item.id" [attr.aria-controls]="idPrefix+'-panel-'+item.id" (click)="toggle(item)" (keydown)="keydown($event,item,index)">
+          <span>{{item.label}}</span><span class="navigation-chevron" aria-hidden="true">›</span>
+        </button>
+        <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="origin" [cdkConnectedOverlayOpen]="openId()===item.id" [cdkConnectedOverlayPositions]="positions" [cdkConnectedOverlayWidth]="232" [cdkConnectedOverlayViewportMargin]="8" [cdkConnectedOverlayPush]="true" (overlayOutsideClick)="outside($event)">
+          <div class="navigation-panel" [id]="idPrefix+'-panel-'+item.id" role="group" [attr.aria-label]="'Submenu de '+item.label">
+            <p class="navigation-panel-title">{{item.label}}</p>
+            <visual-navigation-menu [items]="item.children!" mode="panel" [idPrefix]="idPrefix+'-'+item.id" (navigate)="select()" (back)="close(true)" />
+          </div>
+        </ng-template>
+      } @else {
+        <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="select()" (keydown)="keydown($event,item,index)">{{item.label}}</a>
+      }
+    </div>
+  }
+</div>

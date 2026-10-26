@@ -1,0 +1,2 @@
+@import './app/design-system/styles.css';
+*{box-sizing:border-box}body{margin:0;font-family:var(--fonte-padrao);background:var(--cor-fundo)}button,input{font:inherit}button{cursor:pointer}button:focus-visible{outline:3px solid var(--azul-institucional);outline-offset:3px}button:disabled{cursor:not-allowed}p{line-height:1.6}

@@ -1,0 +1,24 @@
+<section class="form-visual report-page" aria-labelledby="relatorios-title">
+ <div class="list-heading report-controls"><h2 id="relatorios-title">Relatórios</h2><button botaoVisual type="button" [disabled]="!carregado()||loading()||!!erro()||!colunas.length" (click)="export()">{{formato==='csv'?'Exportar CSV':'Imprimir / Salvar PDF'}}</button></div>
+ <div class="report-controls"><visual-tabs [tabs]="abas" [selected]="modo" (selectedChange)="changeMode($event)" />
+ <div class="report-filters"><visual-campo rotulo="Turma" identificador="relatorio-turma"><select campoVisual id="relatorio-turma" [(ngModel)]="turmaId" (ngModelChange)="changeClass()"><option [ngValue]="null">Selecione uma turma</option>@for(t of turmas();track t.id){<option [ngValue]="t.id">{{t.ensino==='F'?'Fundamental':'Médio'}} — {{t.ano}}º ano {{t.letra}}</option>}</select></visual-campo>
+ @if(modo==='resultados'){<visual-campo rotulo="Prova" identificador="relatorio-prova"><select campoVisual id="relatorio-prova" [(ngModel)]="provaId" (ngModelChange)="loadResults()" [disabled]="loading()||!turmaId"><option [ngValue]="null">Selecione uma prova</option>@for(p of provas();track p.id){<option [ngValue]="p.id">{{p.titulo}} — {{p.materia}} — {{p.professor}} — {{p.disponivelEm|date:'dd/MM/yyyy HH:mm'}}</option>}</select></visual-campo>}
+ <button botaoVisual type="button" variant="secondary" [disabled]="loading()||!turmaId||(modo==='resultados'&&!provaId)" (click)="modo==='alunos'?changeClass():loadResults()">Atualizar</button></div>
+ <visual-campo rotulo="Formato de saída" identificador="relatorio-formato"><select campoVisual id="relatorio-formato" [(ngModel)]="formato"><option value="pdf">PDF / Impressão</option><option value="csv">CSV</option></select></visual-campo>
+ <fieldset class="report-field-picker"><legend>Campos do relatório</legend>@for(c of campos;track c.id){<label><input type="checkbox" [(ngModel)]="selecionados[c.id]" />{{c.label}}</label>}</fieldset>
+ @if(!colunas.length){<p role="alert">Selecione ao menos um campo para exportar.</p>}
+ @if(formato==='pdf'){<p>Na janela de impressão, escolha Salvar como PDF para baixar o documento.</p>}
+ @if(erro()){<visual-aviso>{{erro()}}</visual-aviso>}@if(loading()){<p role="status">Carregando relatório…</p>}
+ @if(!turmas().length&&!loading()&&!erro()){<p>Nenhuma turma disponível para consulta.</p>}
+ @if(modo==='resultados'&&turmaId&&!loading()&&!provas().length&&!erro()){<p>Nenhuma prova disponível para esta turma.</p>}
+ </div>
+ @if(carregado()&&!loading()&&!erro()){
+ <div class="report-document"><header class="report-heading"><strong>ESFINORA</strong><h3>{{modo==='alunos'?'Lista de alunos — 2026':'Resultados da prova'}}</h3>
+ @if(turma;as t){<p>{{t.ensino==='F'?'Ensino fundamental':'Ensino médio'}} — {{t.ano}}º ano {{t.letra}}</p>}
+ @if(modo==='resultados'){@if(prova;as p){<p><strong>{{p.titulo}}</strong> · {{p.materia}} · Professor(a): {{p.professor}}</p><p>Disponibilidade: {{p.disponivelEm|date:'dd/MM/yyyy HH:mm'}} a {{p.encerraEm|date:'dd/MM/yyyy HH:mm'}}</p>}}
+ <p>Gerado em {{geradoEm|date:'dd/MM/yyyy HH:mm'}}</p></header>
+ <p>Total: {{linhas.length}} aluno(s)@if(modo==='alunos'){ · Matriculados: {{alunos().length-transferidos}} · Transferidos: {{transferidos}}}@else{ · Entregues: {{entregues.length}} · Corrigidas: {{corrigidas.length}}}</p>
+ @if(colunas.length){<visual-table-scroll><div class="tabela-visual"><table><caption class="sr-only">{{modo==='alunos'?'Alunos da turma selecionada':'Resultados por aluno'}}</caption><thead><tr>@for(c of colunas;track c.id){<th scope="col">{{c.label}}</th>}</tr></thead><tbody>@for(item of linhas;track $index){<tr>@for(c of colunas;track c.id){@if(c.id==='nome'){<th nomeRegistro scope="row">{{valor(item,c.id)}}</th>}@else{<td>{{valor(item,c.id)}}</td>}}</tr>}@empty{<tr><td [attr.colspan]="colunas.length">Nenhum aluno encontrado.</td></tr>}</tbody></table></div></visual-table-scroll>}
+ @if(modo==='resultados'){<p class="report-note">Notas parciais ainda dependem da correção de questões discursivas. Alunos com tentativa permanecem no relatório mesmo após mudança de turma.</p>}
+ </div>}
+</section>

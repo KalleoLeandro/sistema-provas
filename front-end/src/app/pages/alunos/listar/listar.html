@@ -1,0 +1,26 @@
+<section class="form-visual" aria-labelledby="alunos-title">
+  <div class="list-heading"><h2 id="alunos-title">Alunos</h2></div>
+  <p>Consulte os alunos das turmas em que você ministra aulas.</p>
+  <div class="list-filters">
+    <visual-campo rotulo="Turma" identificador="alunos-turma">
+      <select campoVisual id="alunos-turma" [(ngModel)]="turmaId" (ngModelChange)="changeTurma()" [disabled]="loading()" autocomplete="off">
+        <option [ngValue]="null">Todas as minhas turmas</option>
+        @for (t of turmas(); track t.id) { <option [ngValue]="t.id">{{ t.ensino === 'F' ? 'Fundamental' : 'Médio' }} — {{ t.ano }}º ano {{ t.letra }}</option> }
+      </select>
+    </visual-campo>
+  </div>
+  @if (erro()) { <visual-aviso>{{ erro() }}</visual-aviso><button botaoVisual variant="secondary" type="button" (click)="init()">Tentar novamente</button> }
+  <visual-cartao density="compact">
+    @if (loading()) { <p role="status">Carregando alunos…</p> }
+    @else if (!erro()) {
+      <visual-table-scroll><div class="tabela-visual"><table>
+        <caption class="sr-only">Alunos das turmas do professor</caption>
+        <thead><tr><th scope="col">Nome</th><th scope="col">Número</th><th scope="col">CGM</th><th scope="col">Turma</th><th scope="col">Status</th></tr></thead>
+        <tbody>@for (a of alunos(); track a.id) {
+          <tr><th nomeRegistro scope="row">{{ a.nome }}</th><td>{{ a.numero ?? '—' }}</td><td>{{ a.cgm }}</td><td>{{ a.ensino === 'F' ? 'Fundamental' : 'Médio' }} — {{ a.ano }}º ano {{ a.letra }}</td><td><span class="status-visual" [class.inativo]="a.status === 'T'">{{ a.status === 'M' ? 'Matriculado' : 'Transferido' }}</span></td></tr>
+        } @empty { <tr><td colspan="5">Nenhum aluno encontrado nas turmas selecionadas.</td></tr> }</tbody>
+      </table></div></visual-table-scroll>
+    }
+  </visual-cartao>
+  <visual-pagination inputId="alunos-tamanho-pagina" [total]="total" [page]="pagina" [pageSize]="tamanhoPagina" [busy]="loading()" (pageChange)="changePage($event)" (pageSizeChange)="changeSize($event)" />
+</section>

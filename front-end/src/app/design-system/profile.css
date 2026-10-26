@@ -1,0 +1,1 @@
+.profile-subjects{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px}.profile-subjects ul{padding-left:20px;line-height:1.8}.profile-subjects h4{margin:0 0 12px}

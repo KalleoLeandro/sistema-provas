@@ -1,0 +1,8 @@
+<ng-content />
+@if(maximum()>1) {
+  <div class="table-scroll-control" role="group" aria-label="Rolagem horizontal da tabela">
+    <button type="button" aria-label="Rolar tabela para a esquerda" [disabled]="position()<=0" (click)="move(position()-160)">‹</button>
+    <input type="range" min="0" [max]="maximum()" step="1" [value]="position()" aria-label="Posição horizontal da tabela" [style.--scroll-thumb-width]="thumbWidth()+'px'" (input)="input($event)" (keydown)="keydown($event)" autocomplete="off" />
+    <button type="button" aria-label="Rolar tabela para a direita" [disabled]="position()>=maximum()" (click)="move(position()+160)">›</button>
+  </div>
+}

@@ -1,0 +1,42 @@
+<section class="list-page-compact" aria-labelledby="turmas-title" [attr.aria-busy]="loading()">
+  <div class="list-heading">
+    <h2 id="turmas-title">Turmas</h2>
+    <a botaoVisual routerLink="/cadastro/turmas/cadastrar">Cadastrar turma</a>
+  </div>
+  @if (loading()) {
+    <p role="status">Carregando turmas…</p>
+  } @else if (erro()) {
+    <visual-aviso>{{ erro() }}</visual-aviso
+    ><button botaoVisual variant="secondary" type="button" (click)="load()">
+      Tentar novamente
+    </button>
+  } @else {
+    <visual-cartao density="compact"
+      ><div class="tabela-visual">
+        <table>
+          <caption class="sr-only">
+            Turmas cadastradas por ensino, ano e letra
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Turma</th>
+              <th scope="col">Ensino</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (turma of turmas(); track turma.id) {
+              <tr>
+                <th nomeRegistro scope="row">{{ turma.ano }}º ano {{ turma.letra }}</th>
+                <td>{{ turma.ensino === 'F' ? 'Fundamental' : 'Médio' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="2">Nenhuma turma cadastrada.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div></visual-cartao
+    >
+  }
+</section>

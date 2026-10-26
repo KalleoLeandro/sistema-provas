@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+back-end/keys/
+*.pem
+
+database/backups/
+database/seeds/estado-local.json

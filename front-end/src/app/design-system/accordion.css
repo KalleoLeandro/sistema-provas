@@ -1,0 +1,14 @@
+:host { display: block; min-width: 0; }
+details { border: 1px solid var(--cor-borda); border-radius: var(--raio-padrao); background: var(--cor-superficie); color: var(--cor-texto); }
+summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; cursor: pointer; padding: 14px 16px; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary:focus-visible { outline: 2px solid var(--cor-primaria); border-radius: var(--raio-padrao); }
+summary > span:first-child { min-width: 0; }
+summary strong { display: block; overflow-wrap: anywhere; font-size: 16px; line-height: 1.5; }
+small { display: block; margin-top: 4px; color: var(--cor-texto-suave); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.indicador { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--cor-info-fundo); color: var(--cor-primaria); font-size: 20px; transition: transform .15s; }
+details[open] .indicador { transform: rotate(180deg); }
+.conteudo { border-top: 1px solid var(--cor-borda); padding: 20px; }
+
+summary:hover { background: var(--cor-fundo); border-radius: var(--raio-padrao); }
+details[open] > summary { background: var(--cor-info-fundo); border-radius: var(--raio-padrao) var(--raio-padrao) 0 0; }

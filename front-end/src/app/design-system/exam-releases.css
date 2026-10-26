@@ -1,0 +1,10 @@
+.exam-detail-cell { white-space: normal; }
+.exam-details { padding: 16px; background: var(--cor-fundo); border-left: 3px solid var(--cor-primaria); }
+.exam-details .list-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.exam-release-form { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px 20px; max-width: 900px; }
+.exam-release-form .form-actions,.exam-period-error { grid-column: 1 / -1; }
+.exam-period-error { color: var(--cor-erro); }
+.exam-status { display: inline-block; padding: 4px 8px; border-radius: 6px; background: #e8eef6; color: #304d70; font-weight: 600; }
+.exam-status-open { background: #e6f4ea; color: #22653a; }
+.exam-status-closed { background: #eceff2; color: #525c66; }
+@media(max-width:1199px){ .exam-release-form { grid-template-columns: minmax(0,1fr); } .exam-details{padding:10px;} }

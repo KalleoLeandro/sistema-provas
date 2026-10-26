@@ -1,0 +1,5 @@
+@if (auth.usuario()?.perfil === 'professor') {
+  <app-professor-dashboard />
+} @else if (auth.usuario()?.perfil === 'administrador') {
+  <app-administrador-dashboard />
+}

@@ -1,0 +1,14 @@
+<main>
+    <section class="form-page">
+      <visual-cartao
+        ><h1>Não foi possível conectar ao sistema</h1>
+        <p>
+          O servidor pode estar temporariamente indisponível. Sua sessão não foi encerrada por esse
+          erro. Tente novamente em instantes.
+        </p>
+        <button botaoVisual type="button" [disabled]="busy()" (click)="retry()">
+          {{ busy() ? 'Verificando…' : 'Tentar novamente' }}
+        </button></visual-cartao
+      >
+    </section>
+  </main>

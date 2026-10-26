@@ -1,0 +1,2 @@
+<div class="progress-heading"><span>{{label}}</span><strong>{{percent}}%</strong></div>
+<progress class="progress-visual" [max]="maximum||1" [value]="value" [attr.aria-label]="label" [attr.aria-valuetext]="value+' de '+maximum+' ('+percent+'%)'"></progress>

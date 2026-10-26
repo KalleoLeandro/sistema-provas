@@ -1,0 +1,1 @@
+:host{display:block;background:var(--cor-superficie);border:1px solid var(--cor-cartao-borda);border-radius:20px;padding:clamp(24px,4vw,44px);box-shadow:var(--sombra-cartao)}:host(.compact){padding:10px}

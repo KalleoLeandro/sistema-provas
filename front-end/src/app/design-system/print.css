@@ -1,0 +1,12 @@
+@media print{
+ @page{size:A4 landscape;margin:12mm}
+ body:has(.report-page){background:#fff;color:#000;font-size:10pt}
+ body:has(.report-page) .barra-lateral,body:has(.report-page) .cabecalho-portal,body:has(.report-page) .rodape-portal,body:has(.report-page) .alternar-menu,body:has(.report-page) .pular-conteudo,.report-page .report-controls,.report-page .table-scroll-control{display:none!important}
+ body:has(.report-page) .estrutura-portal,body:has(.report-page) .area-trabalho{display:block!important;min-height:0!important;margin:0!important;padding:0!important;width:100%!important;height:auto!important;overflow:visible!important}
+ body:has(.report-page) .conteudo-portal{margin:0!important;padding:0!important;width:100%!important;max-width:none!important;height:auto!important;overflow:visible!important}
+ .report-page .report-document{border:0;border-radius:0;padding:0;box-shadow:none;color:#000}
+ .report-page .tabela-visual,.report-page visual-table-scroll{display:block;overflow:visible!important;max-height:none!important;max-width:none!important}
+ .report-page table{width:100%!important;min-width:0!important;border-collapse:collapse;table-layout:auto}
+ .report-page th,.report-page td{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;padding:7px!important;color:#000!important;border-bottom:1px solid #888!important}
+ .report-page thead{display:table-header-group}.report-page tr{break-inside:avoid}.report-page .report-heading{break-after:avoid}.report-page .report-note{font-size:9pt}
+}
