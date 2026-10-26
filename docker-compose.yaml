@@ -5,7 +5,7 @@ services:
     build:
       context: ./front-end
     ports:
-      - "127.0.0.1:${PORTA_FRONTEND:-4200}:80"
+      - "${HOST_FRONTEND:-0.0.0.0}:${PORTA_FRONTEND:-4200}:80"
     restart: unless-stopped
 
   back-end:

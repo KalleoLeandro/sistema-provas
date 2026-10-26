@@ -175,3 +175,9 @@ O componente visual-chart do design system aceita doughnut e barras com cores di
 O quarto card do dashboard do professor (questões faltantes) integra a mesma grade dos indicadores de provas. As matérias e turmas passaram para Meu perfil, rota /perfil, exclusiva do professor e somente para consulta.
 
 A massa local está documentada em [database/seeds/README.md](database/seeds/README.md), com logins, CGMs, token, cenários e instruções para retomar a carga pelas APIs. O script não é executado automaticamente no início do sistema. Backups e estado local não são versionados.
+
+### Acesso pela rede local
+
+O frontend publica a porta `${PORTA_FRONTEND:-4200}` em `${HOST_FRONTEND:-0.0.0.0}`. Em outra máquina da mesma rede, acesse `http://IP-DO-SERVIDOR:4200`; `0.0.0.0` é o endereço de escuta, não o endereço para abrir no navegador. Para limitar novamente ao computador local, defina `HOST_FRONTEND=127.0.0.1` no .env e recrie o frontend com `docker compose up -d front-end`.
+
+O navegador usa `/api` no mesmo endereço do frontend. O Nginx encaminha ao backend pela rede Docker e preserva o Host com a porta original, permitindo validar corretamente a origem das requisições. Não é necessário publicar o MySQL ou o backend na rede para acessar o portal. Se o acesso remoto não chegar ao frontend, confira conectividade da rede e permissão de entrada TCP na porta 4200 no firewall do servidor.
