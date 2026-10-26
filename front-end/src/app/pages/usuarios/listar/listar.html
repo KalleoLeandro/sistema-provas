@@ -40,10 +40,10 @@
                 }
               </td>
               <td><span class="status-visual" [class.inativo]="!professor.ativo">{{ professor.ativo ? 'Ativo' : 'Inativo' }}</span></td>
-              <td><button botaoVisual size="compact" [variant]="professor.ativo ? 'danger' : 'success'" type="button" [disabled]="saving() !== null"
+              <td><div class="acoes-registro"><a botaoVisual variant="edit" size="compact" [routerLink]="['/cadastro/professores',professor.id,'editar']" [attr.aria-label]="'Editar '+professor.nome">Editar</a><button botaoVisual size="compact" [variant]="professor.ativo ? 'danger' : 'success'" type="button" [disabled]="saving() !== null"
                 [attr.aria-label]="(professor.ativo ? 'Desativar ' : 'Ativar ') + professor.nome" (click)="toggleProfessor(professor)">
                 {{ saving() === professor.id ? 'Salvando…' : professor.ativo ? 'Desativar' : 'Ativar' }}
-              </button></td>
+              </button></div></td>
             </tr>
           } @empty { <tr><td colspan="5">Nenhum professor cadastrado.</td></tr> }
         </tbody>
@@ -51,10 +51,10 @@
     } @else if(perfil() === 'aluno') {
       <visual-table-scroll><div class="tabela-visual tabela-rolagem" role="region" aria-label="Alunos cadastrados" tabindex="0"><table>
         <caption class="sr-only">Alunos, CGM, turma e situação escolar</caption>
-        <thead><tr><th scope="col">Nome</th><th scope="col">Número</th><th scope="col">CGM</th><th scope="col">Turma</th><th scope="col">Status</th></tr></thead>
+        <thead><tr><th scope="col">Nome</th><th scope="col">Número</th><th scope="col">CGM</th><th scope="col">Turma</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
         <tbody>@for(a of alunos();track a.id){
-          <tr><th nomeRegistro scope="row" class="coluna-texto">{{a.nome}}</th><td>{{a.numero ?? '—'}}</td><td>{{a.cgm}}</td><td>{{a.ensino === 'F' ? 'Fundamental' : 'Médio'}} — {{a.ano}}º ano {{a.letra}}</td><td><span class="status-visual" [class.inativo]="a.status === 'T'">{{a.status === 'M' ? 'Matriculado' : 'Transferido'}}</span></td></tr>
-        } @empty {<tr><td colspan="5">Nenhum aluno cadastrado.</td></tr>}</tbody>
+          <tr><th nomeRegistro scope="row" class="coluna-texto">{{a.nome}}</th><td>{{a.numero ?? '—'}}</td><td>{{a.cgm}}</td><td>{{a.ensino === 'F' ? 'Fundamental' : 'Médio'}} — {{a.ano}}º ano {{a.letra}}</td><td><span class="status-visual" [class.inativo]="a.status === 'T'">{{a.status === 'M' ? 'Matriculado' : 'Transferido'}}</span></td><td><a botaoVisual variant="edit" size="compact" [routerLink]="['/cadastro/alunos',a.id,'editar']" [attr.aria-label]="'Editar '+a.nome">Editar</a></td></tr>
+        } @empty {<tr><td colspan="6">Nenhum aluno cadastrado.</td></tr>}</tbody>
       </table></div></visual-table-scroll>
     }
   </visual-cartao>

@@ -74,4 +74,25 @@ class ProfessorServiceTest {
         assertFalse(result.ativo()); assertEquals(2, result.materias().size());
         verify(repository).updateMateriasStatus(3L, false); verify(repository).updateStatus(3L, false);
     }
+    @Test void editsPreservePasswordAndInactiveStatus(){
+        prepare();when(repository.findByIdForUpdate(3L)).thenReturn(Optional.of(professor(false)));when(repository.findById(3L)).thenReturn(Optional.of(professor(false)));
+        service.update(3L,new AtualizarProfessorRequest("Maria Silva","maria.prof","",materias));verify(repository).update(3L,"Maria Silva","maria.prof","hash");verify(repository).replaceMaterias(3L,materias,false);verify(encoder,never()).encode(anyString());
+    }
+    @Test void editsEncodeOnlyTheNewPassword(){
+        prepare();when(repository.findByIdForUpdate(3L)).thenReturn(Optional.of(professor(true)));when(repository.findById(3L)).thenReturn(Optional.of(professor(true)));
+        service.update(3L,new AtualizarProfessorRequest("Maria Silva","maria.prof","nova-senha-123",materias));verify(encoder).encode("nova-senha-123");verify(repository).replaceMaterias(3L,materias,true);
+    }
+    @Test void editsRejectConflictingAssignments(){
+        prepare();when(repository.findByIdForUpdate(3L)).thenReturn(Optional.of(professor(true)));doThrow(new DuplicateKeyException("assignment")).when(repository).replaceMaterias(3L,materias,true);
+        assertEquals(HttpStatus.CONFLICT,assertThrows(DefaultErrorException.class,()->service.update(3L,new AtualizarProfessorRequest("Maria","maria.prof",null,materias))).getStatus());
+    }
+    @Test void editsRejectMissingTeacherBeforeUpdating(){
+        assertEquals(HttpStatus.NOT_FOUND,assertThrows(DefaultErrorException.class,()->service.update(99L,new AtualizarProfessorRequest("Maria","maria.prof",null,materias))).getStatus());verify(repository,never()).update(any(),any(),any(),any());
+    }
+    @Test void optionalPasswordAndNestedAssignmentsAreValidated(){
+        try(var factory=jakarta.validation.Validation.buildDefaultValidatorFactory()){
+            var validator=factory.getValidator();assertTrue(validator.validate(new AtualizarProfessorRequest("Maria","maria.prof","",materias)).isEmpty());assertTrue(validator.validate(new AtualizarProfessorRequest("Maria","maria.prof","curta",materias)).stream().anyMatch(v->v.getPropertyPath().toString().equals("senha")));
+            assertFalse(validator.validate(new AtualizarProfessorRequest("Maria","maria.prof",null,List.of(new ProfessorMateriaRequest(-1L,List.of(1L))))).isEmpty());
+        }
+    }
 }

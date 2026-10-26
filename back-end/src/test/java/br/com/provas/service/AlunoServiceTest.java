@@ -36,4 +36,14 @@ class AlunoServiceTest {
         assertEquals(org.springframework.http.HttpStatus.CONFLICT,assertThrows(DefaultErrorException.class,()->service.create(request)).getStatus());
     }
 
+    @Test void editsStudentWithoutRecreatingIdentity(){
+        var request=new br.com.provas.model.request.AlunoRequest("Ana",null,"001234","T",5L);when(repository.lockById(1L)).thenReturn(true);when(repository.turmaExists(5L)).thenReturn(true);when(repository.findById(1L)).thenReturn(java.util.Optional.of(new br.com.provas.model.response.AlunoResponse(1L,"Ana",null,"001234","T",5L,"F",1,"A")));
+        var result=service.update(1L,request);assertEquals(1L,result.id());assertEquals("001234",result.cgm());verify(repository).update(1L,request);verify(repository,never()).save(any());
+    }
+    @Test void editsRejectMissingStudentAndUnknownClass(){
+        var request=new br.com.provas.model.request.AlunoRequest("Ana",null,"001234","M",5L);assertEquals(org.springframework.http.HttpStatus.NOT_FOUND,assertThrows(DefaultErrorException.class,()->service.update(1L,request)).getStatus());when(repository.lockById(1L)).thenReturn(true);assertThrows(DefaultErrorException.class,()->service.update(1L,request));verify(repository,never()).update(any(),any());
+    }
+    @Test void editsRejectDuplicateCgm(){
+        var request=new br.com.provas.model.request.AlunoRequest("Ana",null,"001234","M",5L);when(repository.lockById(1L)).thenReturn(true);when(repository.turmaExists(5L)).thenReturn(true);doThrow(new org.springframework.dao.DuplicateKeyException("cgm")).when(repository).update(1L,request);assertEquals(org.springframework.http.HttpStatus.CONFLICT,assertThrows(DefaultErrorException.class,()->service.update(1L,request)).getStatus());
+    }
 }

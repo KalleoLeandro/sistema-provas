@@ -53,6 +53,13 @@ public class AlunoRepository {
     public long countAll() {
         return namedParameterJdbcTemplate.query("SELECT COUNT(*) AS total FROM alunos_2026",new MapSqlParameterSource(),(rs,n)->rs.getLong("total")).getFirst();
     }
+    public boolean lockById(Long id){
+        return !namedParameterJdbcTemplate.query("SELECT id FROM alunos_2026 WHERE id=:id FOR UPDATE",new MapSqlParameterSource().addValue("id",id),(rs,n)->rs.getLong("id")).isEmpty();
+    }
+    public void update(Long id,AlunoRequest request){
+        namedParameterJdbcTemplate.update("UPDATE alunos_2026 SET nome=:nome,numero=:numero,cgm=:cgm,status=:status,turma_id=:turma WHERE id=:id",
+            new MapSqlParameterSource().addValue("id",id).addValue("nome",request.nome()).addValue("numero",request.numero()).addValue("cgm",request.cgm()).addValue("status",request.status()).addValue("turma",request.turmaId()));
+    }
     public List<AlunoResponse> findAll(int tamanho,long offset) {
         return namedParameterJdbcTemplate.query("SELECT a.id,a.nome,a.numero,a.cgm,a.status,a.turma_id,t.ensino,t.ano,t.letra FROM alunos_2026 a JOIN turmas t ON t.id=a.turma_id ORDER BY a.nome,a.id LIMIT :tamanho OFFSET :offset",
             new MapSqlParameterSource().addValue("tamanho",tamanho).addValue("offset",offset),mapper);

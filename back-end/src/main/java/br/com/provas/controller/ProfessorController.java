@@ -1,6 +1,7 @@
 package br.com.provas.controller;
 
 import br.com.provas.model.request.ProfessorRequest;
+import br.com.provas.model.request.AtualizarProfessorRequest;
 import br.com.provas.model.request.StatusRequest;
 import br.com.provas.model.response.ProfessorResponse;
 import br.com.provas.service.ProfessorService;
@@ -22,6 +23,10 @@ public class ProfessorController {
 
     @GetMapping
     public List<ProfessorResponse> findAll() { return service.findAll(); }
+    @GetMapping("/{id}")
+    public ProfessorResponse findById(@PathVariable @Positive(message="Informe um professor válido.") Long id){return service.findById(id);}
+    @PutMapping("/{id}")
+    public ProfessorResponse update(@PathVariable @Positive(message="Informe um professor válido.") Long id,@Valid @RequestBody AtualizarProfessorRequest request){return service.update(id,request);}
 
     @PatchMapping("/{id}/status")
     public ProfessorResponse updateStatus(@PathVariable @Positive(message = "O identificador deve ser positivo.") Long id,

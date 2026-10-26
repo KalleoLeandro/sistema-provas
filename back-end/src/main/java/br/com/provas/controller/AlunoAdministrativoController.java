@@ -11,6 +11,7 @@ import br.com.provas.service.AlunoService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,10 @@ public class AlunoAdministrativoController {
     public AlunoAdministrativoController(AlunoService service,AlunoImportacaoService importacao){this.service=service;this.importacao=importacao;}
     @PostMapping @ResponseStatus(HttpStatus.CREATED)
     public AlunoResponse create(@Valid @RequestBody AlunoRequest request){return service.create(request);}
+    @GetMapping("/{id}")
+    public AlunoResponse findById(@PathVariable @Positive(message="Informe um aluno válido.") Long id){return service.findById(id);}
+    @PutMapping("/{id}")
+    public AlunoResponse update(@PathVariable @Positive(message="Informe um aluno válido.") Long id,@Valid @RequestBody AlunoRequest request){return service.update(id,request);}
     @GetMapping
     public PaginaResponse<AlunoResponse> findAll(
         @RequestParam(defaultValue="1") @Min(value=1,message="A página deve ser positiva.") int pagina,

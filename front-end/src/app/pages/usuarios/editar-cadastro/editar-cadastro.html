@@ -1,0 +1,23 @@
+<section class="form-page form-visual" aria-labelledby="editar-cadastro-title">
+ <h2 id="editar-cadastro-title">Editar {{perfil==='professor'?'professor':'aluno'}}</h2>
+ @if(erro()){<visual-aviso>{{erro()}}</visual-aviso>}
+ @if(loading()){<p role="status">Carregando cadastro…</p>}
+ @if(!loading()&&!loaded()){<button botaoVisual type="button" variant="secondary" (click)="load()">Tentar novamente</button>}
+ @if(loaded()){
+ <visual-cartao><form class="form-visual" #form="ngForm" (ngSubmit)="save(form)" autocomplete="off" [attr.aria-busy]="busy()">
+ <visual-campo rotulo="Nome" identificador="editar-cadastro-nome" [erro]="nomeControl|validationMessage:form.submitted"><input campoVisual id="editar-cadastro-nome" name="nome" [(ngModel)]="nome" #nomeControl="ngModel" required notBlank maxlength="120" [disabled]="busy()" /></visual-campo>
+ @if(perfil==='professor'){
+  <visual-campo rotulo="Login" identificador="editar-professor-login" [erro]="loginControl|validationMessage:form.submitted"><input campoVisual id="editar-professor-login" name="login" [(ngModel)]="login" #loginControl="ngModel" required notBlank [trimmedMinlength]="3" maxlength="120" [disabled]="busy()" /></visual-campo>
+  <visual-campo rotulo="Nova senha" identificador="editar-professor-senha" orientacao="Deixe em branco para manter a senha atual. Nova senha: de 8 a 128 caracteres." [erro]="senhaControl|validationMessage:form.submitted"><input campoVisual id="editar-professor-senha" name="senha" type="password" [(ngModel)]="senha" #senhaControl="ngModel" minlength="8" maxlength="128" [disabled]="busy()" /></visual-campo>
+  <p>Status: {{ativo?'Ativo':'Inativo'}}. A ativação ou desativação é feita pela lista.</p>
+  <visual-campo rotulo="Matérias" identificador="editar-professor-materias" [erro]="materiasControl|validationMessage:form.submitted"><visual-chip-select inputId="editar-professor-materias" name="materias" #materiasControl="ngModel" label="Matérias do professor" placeholder="Digite o nome da matéria" [options]="opcoesMaterias()" [ngModel]="materias" (ngModelChange)="changeMaterias($event)" required [disabled]="busy()" /></visual-campo>
+  @for(id of materias;track id){<visual-campo [rotulo]="'Turmas de '+materiaNome(id)" [identificador]="'editar-professor-turmas-'+id" orientacao="Selecione as turmas desta matéria."><visual-chip-select [inputId]="'editar-professor-turmas-'+id" [name]="'turmas-'+id" [label]="'Turmas de '+materiaNome(id)" placeholder="Digite o ensino, ano ou letra" [options]="opcoesTurmas()" [(ngModel)]="turmasPorMateria[id]" [disabled]="busy()" /></visual-campo>}
+ }@else{
+  <visual-campo rotulo="Número (opcional)" identificador="editar-aluno-numero" [erro]="numeroControl|validationMessage:form.submitted"><input campoVisual id="editar-aluno-numero" name="numero" type="number" [(ngModel)]="numero" #numeroControl="ngModel" min="1" max="2147483647" step="1" pattern="[0-9]+" [disabled]="busy()" /></visual-campo>
+  <visual-campo rotulo="CGM" identificador="editar-aluno-cgm" [erro]="cgmControl|validationMessage:form.submitted"><input campoVisual id="editar-aluno-cgm" name="cgm" [(ngModel)]="cgm" #cgmControl="ngModel" required notBlank maxlength="30" pattern="[0-9]+" inputmode="numeric" [disabled]="busy()" /></visual-campo>
+  <visual-campo rotulo="Status" identificador="editar-aluno-status" [erro]="statusControl|validationMessage:form.submitted"><select campoVisual id="editar-aluno-status" name="status" [(ngModel)]="status" #statusControl="ngModel" required [allowedValues]="['M','T']" [disabled]="busy()"><option value="M">Matriculado</option><option value="T">Transferido</option></select></visual-campo>
+  <visual-campo rotulo="Turma" identificador="editar-aluno-turma" [erro]="turmaControl|validationMessage:form.submitted"><select campoVisual id="editar-aluno-turma" name="turmaId" [(ngModel)]="turmaId" #turmaControl="ngModel" required [disabled]="busy()"><option [ngValue]="null" disabled>Selecione a turma</option>@for(t of turmas();track t.id){<option [ngValue]="t.id">{{t.ensino==='F'?'Fundamental':'Médio'}} — {{t.ano}}º ano {{t.letra}}</option>}</select></visual-campo>
+ }
+ <div class="form-actions form-actions-end"><a botaoVisual variant="secondary" routerLink="/cadastro/usuarios/listar" [queryParams]="{perfil:perfil}">Cancelar</a><button botaoVisual type="submit" [disabled]="busy()||!!form.invalid">{{busy()?'Salvando…':'Salvar alterações'}}</button></div>
+ </form></visual-cartao>}
+</section>

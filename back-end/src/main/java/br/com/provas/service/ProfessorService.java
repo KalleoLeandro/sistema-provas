@@ -35,26 +35,7 @@ public class ProfessorService {
          * Uma matéria só aparece uma vez no cadastro. As turmas são únicas dentro
          * de cada matéria, mas a mesma turma pode receber matérias diferentes.
          */
-        var materiasIds = request.materias().stream().map(ProfessorMateriaRequest::materiaId).toList();
-        if (new HashSet<>(materiasIds).size() != materiasIds.size()) {
-            throw new DefaultErrorException("materias: Não informe a mesma matéria mais de uma vez.");
-        }
-        for (var materia : request.materias()) {
-            if (new HashSet<>(materia.turmas()).size() != materia.turmas().size()) {
-                throw new DefaultErrorException("materias: Não repita turmas dentro da mesma matéria.");
-            }
-        }
-        /*
-         * Todas as referências são conferidas antes de criar a conta e permanecem
-         * protegidas por leitura compartilhada até o término da transação.
-         */
-        var turmasIds = request.materias().stream().flatMap(m -> m.turmas().stream()).distinct().sorted().toList();
-        if (repository.findExistingMateriaIds(materiasIds).size() != materiasIds.size()) {
-            throw new DefaultErrorException("materias: Uma ou mais matérias não foram encontradas.");
-        }
-        if (repository.findExistingTurmaIds(turmasIds).size() != turmasIds.size()) {
-            throw new DefaultErrorException("materias: Uma ou mais turmas não foram encontradas.");
-        }
+        validateMaterias(request.materias());
         /*
          * O banco aplica o status ativo por padrão, sem recebê-lo do formulário.
          * Somente o hash da senha é persistido. O conflito de login é tratado
@@ -100,13 +81,13 @@ public class ProfessorService {
 
     /**
      * Consulta o cadastro público usado no dashboard do professor autenticado.
-     * @param id identificador extraído da sessão, sem aceitar IDs enviados pela página
+     * @param id identificador autorizado pelo controller administrativo ou pela sessão do próprio professor
      * @return matérias e turmas pertencentes ao professor da sessão
      * @throws DefaultErrorException quando o cadastro não existe
      */
     @Transactional(readOnly = true)
     public ProfessorResponse findById(Long id) {
-        /* O controller fornece o ID da identidade autenticada, limitando a consulta ao próprio professor. */
+        /* O endpoint do professor usa a identidade da sessão; a consulta por ID exige administrador. */
         var professor = repository.findById(id).orElseThrow(() ->
             new DefaultErrorException("Professor não encontrado.", HttpStatus.NOT_FOUND));
         return toResponse(professor, repository.findTurmasByProfessorIds(List.of(id)).getOrDefault(id, List.of()),
@@ -142,6 +123,54 @@ public class ProfessorService {
         var atualizado = new Professor(professor.id(), professor.nome(), professor.login(), professor.senhaHash(), request.ativo());
         return toResponse(atualizado, repository.findTurmasByProfessorIds(List.of(id)).getOrDefault(id, List.of()),
             repository.findMateriasByProfessorIds(List.of(id)).getOrDefault(id, List.of()));
+    }
+
+    /**
+     * Atualiza dados e atribuições mantendo status, identidade e histórico do professor.
+     * @param id professor existente
+     * @param request dados atuais e senha opcional; branco mantém a senha anterior
+     * @return cadastro público atualizado
+     */
+    @Transactional
+    public ProfessorResponse update(Long id,AtualizarProfessorRequest request){
+        /* O bloqueio compartilha a ordem da alteração de status, evitando reservas inconsistentes. */
+        var professor=repository.findByIdForUpdate(id).orElseThrow(()->new DefaultErrorException("Professor não encontrado.",HttpStatus.NOT_FOUND));
+        validateMaterias(request.materias());
+        /* Senha ausente conserva o hash atual; a resposta nunca revela credenciais. */
+        var senha=request.senha()==null?professor.senhaHash():passwordEncoder.encode(request.senha());
+        try{repository.update(id,request.nome(),request.login(),senha);}
+        catch(DuplicateKeyException e){throw new DefaultErrorException("Este login já está cadastrado para um professor.",HttpStatus.CONFLICT);}
+        /* Substitui somente atribuições cadastrais. O banco mantém a reserva exclusiva de matéria/turma
+           para ativos; qualquer conflito reverte também login, nome e senha na mesma transação.
+           Questões, liberações e cópias de provas respondidas permanecem vinculadas ao mesmo ID. */
+        try{repository.replaceMaterias(id,request.materias(),professor.ativo());}
+        catch(DuplicateKeyException e){throw assignmentConflict();}
+        return findById(id);
+    }
+
+    /** @param materias atribuições propostas para cadastro ou edição */
+    private void validateMaterias(List<ProfessorMateriaRequest> materias){
+        /* Confere duplicações e referências antes de substituir os vínculos existentes. */
+        var materiasIds = materias.stream().map(ProfessorMateriaRequest::materiaId).toList();
+        if (new HashSet<>(materiasIds).size() != materiasIds.size()) {
+            throw new DefaultErrorException("materias: Não informe a mesma matéria mais de uma vez.");
+        }
+        for (var materia : materias) {
+            if (new HashSet<>(materia.turmas()).size() != materia.turmas().size()) {
+                throw new DefaultErrorException("materias: Não repita turmas dentro da mesma matéria.");
+            }
+        }
+        /*
+         * Todas as referências são conferidas antes de criar a conta e permanecem
+         * protegidas por leitura compartilhada até o término da transação.
+         */
+        var turmasIds = materias.stream().flatMap(m -> m.turmas().stream()).distinct().sorted().toList();
+        if (repository.findExistingMateriaIds(materiasIds).size() != materiasIds.size()) {
+            throw new DefaultErrorException("materias: Uma ou mais matérias não foram encontradas.");
+        }
+        if (repository.findExistingTurmaIds(turmasIds).size() != turmasIds.size()) {
+            throw new DefaultErrorException("materias: Uma ou mais turmas não foram encontradas.");
+        }
     }
 
     /** @return recusa de negócio para uma reserva já ocupada por outro professor ativo */

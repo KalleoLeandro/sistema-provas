@@ -189,3 +189,9 @@ O frontend e o catálogo de componentes adotam uma interface inspirada no [Gradi
 O recibo de entrega do aluno também apresenta o progresso total das provas, incluindo a entrega atual, pelo componente visual-progress do design system. O backend envia total/concluídas na própria resposta de entrega antes de invalidar a sessão, tanto no envio manual quanto no automático. Não há consulta autenticada posterior ao logout. Falha na consulta do resumo mantém a entrega confirmada e o encerramento da sessão; o modal informa a indisponibilidade do progresso.
 
 Provas já corrigidas continuam revisáveis pelo professor autor. A tela apresenta Revisar correção e Salvar alterações; notas discursivas e feedbacks podem ser atualizados, preservando o controle de revisão e o salvamento único. Objetivas e respostas em branco mantêm a pontuação automática. Alterar um campo remove a mensagem anterior de salvamento até a nova confirmação.
+
+### Edição de alunos e professores
+
+Na lista administrativa de Usuários, os perfis Professor e Aluno possuem ação Editar. As rotas /cadastro/professores/:id/editar e /cadastro/alunos/:id/editar exigem administrador. GET/PUT /professores/{id} e GET/PUT /alunos/{id} carregam e atualizam os cadastros. O professor continua com consulta dos próprios alunos e do perfil, sem autorização de edição cadastral.
+
+Professor permite alterar nome, login, senha opcional e matérias com turmas por chips. Senha em branco conserva o hash; o status continua sendo alterado pela lista. A troca de vínculos é transacional e preserva a exclusividade de cada matéria/turma entre ativos. Conflitos desfazem também as mudanças de dados pessoais. Aluno permite nome, número opcional, CGM, situação M/T e turma; CGM permanece textual e único. Nenhuma edição recria identidades ou altera cópias e respostas de provas. Os formulários usam validação do design system e descartam dados ao sair.

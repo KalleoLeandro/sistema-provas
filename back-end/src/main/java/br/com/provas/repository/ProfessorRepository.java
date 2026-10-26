@@ -131,4 +131,14 @@ public class ProfessorRepository {
         namedParameterJdbcTemplate.update("UPDATE professores SET ativo = :ativo WHERE id = :id",
             new MapSqlParameterSource().addValue("id", id).addValue("ativo", ativo));
     }
+    public void update(Long id,String nome,String login,String senhaHash){
+        namedParameterJdbcTemplate.update("UPDATE professores SET nome=:nome,login=:login,senha_hash=:senha WHERE id=:id",
+            new MapSqlParameterSource().addValue("id",id).addValue("nome",nome).addValue("login",login).addValue("senha",senhaHash));
+    }
+    public void replaceMaterias(Long id,List<ProfessorMateriaRequest> materias,boolean ativo){
+        var params=new MapSqlParameterSource().addValue("id",id);
+        namedParameterJdbcTemplate.update("DELETE FROM professores_materias WHERE professor_id=:id",params);
+        namedParameterJdbcTemplate.update("DELETE FROM professores_turmas WHERE professor_id=:id",params);
+        saveMaterias(id,materias,ativo);
+    }
 }

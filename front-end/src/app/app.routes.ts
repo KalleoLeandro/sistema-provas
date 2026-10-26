@@ -21,6 +21,8 @@ export const rotas: Routes = [
             { path: 'provas', data: { perfis: ['professor'] }, loadComponent: () => import('./pages/provas/provas').then(modulo => modulo.ProvasComponent) },
             { path: 'alunos/listar', data: { perfis: ['professor'] }, loadComponent: () => import('./pages/alunos/listar/listar').then(modulo => modulo.ListarAlunosComponent) },
             { path: 'questoes/listar', data: { perfis: ['professor'] }, loadComponent: () => import('./pages/questoes/listar/listar').then(modulo => modulo.ListarQuestoesComponent) },
+            { path: 'cadastro/professores/:id/editar', data: { perfis: ['administrador'], perfil:'professor' }, loadComponent: () => import('./pages/usuarios/editar-cadastro/editar-cadastro').then(m => m.EditarCadastroComponent) },
+            { path: 'cadastro/alunos/:id/editar', data: { perfis: ['administrador'], perfil:'aluno' }, loadComponent: () => import('./pages/usuarios/editar-cadastro/editar-cadastro').then(m => m.EditarCadastroComponent) },
             { path: 'cadastro/usuarios/:id/editar', data: { perfis: ['administrador'] }, loadComponent: () => import('./pages/usuarios/editar/editar').then(modulo => modulo.EditarUsuarioComponent) },
             { path: 'cadastro/usuarios/listar', data: { perfis: ['administrador'] }, loadComponent: () => import('./pages/usuarios/listar/listar').then(modulo => modulo.ListarUsuariosComponent) },
             { path: 'cadastro/materias/cadastrar', data: { perfis: ['administrador'] }, loadComponent: () => import('./pages/materias/cadastrar/cadastrar').then(modulo => modulo.CadastrarMateriaComponent) },

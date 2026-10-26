@@ -16,6 +16,32 @@ import org.springframework.transaction.annotation.Transactional;
 public class AlunoService {
     private final AlunoRepository repository;
     public AlunoService(AlunoRepository repository) { this.repository=repository; }
+    /**
+     * Consulta o aluno para edição administrativa.
+     * @param id identificador do aluno
+     * @return dados atuais, sem informações de provas ou credenciais
+     */
+    @Transactional(readOnly=true)
+    public AlunoResponse findById(Long id){
+        /* O endpoint exige administrador; recursos ausentes têm resposta padronizada. */
+        return repository.findById(id).orElseThrow(()->new DefaultErrorException("Aluno não encontrado.",HttpStatus.NOT_FOUND));
+    }
+    /**
+     * Atualiza o cadastro escolar preservando a identidade e o histórico de provas.
+     * @param id identificador existente
+     * @param request nome, número, CGM, status e turma validados
+     * @return cadastro atualizado
+     */
+    @Transactional
+    public AlunoResponse update(Long id,AlunoRequest request){
+        /* Serializa alterações no cadastro sem recriar o aluno ou tocar suas respostas e tentativas. */
+        if(!repository.lockById(id))throw new DefaultErrorException("Aluno não encontrado.",HttpStatus.NOT_FOUND);
+        if(!repository.turmaExists(request.turmaId()))throw new DefaultErrorException("turmaId: Selecione uma turma cadastrada.");
+        /* O CGM continua único. Transferência e troca de CGM passam a valer na próxima validação de sessão. */
+        try{repository.update(id,request);}
+        catch(DuplicateKeyException e){throw new DefaultErrorException("Já existe um aluno cadastrado com este CGM.",HttpStatus.CONFLICT);}
+        return findById(id);
+    }
 
     /**
      * Retorna uma página de alunos sem duplicar quem pertence a uma turma com várias matérias do professor.
