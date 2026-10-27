@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS alunos_2026 (
   status CHAR(1) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT 'M',
   PRIMARY KEY (id),
   CONSTRAINT uk_alunos_cgm UNIQUE (cgm),
-  CONSTRAINT ck_alunos_status CHECK (status IN ('M','T')),
+  CONSTRAINT ck_alunos_status CHECK (status IN ('M','T','R','D')),
   CONSTRAINT ck_alunos_numero CHECK (numero IS NULL OR numero>0),
   KEY ix_alunos_turma_nome (turma_id,nome,id),
   CONSTRAINT fk_alunos_turma FOREIGN KEY (turma_id) REFERENCES turmas (id)

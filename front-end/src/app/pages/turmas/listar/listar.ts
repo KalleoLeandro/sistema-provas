@@ -1,3 +1,5 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { ConfirmDialogComponent } from '../../../design-system/confirm-dialog';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
@@ -10,7 +12,7 @@ import {
 } from '../../../design-system/components';
 @Component({
   selector: 'app-listar-turmas',
-  imports: [RouterLink, AlertComponent, ButtonDirective, CardComponent, RecordNameDirective],
+  imports: [ConfirmDialogComponent,RouterLink, AlertComponent, ButtonDirective, CardComponent, RecordNameDirective],
   templateUrl: './listar.html',
 })
 export class ListarTurmasComponent implements OnInit {
@@ -18,6 +20,12 @@ export class ListarTurmasComponent implements OnInit {
   readonly turmas = signal<Turma[]>([]);
   readonly loading = signal(true);
   readonly erro = signal('');
+  readonly deleteTarget=signal<Turma|null>(null);readonly deleting=signal(false);readonly actionError=signal('');
+  confirmDelete(turma:Turma){this.actionError.set('');this.deleteTarget.set(turma);}
+  closeDelete(){if(!this.deleting())this.deleteTarget.set(null);}
+  async remove(){const turma=this.deleteTarget();if(!turma||this.deleting())return;this.deleting.set(true);this.actionError.set('');
+    try{await this.api.delete('/turmas/'+turma.id);this.turmas.update(items=>items.filter(t=>t.id!==turma.id));this.deleteTarget.set(null);}
+    catch(e){this.actionError.set(e instanceof HttpErrorResponse&&e.error?.mensagem?e.error.mensagem:'Não foi possível excluir a turma.');}finally{this.deleting.set(false);}}
   ngOnInit() {
     void this.load();
   }

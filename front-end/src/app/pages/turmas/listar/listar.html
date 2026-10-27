@@ -3,6 +3,7 @@
     <h2 id="turmas-title">Turmas</h2>
     <a botaoVisual routerLink="/cadastro/turmas/cadastrar">Cadastrar turma</a>
   </div>
+  <visual-confirm-dialog [open]="!!deleteTarget()" [busy]="deleting()" title="Excluir turma" [message]="'Deseja excluir a turma '+(deleteTarget()?.ano??'')+'º ano '+(deleteTarget()?.letra??'')+'? Esta ação não pode ser desfeita.'" (openChange)="closeDelete()" (confirmed)="remove()">@if(actionError()){<visual-aviso>{{actionError()}}</visual-aviso>}</visual-confirm-dialog>
   @if (loading()) {
     <p role="status">Carregando turmas…</p>
   } @else if (erro()) {
@@ -20,18 +21,18 @@
           <thead>
             <tr>
               <th scope="col">Turma</th>
-              <th scope="col">Ensino</th>
+              <th scope="col">Ensino</th><th scope="col">Ações</th>
             </tr>
           </thead>
           <tbody>
             @for (turma of turmas(); track turma.id) {
               <tr>
                 <th nomeRegistro scope="row">{{ turma.ano }}º ano {{ turma.letra }}</th>
-                <td>{{ turma.ensino === 'F' ? 'Fundamental' : 'Médio' }}</td>
+                <td>{{ turma.ensino === 'F' ? 'Fundamental' : 'Médio' }}</td><td><div class="acoes-registro"><a botaoVisual variant="edit" size="compact" [routerLink]="['/cadastro/turmas',turma.id,'editar']">Editar</a><button botaoVisual variant="danger" size="compact" type="button" [disabled]="deleting()" (click)="confirmDelete(turma)">Excluir</button></div></td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="2">Nenhuma turma cadastrada.</td>
+                <td colspan="3">Nenhuma turma cadastrada.</td>
               </tr>
             }
           </tbody>

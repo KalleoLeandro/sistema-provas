@@ -17,7 +17,7 @@
  @if(turma;as t){<p>{{t.ensino==='F'?'Ensino fundamental':'Ensino médio'}} — {{t.ano}}º ano {{t.letra}}</p>}
  @if(modo==='resultados'){@if(prova;as p){<p><strong>{{p.titulo}}</strong> · {{p.materia}} · Professor(a): {{p.professor}}</p><p>Disponibilidade: {{p.disponivelEm|date:'dd/MM/yyyy HH:mm'}} a {{p.encerraEm|date:'dd/MM/yyyy HH:mm'}}</p>}}
  <p>Gerado em {{geradoEm|date:'dd/MM/yyyy HH:mm'}}</p></header>
- <p>Total: {{linhas.length}} aluno(s)@if(modo==='alunos'){ · Matriculados: {{alunos().length-transferidos}} · Transferidos: {{transferidos}}}@else{ · Entregues: {{entregues.length}} · Corrigidas: {{corrigidas.length}}}</p>
+ <p>Total: {{linhas.length}} aluno(s)@if(modo==='alunos'){ · Matriculados: {{matriculados}} · Transferidos: {{transferidos}} · Remanejados: {{remanejados}} · Desistentes: {{desistentes}}}@else{ · Entregues: {{entregues.length}} · Corrigidas: {{corrigidas.length}}}</p>
  @if(colunas.length){<visual-table-scroll><div class="tabela-visual"><table><caption class="sr-only">{{modo==='alunos'?'Alunos da turma selecionada':'Resultados por aluno'}}</caption><thead><tr>@for(c of colunas;track c.id){<th scope="col">{{c.label}}</th>}</tr></thead><tbody>@for(item of linhas;track $index){<tr>@for(c of colunas;track c.id){@if(c.id==='nome'){<th nomeRegistro scope="row">{{valor(item,c.id)}}</th>}@else{<td>{{valor(item,c.id)}}</td>}}</tr>}@empty{<tr><td [attr.colspan]="colunas.length">Nenhum aluno encontrado.</td></tr>}</tbody></table></div></visual-table-scroll>}
  @if(modo==='resultados'){<p class="report-note">Notas parciais ainda dependem da correção de questões discursivas. Alunos com tentativa permanecem no relatório mesmo após mudança de turma.</p>}
  </div>}

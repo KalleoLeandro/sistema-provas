@@ -1,14 +1,16 @@
 <section class="form-visual" aria-labelledby="alunos-title">
   <div class="list-heading"><h2 id="alunos-title">Alunos</h2></div>
   <p>Consulte os alunos das turmas em que você ministra aulas.</p>
-  <div class="list-filters">
+  <form class="list-filters" (ngSubmit)="changeTurma()" autocomplete="off">
+    <visual-campo rotulo="Nome ou CGM" identificador="alunos-busca"><input campoVisual id="alunos-busca" name="busca" type="search" maxlength="120" [(ngModel)]="busca" /></visual-campo>
+    <visual-campo rotulo="Status" identificador="alunos-status"><select campoVisual id="alunos-status" name="status" [(ngModel)]="status" (ngModelChange)="changeTurma()"><option value="">Todos os status</option><option value="M">Matriculado</option><option value="T">Transferido</option><option value="R">Remanejado</option><option value="D">Desistente</option></select></visual-campo>
     <visual-campo rotulo="Turma" identificador="alunos-turma">
-      <select campoVisual id="alunos-turma" [(ngModel)]="turmaId" (ngModelChange)="changeTurma()" [disabled]="loading()" autocomplete="off">
+      <select campoVisual id="alunos-turma" name="turma" [(ngModel)]="turmaId" (ngModelChange)="changeTurma()" [disabled]="loading()" autocomplete="off">
         <option [ngValue]="null">Todas as minhas turmas</option>
         @for (t of turmas(); track t.id) { <option [ngValue]="t.id">{{ t.ensino === 'F' ? 'Fundamental' : 'Médio' }} — {{ t.ano }}º ano {{ t.letra }}</option> }
       </select>
-    </visual-campo>
-  </div>
+    </visual-campo><button botaoVisual variant="secondary" type="submit" [disabled]="loading()">Pesquisar</button><button botaoVisual variant="secondary" type="button" (click)="clearFilters()">Limpar filtros</button>
+  </form>
   @if (erro()) { <visual-aviso>{{ erro() }}</visual-aviso><button botaoVisual variant="secondary" type="button" (click)="init()">Tentar novamente</button> }
   <visual-cartao density="compact">
     @if (loading()) { <p role="status">Carregando alunos…</p> }
@@ -17,7 +19,7 @@
         <caption class="sr-only">Alunos das turmas do professor</caption>
         <thead><tr><th scope="col">Nome</th><th scope="col">Número</th><th scope="col">CGM</th><th scope="col">Turma</th><th scope="col">Status</th></tr></thead>
         <tbody>@for (a of alunos(); track a.id) {
-          <tr><th nomeRegistro scope="row">{{ a.nome }}</th><td>{{ a.numero ?? '—' }}</td><td>{{ a.cgm }}</td><td>{{ a.ensino === 'F' ? 'Fundamental' : 'Médio' }} — {{ a.ano }}º ano {{ a.letra }}</td><td><span class="status-visual" [class.inativo]="a.status === 'T'">{{ a.status === 'M' ? 'Matriculado' : 'Transferido' }}</span></td></tr>
+          <tr><th nomeRegistro scope="row">{{ a.nome }}</th><td>{{ a.numero ?? '—' }}</td><td>{{ a.cgm }}</td><td>{{ a.ensino === 'F' ? 'Fundamental' : 'Médio' }} — {{ a.ano }}º ano {{ a.letra }}</td><td><span class="status-visual" [class.inativo]="a.status !== 'M'">{{ statusAluno(a.status) }}</span></td></tr>
         } @empty { <tr><td colspan="5">Nenhum aluno encontrado nas turmas selecionadas.</td></tr> }</tbody>
       </table></div></visual-table-scroll>
     }

@@ -30,6 +30,7 @@ export const rotas: Routes = [
             { path: 'cadastro/materias/:id/editar', data: { perfis: ['administrador'] }, loadComponent: () => import('./pages/materias/editar/editar').then(modulo => modulo.EditarMateriaComponent) },
             { path: 'cadastro/materias/listar', data: { perfis: ['administrador'] }, loadComponent: () => import('./pages/materias/listar/listar').then(modulo => modulo.ListarMateriasComponent) },
             { path: 'cadastro/turmas/cadastrar', data: { perfis: ['administrador'] }, loadComponent: () => import('./pages/turmas/cadastrar/cadastrar').then(modulo => modulo.CadastrarTurmaComponent) },
+            { path: 'cadastro/turmas/:id/editar', data: { perfis: ['administrador'] }, loadComponent: () => import('./pages/turmas/cadastrar/cadastrar').then(modulo => modulo.CadastrarTurmaComponent) },
             { path: 'cadastro/turmas/listar', data: { perfis: ['administrador'] }, loadComponent: () => import('./pages/turmas/listar/listar').then(modulo => modulo.ListarTurmasComponent) },
             { path: 'relatorios', data: { perfis: ['administrador', 'professor'] }, loadComponent: () => import('./pages/relatorios/relatorios').then(m => m.RelatoriosComponent) },
             { path: 'resultados-provas', pathMatch: 'full', redirectTo: 'relatorios' },

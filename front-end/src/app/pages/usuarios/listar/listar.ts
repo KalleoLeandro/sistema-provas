@@ -1,3 +1,5 @@
+import { Turma } from '../../../models/turma';
+import { statusAluno } from '../../../models/status-aluno';
 import { PaginationComponent } from '../../../design-system/pagination';
 import { TableScrollComponent } from '../../../design-system/table-scroll';
 import { Aluno, Pagina } from '../../../models/aluno';
@@ -8,22 +10,30 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Professor } from '../../../models/professor';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
-import { AlertComponent, CardComponent, RecordNameDirective, ButtonDirective, InputDirective } from '../../../design-system/components';
+import { AlertComponent, CardComponent, RecordNameDirective, ButtonDirective, InputDirective, FieldComponent } from '../../../design-system/components';
 
 interface UsuarioAdministrativo { id: number; nome: string; login: string; ativo: boolean; }
 
 @Component({
   selector: 'app-listar-usuarios',
-  imports: [PaginationComponent, TableScrollComponent, RouterLink, AlertComponent, CardComponent, RecordNameDirective, ButtonDirective, InputDirective, FormsModule],
+  imports: [FieldComponent, PaginationComponent, TableScrollComponent, RouterLink, AlertComponent, CardComponent, RecordNameDirective, ButtonDirective, InputDirective, FormsModule],
   templateUrl: './listar.html',
-  styleUrl: './listar.css',
+  styleUrls: ['./listar.css','../../../design-system/list-filters.css'],
 })
 export class ListarUsuariosComponent implements OnInit {
+ readonly statusAluno=statusAluno;
   private readonly api = inject(ApiService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private requestId = 0;
+  readonly busca=signal('');readonly filtroStatus=signal('');readonly filtroTurma=signal<number|null>(null);readonly turmas=signal<Turma[]>([]);
+  readonly professoresFiltrados=computed(()=>{
+    const normalize=(v:string)=>v.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();const busca=normalize(this.busca().trim());
+    return this.professores().filter(p=>(!busca||normalize(p.nome+' '+p.login).includes(busca))&&(!this.filtroStatus()||p.ativo===(this.filtroStatus()==='ativo'))&&(!this.filtroTurma()||p.turmas?.some(t=>t.id===this.filtroTurma())||p.materias?.some(m=>m.turmas.some(t=>t.id===this.filtroTurma()))));
+  });
+  applyFilters(){if(this.perfil()==='aluno')void this.changeProfile('aluno');}
+  clearFilters(){this.busca.set('');this.filtroStatus.set('');this.filtroTurma.set(null);this.applyFilters();}
   readonly professores = signal<Professor[]>([]);
   readonly alunos=signal<Aluno[]>([]);
   paginaAlunos=1; tamanhoAlunos=15; totalAlunos=0;
@@ -36,6 +46,7 @@ export class ListarUsuariosComponent implements OnInit {
   readonly mensagem = signal('');
 
   async ngOnInit() {
+    void this.api.get<Turma[]>('/turmas').then(t=>this.turmas.set(t)).catch(()=>this.erro.set('Não foi possível carregar as turmas do filtro.'));
     const perfil=this.route.snapshot.queryParamMap.get('perfil');
     await this.changeProfile(perfil==='professor'||perfil==='aluno'?perfil:'administrador');
   }
@@ -44,6 +55,7 @@ export class ListarUsuariosComponent implements OnInit {
   async changeProfile(perfil: string, pagina=1) {
     /* A lista de um perfil não pode aparecer sob o cabeçalho de outro durante a troca. */
     const requestId = ++this.requestId;
+    if(perfil!==this.perfil()){this.busca.set('');this.filtroStatus.set('');this.filtroTurma.set(null);}
     this.perfil.set(perfil);
     this.loading.set(true); this.erro.set(''); this.mensagem.set('');
     this.usuarios.set([]); this.professores.set([]); this.alunos.set([]);this.totalAlunos=0;this.paginaAlunos=pagina;
@@ -55,7 +67,7 @@ export class ListarUsuariosComponent implements OnInit {
         const professores = await this.api.get<Professor[]>('/professores');
         if (requestId === this.requestId) this.professores.set(professores);
       } else if(perfil==='aluno') {
-        const result=await this.api.get<Pagina<Aluno>>('/alunos?pagina='+pagina+'&tamanho='+this.tamanhoAlunos);
+        const result=await this.api.get<Pagina<Aluno>>('/alunos?pagina='+pagina+'&tamanho='+this.tamanhoAlunos+(this.busca().trim()?'&busca='+encodeURIComponent(this.busca().trim()):'')+(this.filtroStatus()?'&status='+this.filtroStatus():'')+(this.filtroTurma()?'&turmaId='+this.filtroTurma():''));
         if(requestId===this.requestId){this.alunos.set(result.itens);this.totalAlunos=result.total;this.paginaAlunos=result.pagina;}
       }
     } catch {

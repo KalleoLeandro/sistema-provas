@@ -1,3 +1,4 @@
+import { statusAluno } from '../../../models/status-aluno';
 import { TableScrollComponent } from '../../../design-system/table-scroll';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -13,11 +14,14 @@ import { ApiService } from '../../../services/api.service';
   templateUrl: './listar.html', styleUrl: '../../../design-system/list-filters.css',
 })
 export class ListarAlunosComponent implements OnInit {
+ readonly statusAluno=statusAluno;
   private readonly api = inject(ApiService);
   readonly alunos = signal<Aluno[]>([]);
   readonly turmas = signal<Turma[]>([]);
   readonly loading = signal(false);
   readonly erro = signal('');
+  busca='';status='';
+  clearFilters(){this.busca='';this.status='';this.turmaId=null;this.changeTurma();}
   turmaId: number | null = null;
   pagina = 1;
   tamanhoPagina = 15;
@@ -42,7 +46,7 @@ export class ListarAlunosComponent implements OnInit {
   async load() {
     /* Alterar filtros rapidamente não permite que uma resposta anterior substitua a pesquisa mais recente. */
     const visit = ++this.visit; this.loading.set(true); this.erro.set(''); this.alunos.set([]);
-    const query = '?pagina=' + this.pagina + '&tamanho=' + this.tamanhoPagina + (this.turmaId ? '&turmaId=' + this.turmaId : '');
+    const query = '?pagina=' + this.pagina + '&tamanho=' + this.tamanhoPagina + (this.turmaId ? '&turmaId=' + this.turmaId : '')+(this.busca.trim()?'&busca='+encodeURIComponent(this.busca.trim()):'')+(this.status?'&status='+this.status:'');
     try {
       const result = await this.api.get<Pagina<Aluno>>('/professor/alunos' + query);
       if (visit !== this.visit) return;

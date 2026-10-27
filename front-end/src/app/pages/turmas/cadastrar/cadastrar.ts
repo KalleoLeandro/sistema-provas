@@ -2,9 +2,10 @@ import { AllowedValuesDirective, ValidationMessagePipe } from '../../../design-s
 import { Component, ElementRef, HostListener, OnDestroy, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 import {
+  ButtonDirective,
   AlertComponent,
   CardComponent,
   FieldComponent,
@@ -15,7 +16,7 @@ import { FormActionsComponent } from '../../../design-system/form-actions';
 @Component({
   selector: 'app-cadastrar-turma',
   imports: [AllowedValuesDirective, ValidationMessagePipe, 
-    FormsModule,
+    FormsModule,RouterLink,ButtonDirective,
     AlertComponent,
     CardComponent,
     FieldComponent,
@@ -28,6 +29,13 @@ export class CadastrarTurmaComponent implements OnDestroy {
   private readonly api = inject(ApiService);
   private readonly router = inject(Router);
   private readonly element = inject(ElementRef<HTMLElement>);
+  private readonly route=inject(ActivatedRoute);
+  readonly id=Number(this.route.snapshot.paramMap.get('id'))||null;
+  async ngOnInit(){
+    if(!this.id)return;this.busy.set(true);
+    try{const turma=await this.api.get<{ensino:string;ano:number;letra:string}>('/turmas/'+this.id);this.ensino=turma.ensino;this.ano=turma.ano;this.letra=turma.letra;}
+    catch{this.erro.set('Não foi possível carregar a turma.');}finally{this.busy.set(false);}
+  }
   readonly anos = Array.from({ length: 9 }, (_, index) => index + 1);
   readonly letras = Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index));
   ensino = '';
@@ -63,7 +71,8 @@ export class CadastrarTurmaComponent implements OnDestroy {
     this.erro.set('');
     this.mensagem.set('');
     try {
-      await this.api.post('/turmas', { ensino: this.ensino, ano: this.ano, letra: this.letra });
+      if(this.id)await this.api.put('/turmas/'+this.id,{ensino:this.ensino,ano:this.ano,letra:this.letra});
+      else await this.api.post('/turmas', { ensino: this.ensino, ano: this.ano, letra: this.letra });
       /*
        * Após gravar, limpa as seleções. Cadastrar retorna à lista; cadastrar e
        * continuar mantém a página disponível para uma nova turma independente.

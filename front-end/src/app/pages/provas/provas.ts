@@ -1,3 +1,4 @@
+import { statusAluno } from '../../models/status-aluno';
 import { Component, HostListener, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ListarCorrecoesComponent } from './correcoes/listar';
@@ -19,6 +20,7 @@ import { LiberacaoProva,LiberacaoDetalhe } from '../../models/prova';
 @Component({ selector:'app-provas', imports:[ListarCorrecoesComponent,DateFieldComponent,TabsComponent,FormsModule,DatePipe,AlertComponent,ButtonDirective,CardComponent,FieldComponent,InputDirective,RecordNameDirective,TableScrollComponent,PaginationComponent,InfoTooltipComponent,NotBlankDirective,ValidationMessagePipe],
   templateUrl:'./provas.html',styleUrls:['../../design-system/list-filters.css','../../design-system/exam-releases.css'] })
 export class ProvasComponent implements OnInit,OnDestroy {
+ readonly statusAluno=statusAluno;
   private readonly api=inject(ApiService);
   private readonly route=inject(ActivatedRoute,{optional:true});
   readonly alunos=signal<Aluno[]>([]);

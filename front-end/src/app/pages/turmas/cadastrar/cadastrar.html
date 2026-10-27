@@ -1,6 +1,6 @@
 <section class="form-page" aria-labelledby="turma-title">
   <span class="sobretitulo">CADASTRO</span>
-  <h2 class="ds-title" id="turma-title">Cadastrar turma</h2>
+  <h2 class="ds-title" id="turma-title">{{id?'Editar turma':'Cadastrar turma'}}</h2>
   <visual-cartao
     ><form
       class="form-visual"
@@ -59,11 +59,12 @@
       @if (mensagem()) {
         <p class="form-feedback" role="status">{{ mensagem() }}</p>
       }
+      @if(id){<div class="form-actions"><a botaoVisual variant="secondary" routerLink="/cadastro/turmas/listar">Cancelar</a><button botaoVisual type="submit" [disabled]="busy()||!!form.invalid">Salvar alterações</button></div>}@else{
       <visual-form-actions
         [busy]="busy()"
         [invalid]="!!form.invalid"
         (clear)="reset(form)"
         (saveAndContinue)="save(form, true)"
-      /></form
+      />}</form
   ></visual-cartao>
 </section>

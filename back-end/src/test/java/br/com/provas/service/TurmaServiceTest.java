@@ -28,4 +28,29 @@ class TurmaServiceTest {
         assertEquals(HttpStatus.CONFLICT,assertThrows(DefaultErrorException.class,
             () -> service.create(new TurmaRequest("F",1,"A"))).getStatus());
     }
+
+    @Test void refusesDeletionWithPeopleRegardlessOfTheirStatus(){
+        when(repository.findById(4L,true)).thenReturn(java.util.Optional.of(new Turma(4L,"F",1,"A")));
+        when(repository.hasPeople(4L)).thenReturn(true);
+        assertEquals(HttpStatus.CONFLICT,assertThrows(DefaultErrorException.class,()->service.delete(4L)).getStatus());
+        verify(repository,never()).delete(any());
+    }
+    @Test void protectsExamAndQuestionReferences(){
+        when(repository.findById(4L,true)).thenReturn(java.util.Optional.of(new Turma(4L,"F",1,"A")));
+        doThrow(new org.springframework.dao.DataIntegrityViolationException("fk")).when(repository).delete(4L);
+        assertEquals(HttpStatus.CONFLICT,assertThrows(DefaultErrorException.class,()->service.delete(4L)).getStatus());
+    }
+    @Test void deletesAnUnlinkedClassAndRejectsMissingClass(){
+        assertEquals(HttpStatus.NOT_FOUND,assertThrows(DefaultErrorException.class,()->service.delete(4L)).getStatus());
+        when(repository.findById(4L,true)).thenReturn(java.util.Optional.of(new Turma(4L,"F",1,"A")));
+        service.delete(4L);verify(repository).delete(4L);
+    }
+    @Test void updatesWithoutChangingIdentityAndRejectsDuplicate(){
+        when(repository.findById(4L,true)).thenReturn(java.util.Optional.of(new Turma(4L,"F",1,"A")));
+        when(repository.findById(4L,false)).thenReturn(java.util.Optional.of(new Turma(4L,"F",1,"B")));
+        var request=new TurmaRequest("F",1,"B");assertEquals(4L,service.update(4L,request).id());
+        verify(repository).update(4L,request);verify(repository,never()).save(any(),any(),any());
+        doThrow(new DuplicateKeyException("duplicate")).when(repository).update(4L,request);
+        assertEquals(HttpStatus.CONFLICT,assertThrows(DefaultErrorException.class,()->service.update(4L,request)).getStatus());
+    }
 }

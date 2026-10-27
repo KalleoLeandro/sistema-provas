@@ -29,9 +29,10 @@ public class AlunoAdministrativoController {
     public AlunoResponse update(@PathVariable @Positive(message="Informe um aluno válido.") Long id,@Valid @RequestBody AlunoRequest request){return service.update(id,request);}
     @GetMapping
     public PaginaResponse<AlunoResponse> findAll(
+        @Valid @ModelAttribute br.com.provas.model.request.AlunoFiltroRequest filtro,
         @RequestParam(defaultValue="1") @Min(value=1,message="A página deve ser positiva.") int pagina,
         @RequestParam(defaultValue="15") @Pattern(regexp="15|25|50",message="Selecione 15, 25 ou 50 itens por página.") String tamanho){
-        return service.findAllForAdmin(pagina,Integer.parseInt(tamanho));
+        return service.search(null,filtro,pagina,Integer.parseInt(tamanho));
     }
     @PostMapping("/importar/validar")
     public ImportacaoAlunosResponse validateCsv(@Valid @RequestBody ImportarAlunosRequest request){return importacao.validate(request);}

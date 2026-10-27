@@ -5,6 +5,14 @@
       <option value="administrador">Administradores</option><option value="professor">Professores</option><option value="aluno">Alunos</option>
     </select>
   </div>
+
+  @if(perfil()!=='administrador'){
+  <form class="list-filters" (ngSubmit)="applyFilters()" autocomplete="off">
+   <visual-campo [rotulo]="perfil()==='aluno'?'Nome ou CGM':'Nome ou login'" identificador="usuarios-busca"><input campoVisual type="search" id="usuarios-busca" name="busca" maxlength="120" [ngModel]="busca()" (ngModelChange)="busca.set($event)" /></visual-campo>
+   <visual-campo rotulo="Status" identificador="usuarios-status"><select campoVisual id="usuarios-status" name="status" [ngModel]="filtroStatus()" (ngModelChange)="filtroStatus.set($event);applyFilters()"><option value="">Todos os status</option>@if(perfil()==='aluno'){<option value="M">Matriculado</option><option value="T">Transferido</option><option value="R">Remanejado</option><option value="D">Desistente</option>}@else{<option value="ativo">Ativo</option><option value="inativo">Inativo</option>}</select></visual-campo>
+   <visual-campo rotulo="Turma" identificador="usuarios-turma"><select campoVisual id="usuarios-turma" name="turma" [ngModel]="filtroTurma()" (ngModelChange)="filtroTurma.set($event);applyFilters()"><option [ngValue]="null">Todas as turmas</option>@for(t of turmas();track t.id){<option [ngValue]="t.id">{{t.ensino==='F'?'Fundamental':'Médio'}} — {{t.ano}}º ano {{t.letra}}</option>}</select></visual-campo>
+   <button botaoVisual type="submit" variant="secondary" [disabled]="loading()">Pesquisar</button><button botaoVisual type="button" variant="secondary" (click)="clearFilters()">Limpar filtros</button>
+  </form>}
   @if (erro()) { <visual-aviso>{{ erro() }}</visual-aviso> }
   @if (mensagem()) { <p role="status">{{ mensagem() }}</p> }
   <visual-cartao density="compact" class="table-scroll-card">
@@ -23,7 +31,7 @@
       <div class="tabela-visual"><table><caption class="sr-only">Professores, turmas e status de acesso</caption>
         <thead><tr><th scope="col">Nome</th><th scope="col">Login</th><th scope="col">Matérias e turmas</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
         <tbody>
-          @for (professor of professores(); track professor.id) {
+          @for (professor of professoresFiltrados(); track professor.id) {
             <tr>
               <th nomeRegistro scope="row">{{ professor.nome }}</th><td>{{ professor.login }}</td>
               <td>
@@ -53,7 +61,7 @@
         <caption class="sr-only">Alunos, CGM, turma e situação escolar</caption>
         <thead><tr><th scope="col">Nome</th><th scope="col">Número</th><th scope="col">CGM</th><th scope="col">Turma</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
         <tbody>@for(a of alunos();track a.id){
-          <tr><th nomeRegistro scope="row" class="coluna-texto">{{a.nome}}</th><td>{{a.numero ?? '—'}}</td><td>{{a.cgm}}</td><td>{{a.ensino === 'F' ? 'Fundamental' : 'Médio'}} — {{a.ano}}º ano {{a.letra}}</td><td><span class="status-visual" [class.inativo]="a.status === 'T'">{{a.status === 'M' ? 'Matriculado' : 'Transferido'}}</span></td><td><a botaoVisual variant="edit" size="compact" [routerLink]="['/cadastro/alunos',a.id,'editar']" [attr.aria-label]="'Editar '+a.nome">Editar</a></td></tr>
+          <tr><th nomeRegistro scope="row" class="coluna-texto">{{a.nome}}</th><td>{{a.numero ?? '—'}}</td><td>{{a.cgm}}</td><td>{{a.ensino === 'F' ? 'Fundamental' : 'Médio'}} — {{a.ano}}º ano {{a.letra}}</td><td><span class="status-visual" [class.inativo]="a.status !== 'M'">{{statusAluno(a.status)}}</span></td><td><a botaoVisual variant="edit" size="compact" [routerLink]="['/cadastro/alunos',a.id,'editar']" [attr.aria-label]="'Editar '+a.nome">Editar</a></td></tr>
         } @empty {<tr><td colspan="6">Nenhum aluno cadastrado.</td></tr>}</tbody>
       </table></div></visual-table-scroll>
     }

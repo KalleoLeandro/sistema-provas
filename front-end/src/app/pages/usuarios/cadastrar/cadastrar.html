@@ -72,8 +72,8 @@
           <input campoVisual id="aluno-cgm" name="cgm" inputmode="numeric" [(ngModel)]="cgm" #alunoCgm="ngModel" required notBlank maxlength="30" pattern="[0-9]+" placeholder="CGM do aluno" [disabled]="busy()" aria-describedby="aluno-cgm-erro" [attr.aria-invalid]="!!(alunoCgm | validationMessage:form.submitted)" />
         </visual-campo>
         <visual-campo rotulo="Status" identificador="aluno-status" [erro]="alunoStatus | validationMessage:form.submitted">
-          <select campoVisual id="aluno-status" name="statusAluno" [(ngModel)]="statusAluno" #alunoStatus="ngModel" required [allowedValues]="['M','T']" [disabled]="busy()" aria-describedby="aluno-status-erro" [attr.aria-invalid]="!!(alunoStatus | validationMessage:form.submitted)">
-            <option value="M">Matriculado</option><option value="T">Transferido</option>
+          <select campoVisual id="aluno-status" name="statusAluno" [(ngModel)]="statusAluno" #alunoStatus="ngModel" required [allowedValues]="['M','T','R','D']" [disabled]="busy()" aria-describedby="aluno-status-erro" [attr.aria-invalid]="!!(alunoStatus | validationMessage:form.submitted)">
+            <option value="M">Matriculado</option><option value="T">Transferido</option><option value="R">Remanejado</option><option value="D">Desistente</option>
           </select>
         </visual-campo>
         @if (loadingCatalogos()) { <p role="status">Carregando turmas…</p> }

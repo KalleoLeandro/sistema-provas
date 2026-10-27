@@ -81,4 +81,17 @@ describe('Status dos administradores', () => {
     expect(fixture.nativeElement.querySelector('visual-pagination')).toBeTruthy();
   });
 
+
+  it('combina nome sem acento, status e turma na lista completa de professores',async()=>{
+    const f=TestBed.createComponent(ListarUsuariosComponent);await f.whenStable();const c=f.componentInstance;
+    c.professores.set([{id:1,nome:'João',login:'joao',ativo:true,turmas:[],materias:[{materiaId:1,nome:'Matemática',turmas:[{id:5,ensino:'F',ano:1,letra:'A'}]}]},{id:2,nome:'João',login:'outro',ativo:false,turmas:[],materias:[]}]);
+    c.busca.set('joao');c.filtroStatus.set('ativo');c.filtroTurma.set(5);expect(c.professoresFiltrados().map(p=>p.id)).toEqual([1]);
+    c.filtroStatus.set('inativo');expect(c.professoresFiltrados()).toEqual([]);
+  });
+  it('envia os filtros de alunos antes de paginar e exibe remanejado',async()=>{
+    const f=TestBed.createComponent(ListarUsuariosComponent);await f.whenStable();const c=f.componentInstance;
+    await c.changeProfile('aluno');c.busca.set('Ana');c.filtroStatus.set('R');c.filtroTurma.set(5);
+    get.mockResolvedValueOnce({itens:[{id:4,nome:'Ana',numero:null,cgm:'001',status:'R',turmaId:5,ensino:'F',ano:1,letra:'A'}],total:1,pagina:1,tamanho:15});
+    await c.changeProfile('aluno',2);f.detectChanges();expect(get).toHaveBeenLastCalledWith('/alunos?pagina=2&tamanho=15&busca=Ana&status=R&turmaId=5');expect(f.nativeElement.textContent).toContain('Remanejado');
+  });
 });

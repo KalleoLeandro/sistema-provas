@@ -63,7 +63,7 @@ As tabelas de questões e alunos usam `visual-table-scroll`: quando há conteúd
 
 ### Cadastro administrativo de alunos
 
-Somente administradores podem cadastrar em `Cadastros → Usuários → Cadastrar → Aluno` (`POST /alunos`) e consultar a lista geral paginada (`GET /alunos`). O cadastro exige nome, CGM numérico textual (preserva zeros iniciais), turma e status escolar: `M` Matriculado ou `T` Transferido. Número é um inteiro positivo opcional. O formulário oferece Limpar, Cadastrar e Cadastrar e continuar, sem persistir dados no navegador. CGM duplicado retorna 409. Professores não podem cadastrar alunos: permanecem limitados à leitura de suas turmas em `/professor/alunos`.
+Somente administradores podem cadastrar em `Cadastros → Usuários → Cadastrar → Aluno` (`POST /alunos`) e consultar a lista geral paginada (`GET /alunos`). O cadastro exige nome, CGM numérico textual (preserva zeros iniciais), turma e status escolar: `M` Matriculado, `T` Transferido, `R` Remanejado ou `D` Desistente. Número é um inteiro positivo opcional. O formulário oferece Limpar, Cadastrar e Cadastrar e continuar, sem persistir dados no navegador. CGM duplicado retorna 409. Professores não podem cadastrar alunos: permanecem limitados à leitura de suas turmas em `/professor/alunos`.
 
 A migração `013_cadastro_alunos.sql` acrescenta número e status M/T, converte o status anterior e remove o booleano `ativo` de alunos. Cadastro/login de aluno não são a mesma operação; o login de alunos permanece fora desta implementação.
 
@@ -195,3 +195,11 @@ Provas já corrigidas continuam revisáveis pelo professor autor. A tela apresen
 Na lista administrativa de Usuários, os perfis Professor e Aluno possuem ação Editar. As rotas /cadastro/professores/:id/editar e /cadastro/alunos/:id/editar exigem administrador. GET/PUT /professores/{id} e GET/PUT /alunos/{id} carregam e atualizam os cadastros. O professor continua com consulta dos próprios alunos e do perfil, sem autorização de edição cadastral.
 
 Professor permite alterar nome, login, senha opcional e matérias com turmas por chips. Senha em branco conserva o hash; o status continua sendo alterado pela lista. A troca de vínculos é transacional e preserva a exclusividade de cada matéria/turma entre ativos. Conflitos desfazem também as mudanças de dados pessoais. Aluno permite nome, número opcional, CGM, situação M/T e turma; CGM permanece textual e único. Nenhuma edição recria identidades ou altera cópias e respostas de provas. Os formulários usam validação do design system e descartam dados ao sair.
+
+### Estados, filtros e manutenção de turmas
+
+Alunos aceitam M (Matriculado), T (Transferido), R (Remanejado) e D (Desistente), inclusive na importação CSV, que também aceita os nomes completos. Apenas matriculados continuam habilitados para login. Bancos já existentes devem executar uma vez `database/migrations/20261027-estados-alunos.sql`; a base deste ambiente já foi atualizada. Novos bancos usam a restrição atualizada de `database/init.sql`.
+
+As listas administrativas de professores e alunos oferecem nome/login ou nome/CGM, status e turma. A consulta de alunos do professor mantém o escopo de suas turmas. A pesquisa de alunos é feita no banco antes da contagem e paginação.
+
+Administradores podem editar turmas pela lista e excluir após confirmação. `GET/PUT/DELETE /turmas/{id}` validam o identificador; edição mantém o ID e rejeita combinações duplicadas de ensino/ano/letra. Exclusão bloqueia qualquer aluno ou professor vinculado, inclusive não matriculados e professores inativos. Questões e provas referenciadas também impedem remoção para preservar os dados.

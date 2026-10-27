@@ -25,6 +25,18 @@ public class AlunoRepository {
     private final RowMapper<AlunoResponse> mapper = (rs,n) -> new AlunoResponse(rs.getLong("id"),rs.getString("nome"),rs.getObject("numero",Integer.class),rs.getString("cgm"),
         rs.getString("status"),rs.getLong("turma_id"),rs.getString("ensino"),rs.getInt("ano"),rs.getString("letra"));
 
+    private static final String PESQUISA=" AND (:status IS NULL OR a.status=:status) AND (:busca='' OR LOCATE(:busca,a.nome)>0 OR LOCATE(:busca,a.cgm)>0) ";
+    private MapSqlParameterSource filtros(Long professor,br.com.provas.model.request.AlunoFiltroRequest filtro){
+        return new MapSqlParameterSource().addValue("professor_id",professor).addValue("turma_id",filtro.turmaId()).addValue("status",filtro.status()).addValue("busca",filtro.busca());
+    }
+    public long countFiltered(Long professor,br.com.provas.model.request.AlunoFiltroRequest filtro){
+        String from=professor==null?"FROM alunos_2026 a JOIN turmas t ON t.id=a.turma_id WHERE (:turma_id IS NULL OR a.turma_id=:turma_id) ":FILTRO;
+        return namedParameterJdbcTemplate.query("SELECT COUNT(*) AS total "+from+PESQUISA,filtros(professor,filtro),(rs,n)->rs.getLong("total")).getFirst();
+    }
+    public List<AlunoResponse> findFiltered(Long professor,br.com.provas.model.request.AlunoFiltroRequest filtro,int tamanho,long offset){
+        String from=professor==null?"FROM alunos_2026 a JOIN turmas t ON t.id=a.turma_id WHERE (:turma_id IS NULL OR a.turma_id=:turma_id) ":FILTRO;
+        return namedParameterJdbcTemplate.query("SELECT a.id,a.nome,a.numero,a.cgm,a.status,a.turma_id,t.ensino,t.ano,t.letra "+from+PESQUISA+" ORDER BY a.nome,a.id LIMIT :tamanho OFFSET :offset",filtros(professor,filtro).addValue("tamanho",tamanho).addValue("offset",offset),mapper);
+    }
     public long countByProfessor(Long professorId, Long turmaId) {
         var params = new MapSqlParameterSource().addValue("professor_id",professorId).addValue("turma_id",turmaId);
         return namedParameterJdbcTemplate.query("SELECT COUNT(*) AS total "+FILTRO,params,(rs,n)->rs.getLong("total")).getFirst();

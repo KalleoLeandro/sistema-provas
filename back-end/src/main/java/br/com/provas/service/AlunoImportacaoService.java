@@ -79,7 +79,7 @@ public class AlunoImportacaoService {
             String nome=value(row.colunas(),header,"nome").replaceAll("\\s+"," ");
             String cgm=value(row.colunas(),header,"cgm");
             String status=normalize(value(row.colunas(),header,"status")).toUpperCase(Locale.ROOT);
-            if(status.equals("MATRICULADO"))status="M";if(status.equals("TRANSFERIDO"))status="T";
+            if(status.equals("MATRICULADO"))status="M";if(status.equals("TRANSFERIDO"))status="T";if(status.equals("REMANEJADO"))status="R";if(status.equals("DESISTENTE"))status="D";
             String ensino=normalize(value(row.colunas(),header,"ensino")).toUpperCase(Locale.ROOT);
             if(ensino.equals("FUNDAMENTAL"))ensino="F";if(ensino.equals("MEDIO"))ensino="M";
             String letra=value(row.colunas(),header,"letra").toUpperCase(Locale.ROOT);

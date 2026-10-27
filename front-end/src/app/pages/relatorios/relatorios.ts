@@ -1,3 +1,4 @@
+import { statusAluno } from '../../models/status-aluno';
 import { Component, HostListener, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { TableScrollComponent } from '../../design-system/table-scroll';
 import { TabsComponent } from '../../design-system/tabs';
 
 export interface ProvaRelatorio { id:number; titulo:string; materia:string; professor:string; turmaId:number; disponivelEm:string; encerraEm:string; }
-export interface ResultadoRelatorio { alunoId:number; nome:string; numero:number|null; cgm:string; status:'M'|'T'; tentativaId:number|null; iniciadaEm:string|null; entregueEm:string|null; pendentes:number; nota:number|null; }
+export interface ResultadoRelatorio { alunoId:number; nome:string; numero:number|null; cgm:string; status:'M'|'T'|'R'|'D'; tentativaId:number|null; iniciadaEm:string|null; entregueEm:string|null; pendentes:number; nota:number|null; }
 @Component({selector:'app-relatorios',imports:[FormsModule,DatePipe,AlertComponent,ButtonDirective,FieldComponent,InputDirective,RecordNameDirective,TableScrollComponent,TabsComponent],templateUrl:'./relatorios.html',styleUrl:'../../design-system/reports.css'})
 export class RelatoriosComponent implements OnInit,OnDestroy {
  readonly api=inject(ApiService);
@@ -23,6 +24,9 @@ export class RelatoriosComponent implements OnInit,OnDestroy {
  get campos(){return this.modo==='alunos'?this.camposAlunos:this.camposResultados;}
  get colunas(){return this.campos.filter(c=>this.selecionados[c.id]);}
  get linhas():Array<Aluno|ResultadoRelatorio>{return this.modo==='alunos'?this.alunos():this.resultados();}
+ get matriculados(){return this.alunos().filter(a=>a.status==='M').length;}
+ get remanejados(){return this.alunos().filter(a=>a.status==='R').length;}
+ get desistentes(){return this.alunos().filter(a=>a.status==='D').length;}
  get transferidos(){return this.alunos().filter(a=>a.status==='T').length;}
  modo='alunos';turmaId:number|null=null;provaId:number|null=null;geradoEm=new Date();private visit=0;
  get turma(){return this.turmas().find(t=>t.id===this.turmaId);}
@@ -53,7 +57,7 @@ export class RelatoriosComponent implements OnInit,OnDestroy {
   switch(campo){
    case 'numero':return item.numero===null?'—':String(item.numero);
    case 'nome':return item.nome;case 'cgm':return item.cgm;
-   case 'status':return item.status==='M'?'Matriculado':'Transferido';
+   case 'status':return statusAluno(item.status);
    case 'turma':return this.turma?(this.turma.ensino==='F'?'Fundamental':'Médio')+' — '+this.turma.ano+'º ano '+this.turma.letra:'';
    case 'prova':return this.prova?.titulo??'';case 'materia':return this.prova?.materia??'';case 'professor':return this.prova?.professor??'';
    case 'situacao':return this.situacao(r);

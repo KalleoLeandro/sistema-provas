@@ -46,4 +46,12 @@ class AlunoServiceTest {
     @Test void editsRejectDuplicateCgm(){
         var request=new br.com.provas.model.request.AlunoRequest("Ana",null,"001234","M",5L);when(repository.lockById(1L)).thenReturn(true);when(repository.turmaExists(5L)).thenReturn(true);doThrow(new org.springframework.dao.DuplicateKeyException("cgm")).when(repository).update(1L,request);assertEquals(org.springframework.http.HttpStatus.CONFLICT,assertThrows(DefaultErrorException.class,()->service.update(1L,request)).getStatus());
     }
+
+    @Test void filtersBeforePaginationAndPreservesProfessorScope(){
+        var filtro=new br.com.provas.model.request.AlunoFiltroRequest(" Ana ","R",5L);
+        when(repository.countFiltered(7L,filtro)).thenReturn(16L);
+        when(repository.findFiltered(7L,filtro,15,15L)).thenReturn(List.of());
+        var page=service.search(7L,filtro,99,15);assertEquals(2,page.pagina());assertEquals(16,page.total());
+        assertEquals("Ana",filtro.busca());verify(repository).findFiltered(7L,filtro,15,15L);
+    }
 }

@@ -37,7 +37,7 @@
       <visual-table-scroll><div class="tabela-visual"><table><caption class="sr-only">Alunos e suas liberações de provas</caption>
         <thead><tr><th scope="col">Aluno</th><th scope="col">Número</th><th scope="col">CGM</th><th scope="col">Turma</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
         <tbody>@for(a of alunos();track a.id){
-          <tr><th nomeRegistro scope="row">{{a.nome}}</th><td>{{a.numero??'—'}}</td><td>{{a.cgm}}</td><td>{{a.ensino==='F'?'Fundamental':'Médio'}} — {{a.ano}}º ano {{a.letra}}</td><td>{{a.status==='M'?'Matriculado':'Transferido'}}</td>
+          <tr><th nomeRegistro scope="row">{{a.nome}}</th><td>{{a.numero??'—'}}</td><td>{{a.cgm}}</td><td>{{a.ensino==='F'?'Fundamental':'Médio'}} — {{a.ano}}º ano {{a.letra}}</td><td>{{statusAluno(a.status)}}</td>
             <td><button botaoVisual type="button" variant="secondary" size="compact" [disabled]="busy()" [attr.aria-expanded]="selecionado()?.id===a.id" [attr.aria-controls]="'provas-aluno-'+a.id" (click)="toggle(a)">{{selecionado()?.id===a.id?'Recolher':'Ver provas'}}</button></td></tr>
           @if(selecionado()?.id===a.id){<tr><td colspan="6" class="exam-detail-cell"><section class="exam-details" [id]="'provas-aluno-'+a.id" [attr.aria-label]="'Provas de '+a.nome">
             <div class="list-heading"><h3>Liberações de {{a.nome}}</h3><button botaoVisual type="button" size="compact" variant="secondary" [disabled]="loadingProvas()||busy()" (click)="loadProvas()">Atualizar</button></div>

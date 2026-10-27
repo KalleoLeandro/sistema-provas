@@ -1,3 +1,4 @@
+import { statusAluno } from '../../../models/status-aluno';
 import { Component, EventEmitter, HostListener, Input, OnDestroy, Output, ViewChild, ElementRef, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AlertComponent, ButtonDirective, FieldComponent, InputDirective, RecordNameDirective } from '../../../design-system/components';
@@ -11,6 +12,7 @@ import { ApiService } from '../../../services/api.service';
   templateUrl:'./importar-alunos.html',styleUrl:'../../../design-system/csv-import.css',
 })
 export class ImportarAlunosComponent implements OnDestroy {
+ readonly statusAluno=statusAluno;
   private readonly api=inject(ApiService);
   @Input() disabled=false;
   @Output() busyChange=new EventEmitter<boolean>();
