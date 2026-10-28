@@ -20,12 +20,12 @@
           </caption>
           <thead>
             <tr>
-              <th scope="col">Turma</th>
-              <th scope="col">Ensino</th><th scope="col">Ações</th>
+              <th scope="col" sortColumn="turma" [sort]="sort">Turma</th>
+              <th scope="col" sortColumn="ensino" [sort]="sort">Ensino</th><th scope="col">Ações</th>
             </tr>
           </thead>
           <tbody>
-            @for (turma of turmas(); track turma.id) {
+            @for (turma of turmasOrdenadas; track turma.id) {
               <tr>
                 <th nomeRegistro scope="row">{{ turma.ano }}º ano {{ turma.letra }}</th>
                 <td>{{ turma.ensino === 'F' ? 'Fundamental' : 'Médio' }}</td><td><div class="acoes-registro"><a botaoVisual variant="edit" size="compact" [routerLink]="['/cadastro/turmas',turma.id,'editar']">Editar</a><button botaoVisual variant="danger" size="compact" type="button" [disabled]="deleting()" (click)="confirmDelete(turma)">Excluir</button></div></td>

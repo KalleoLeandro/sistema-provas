@@ -1,4 +1,5 @@
 export interface PendenciaQuestoes {
+ assuntoId:number|null;assunto:string|null;
   materiaId: number;
   materia: string;
   turmaId: number;

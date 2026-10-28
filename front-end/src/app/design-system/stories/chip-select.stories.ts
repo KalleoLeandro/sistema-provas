@@ -14,3 +14,7 @@ export const Padrao: StoryObj<ChipSelectComponent> = {
     template: '<visual-chip-select inputId="exemplo-materias" label="Matérias" placeholder="Digite o nome da matéria" [options]="opcoes" [(ngModel)]="selecionadas" />',
   }),
 };
+
+export const AssuntoUnico:StoryObj<ChipSelectComponent>={name:'Assunto com sugestões e criação',render:()=>{
+ const state={selecionadas:[] as number[],opcoes:[{value:1,label:'Frações'},{value:2,label:'Equações'}],criar(nome:string){const option={value:this.opcoes.length+1,label:nome};this.opcoes=[...this.opcoes,option];this.selecionadas=[option.value];}};
+ return {props:state,template:'<visual-chip-select inputId="assunto-exemplo" label="Assunto" placeholder="Digite um assunto" [options]="opcoes" [(ngModel)]="selecionadas" [maxSelected]="1" [allowCreate]="true" [fuzzySearch]="true" createLabel="Criar assunto" (createOption)="criar($event)" />'};}};

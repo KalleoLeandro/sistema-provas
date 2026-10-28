@@ -1,5 +1,5 @@
 <section aria-labelledby="questoes-title" class="form-visual">
-  <div class="list-heading"><div class="screen-title"><h2 id="questoes-title">Questões</h2><visual-info-tooltip text="Mínimo por matéria e turma: 4 de peso 0,5; 3 de 1,0; 2 de 1,5; e 1 de 2,0. A contagem considera os dois tipos de questão e acompanha os filtros de ensino, ano e turma." /></div><a botaoVisual routerLink="/questoes/cadastrar">Cadastrar questões</a></div>
+  <div class="list-heading"><div class="screen-title"><h2 id="questoes-title">Questões</h2><visual-info-tooltip text="Pelo menos um assunto completo por matéria e turma: 4 de peso 0,5; 3 de 1,0; 2 de 1,5; e 1 de 2,0. A contagem considera os dois tipos de questão e acompanha os filtros de ensino, ano e turma." /></div><a botaoVisual routerLink="/questoes/cadastrar">Cadastrar questões</a></div>
   @if (erro()) {
     <visual-aviso>{{ erro() }}</visual-aviso>
     <button botaoVisual variant="secondary" type="button" (click)="load()">Tentar novamente</button>
@@ -19,6 +19,7 @@
       </select>
     </visual-campo>
     @if (aba === 'cadastradas') {
+    <visual-campo rotulo="Assunto" identificador="questoes-filtro-assunto"><select campoVisual id="questoes-filtro-assunto" [(ngModel)]="assuntoId" (ngModelChange)="closeDetail()" [disabled]="loading()"><option [ngValue]="null">Todos os assuntos</option>@for(a of assuntosDisponiveis;track a.id){<option [ngValue]="a.id">{{a.label}}</option>}</select></visual-campo>
     <visual-campo rotulo="Peso" identificador="questoes-filtro-peso">
       <select campoVisual id="questoes-filtro-peso" [(ngModel)]="peso" (ngModelChange)="closeDetail()" [disabled]="loading()" autocomplete="off">
         <option [ngValue]="null">Todos os pesos</option>
@@ -42,16 +43,16 @@
     @else {
       <visual-table-scroll><div class="tabela-visual tabela-rolagem" role="region" aria-label="Questões cadastradas — tabela com rolagem horizontal" tabindex="0"><table>
         <caption class="sr-only">Questões cadastradas pelo professor</caption>
-        <thead><tr><th scope="col">Questão</th><th scope="col">Matéria</th><th scope="col">Turma</th><th scope="col">Tipo</th><th scope="col">Peso</th><th scope="col">Ações</th></tr></thead>
+        <thead><tr><th scope="col" sortColumn="resumo" [sort]="sort" (sortChange)="closeDetail()">Questão</th><th scope="col" sortColumn="materia" [sort]="sort" (sortChange)="closeDetail()">Matéria</th><th scope="col" sortColumn="assunto" [sort]="sort" (sortChange)="closeDetail()">Assunto</th><th scope="col" sortColumn="turma" [sort]="sort" (sortChange)="closeDetail()">Turma</th><th scope="col" sortColumn="tipo" [sort]="sort" (sortChange)="closeDetail()">Tipo</th><th scope="col" sortColumn="peso" [sort]="sort" (sortChange)="closeDetail()">Peso</th><th scope="col">Ações</th></tr></thead>
         <tbody>
           @for (q of questoesDaPagina; track q.id) {
-            <tr><th nomeRegistro scope="row" class="coluna-texto"><span class="question-summary" [title]="q.resumo">{{ q.resumo }}</span></th><td>{{ q.materia }}</td>
+            <tr><th nomeRegistro scope="row" class="coluna-texto"><span class="question-summary" [title]="q.resumo">{{ q.resumo }}</span></th><td>{{ q.materia }}</td><td>{{q.assunto}}</td>
               <td>{{ q.ensino === 'F' ? 'Fundamental' : 'Médio' }} — {{ q.ano }}º ano — {{ q.abrangencia === 'ano' ? 'Todas as turmas' : 'Turmas ' + q.letras }}</td>
               <td>{{ q.tipo === 'objetiva' ? 'Objetiva' : 'Discursiva' }}</td><td>{{ q.peso.toFixed(1).replace('.', ',') }}</td>
               <td><div class="acoes-registro"><button botaoVisual variant="secondary" size="compact" type="button" [disabled]="opening() !== null && expandedId() !== q.id" [attr.aria-expanded]="expandedId() === q.id" [attr.aria-controls]="'questao-detalhe-' + q.id" (click)="open(q.id)">{{ expandedId() === q.id ? 'Recolher' : 'Visualizar' }}</button><a botaoVisual variant="edit" size="compact" [routerLink]="['/questoes', q.id, 'editar']">Editar</a></div></td>
             </tr>
             @if (expandedId() === q.id) {
-              <tr class="table-detail-row"><td colspan="6">
+              <tr class="table-detail-row"><td colspan="7">
                 <div class="table-detail-content" [id]="'questao-detalhe-' + q.id" role="region" aria-label="Visualização da questão">
                   @if (opening() === q.id) { <p role="status">Carregando questão…</p> }
                   @else if (detalheErro()) { <visual-aviso>{{ detalheErro() }}</visual-aviso> }
@@ -80,9 +81,9 @@
       } @else if (pendenciasFiltradas.length) {
         <visual-cartao density="compact" class="table-scroll-card"><visual-table-scroll><div class="tabela-visual tabela-rolagem" role="region" aria-label="Questões faltantes — tabela com rolagem horizontal" tabindex="0"><table>
           <caption class="sr-only">Questões faltantes por matéria, ensino, ano, turma e peso</caption>
-          <thead><tr><th scope="col">Matéria</th><th scope="col">Ensino e ano</th><th scope="col">Turma</th><th scope="col">Peso 0,5</th><th scope="col">Peso 1,0</th><th scope="col">Peso 1,5</th><th scope="col">Peso 2,0</th></tr></thead>
+          <thead><tr><th scope="col" sortColumn="materia" [sort]="pendingSort" (sortChange)="closeDetail()">Matéria</th><th scope="col" sortColumn="assunto" [sort]="pendingSort" (sortChange)="closeDetail()">Assunto a completar</th><th scope="col" sortColumn="ano" [sort]="pendingSort" (sortChange)="closeDetail()">Ensino e ano</th><th scope="col" sortColumn="turma" [sort]="pendingSort" (sortChange)="closeDetail()">Turma</th><th scope="col" sortColumn="0.5" [sort]="pendingSort" (sortChange)="closeDetail()">Peso 0,5</th><th scope="col" sortColumn="1" [sort]="pendingSort" (sortChange)="closeDetail()">Peso 1,0</th><th scope="col" sortColumn="1.5" [sort]="pendingSort" (sortChange)="closeDetail()">Peso 1,5</th><th scope="col" sortColumn="2" [sort]="pendingSort" (sortChange)="closeDetail()">Peso 2,0</th></tr></thead>
           <tbody>@for (p of pendenciasFiltradas; track p.materiaId + ':' + p.turmaId) {
-            <tr><th nomeRegistro scope="row">{{ p.materia }}</th><td>{{ p.ensino === 'F' ? 'Fundamental' : 'Médio' }} — {{ p.ano }}º ano</td><td>{{ p.letra }}</td>
+            <tr><th nomeRegistro scope="row">{{ p.materia }}</th><td>{{p.assunto??"Selecione ou crie um assunto"}}</td><td>{{ p.ensino === 'F' ? 'Fundamental' : 'Médio' }} — {{ p.ano }}º ano</td><td>{{ p.letra }}</td>
               @for (q of p.quantidades; track q.peso) {
                 <td><strong class="question-deficit" [class.complete]="!q.faltantes">{{ q.faltantes ? 'Faltam ' + q.faltantes : 'Mínimo atingido' }}</strong><small>{{ q.cadastradas }} de {{ q.minimo }} cadastradas</small></td>
               }

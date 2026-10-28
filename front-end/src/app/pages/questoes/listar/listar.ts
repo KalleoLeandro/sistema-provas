@@ -1,3 +1,5 @@
+import { ListSort } from '../../../design-system/list-sort';
+import { SortHeaderComponent } from '../../../design-system/sort-header';
 import { TableScrollComponent } from '../../../design-system/table-scroll';
 import { InfoTooltipComponent } from '../../../design-system/info-tooltip';
 import { Component, inject, OnInit, signal } from '@angular/core';
@@ -13,11 +15,14 @@ import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-listar-questoes',
-  imports: [TableScrollComponent, InfoTooltipComponent, TabsComponent, PaginationComponent, FormsModule, FieldComponent, InputDirective, RouterLink, AlertComponent, ButtonDirective, CardComponent, RecordNameDirective, QuestionPreviewComponent],
+  imports: [SortHeaderComponent,TableScrollComponent, InfoTooltipComponent, TabsComponent, PaginationComponent, FormsModule, FieldComponent, InputDirective, RouterLink, AlertComponent, ButtonDirective, CardComponent, RecordNameDirective, QuestionPreviewComponent],
   templateUrl: './listar.html',
   styleUrls: ['../../../design-system/list-filters.css', '../../../design-system/question-deficits.css', '../../../design-system/table-detail.css', '../../../design-system/screen-title.css'],
 })
 export class ListarQuestoesComponent implements OnInit {
+ readonly sort=new ListSort();
+ readonly pendingSort=new ListSort();
+
   private readonly api = inject(ApiService);
   readonly questoes = signal<QuestaoResumo[]>([]);
   readonly loading = signal(false);
@@ -33,6 +38,8 @@ export class ListarQuestoesComponent implements OnInit {
   aba = 'cadastradas';
   readonly abas = [{ id: 'cadastradas', label: 'Questões cadastradas' }, { id: 'faltantes', label: 'Questões que faltam cadastrar' }];
   changeTab(id: string) { this.aba = id; this.collapseDetail(); }
+  assuntoId:number|null=null;
+  get assuntosDisponiveis(){return [...new Map(this.questoes().filter(q=>q.assuntoId).map(q=>[q.assuntoId,{id:q.assuntoId,label:q.materia+' — '+q.assunto}])).values()].sort((a,b)=>a.label.localeCompare(b.label,'pt-BR'));}
   ensinoAno = '';
   turma = '';
   pagina = 1;
@@ -40,7 +47,7 @@ export class ListarQuestoesComponent implements OnInit {
   peso: number | null = null;
   tipo = '';
 
-  get filtrosAtivos() { return !!this.ensinoAno || !!this.turma || this.peso !== null || !!this.tipo; }
+  get filtrosAtivos() { return !!this.assuntoId || !!this.ensinoAno || !!this.turma || this.peso !== null || !!this.tipo; }
   get pesosDisponiveis() { return [...new Set(this.questoes().map(q => q.peso))].sort((a, b) => a - b); }
 
   get anosDisponiveis() {
@@ -57,15 +64,15 @@ export class ListarQuestoesComponent implements OnInit {
 
   get questoesFiltradas() {
     /* Questões do ano inteiro também pertencem a qualquer turma selecionada daquele ano. */
-    return this.questoes().filter(q => (!this.ensinoAno || q.ensino + ':' + q.ano === this.ensinoAno)
+    return this.sort.ordered(this.questoes().filter(q => (!this.ensinoAno || q.ensino + ':' + q.ano === this.ensinoAno)
       && (!this.turma || q.abrangencia === 'ano' || q.letras.split(',').some(l => l.trim() === this.turma))
       && (this.peso === null || q.peso === this.peso)
-      && (!this.tipo || q.tipo === this.tipo));
+      && (!this.tipo || q.tipo === this.tipo) && (!this.assuntoId||q.assuntoId===this.assuntoId)),(q,c)=>c==='assunto'?q.assunto:c==='resumo'?q.resumo:c==='turma'?[q.ensino,q.ano,q.abrangencia==='ano'?'Todas as turmas':q.letras]:c==='tipo'?(q.tipo==='objetiva'?'Objetiva':'Discursiva'):c==='peso'?q.peso:q.materia);
   }
 
   get pendenciasFiltradas() {
     /* As metas são por matéria/turma e peso, considerando questões objetivas e discursivas juntas. */
-    return this.pendencias().filter(p => (!this.ensinoAno || p.ensino + ':' + p.ano === this.ensinoAno) && (!this.turma || p.letra === this.turma));
+    return this.pendingSort.ordered(this.pendencias().filter(p => (!this.ensinoAno || p.ensino + ':' + p.ano === this.ensinoAno) && (!this.turma || p.letra === this.turma)),(p,c)=>c==='assunto'?p.assunto:c==='materia'?p.materia:c==='ano'?[p.ensino,p.ano]:c==='turma'?p.letra:p.quantidades.find(q=>q.peso===Number(c))?.faltantes??0);
   }
 
   get paginaAtual() { return Math.min(this.pagina, Math.max(1, Math.ceil(this.questoesFiltradas.length / this.tamanhoPagina))); }
@@ -91,7 +98,7 @@ export class ListarQuestoesComponent implements OnInit {
   changePage(page: number) { this.pagina=page; this.collapseDetail(); }
 
   /** Retorna à lista completa das questões do professor. */
-  resetFilters() { this.ensinoAno = ''; this.peso = null; this.tipo = ''; this.changeAno(); }
+  resetFilters() { this.assuntoId=null;this.ensinoAno = ''; this.peso = null; this.tipo = ''; this.changeAno(); }
 
   ngOnInit() { void this.load(); }
 

@@ -19,7 +19,7 @@ public class AlunoService {
     /**
      * Pesquisa alunos no escopo autorizado, contando e paginando somente os resultados filtrados.
      * @param professorId professor da sessão ou null para consulta administrativa
-     * @param filtro nome/CGM, status e turma
+     * @param filtro nome/CGM, status, turma e ordenação
      * @param pagina página iniciando em um
      * @param tamanho limite permitido
      * @return página filtrada
@@ -27,7 +27,8 @@ public class AlunoService {
     @Transactional(readOnly=true)
     public PaginaResponse<AlunoResponse> search(Long professorId,br.com.provas.model.request.AlunoFiltroRequest filtro,int pagina,int tamanho){
         /* A pesquisa é aplicada no banco inteiro, sem filtrar apenas os alunos da página atual.
-         * O escopo do professor permanece obrigatório tanto na contagem quanto na busca. */
+         * O escopo do professor permanece obrigatório tanto na contagem quanto na busca.
+         * A ordenação é aplicada a todos os registros filtrados antes do LIMIT/OFFSET. */
         if(pagina<1||!Set.of(15,25,50).contains(tamanho))throw new DefaultErrorException("Informe página positiva e 15, 25 ou 50 itens por página.");
         long total=repository.countFiltered(professorId,filtro);
         int atual=(int)Math.min(pagina,Math.max(1,(total+tamanho-1)/tamanho));

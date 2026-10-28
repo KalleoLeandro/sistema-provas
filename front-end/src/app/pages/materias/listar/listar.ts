@@ -1,3 +1,5 @@
+import { ListSort } from '../../../design-system/list-sort';
+import { SortHeaderComponent } from '../../../design-system/sort-header';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ConfirmDialogComponent } from '../../../design-system/confirm-dialog';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -21,7 +23,7 @@ const normalize = (value: string) =>
 
 @Component({
   selector: 'app-listar-materias',
-  imports: [
+  imports: [SortHeaderComponent,
     FormsModule,
     RouterLink,
     AlertComponent,
@@ -34,6 +36,8 @@ const normalize = (value: string) =>
   templateUrl: './listar.html',
 })
 export class ListarMateriasComponent implements OnInit {
+ readonly sort=new ListSort();
+
   private readonly api = inject(ApiService);
   readonly materias = signal<Materia[]>([]);
   readonly search = signal('');
@@ -73,7 +77,7 @@ export class ListarMateriasComponent implements OnInit {
   }
   readonly filtered = computed(() => {
     const query = normalize(this.search().trim());
-    return this.materias().filter((materia) => normalize(materia.nome).includes(query));
+    return this.sort.ordered(this.materias().filter((materia) => normalize(materia.nome).includes(query)),m=>m.nome);
   });
   ngOnInit() {
     void this.load();

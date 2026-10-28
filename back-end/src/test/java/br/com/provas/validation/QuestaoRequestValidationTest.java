@@ -10,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class QuestaoRequestValidationTest {
     @Test void missingFieldsAreIdentified() {
         try(var factory = Validation.buildDefaultValidatorFactory()) {
-            var campos = factory.getValidator().validate(new QuestaoRequest(null,null,null,null,null,null,null,null,null,null)).stream()
+            var campos = factory.getValidator().validate(new QuestaoRequest(null,null,null,null,null,null,null,null,null,null, 1L)).stream()
                 .map(v -> v.getPropertyPath().toString()).collect(java.util.stream.Collectors.toSet());
             assertTrue(campos.containsAll(java.util.List.of("materiaId","ensino","ano","abrangencia","turmas","tipo","peso","enunciado","alternativas")));
         }
     }
     @Test void invalidIdentifiersWeightAndAlternativeKeysAreRejected() {
         try(var factory = Validation.buildDefaultValidatorFactory()) {
-            var erros = factory.getValidator().validate(new QuestaoRequest(0L,"Z",0,"invalida",java.util.List.of(-1L),"invalida",new BigDecimal("0"),"Texto",Map.of("Z","Texto"),"Z"));
+            var erros = factory.getValidator().validate(new QuestaoRequest(0L,"Z",0,"invalida",java.util.List.of(-1L),"invalida",new BigDecimal("0"),"Texto",Map.of("Z","Texto"),"Z", 1L));
             assertTrue(erros.size() >= 6);
         }
     }

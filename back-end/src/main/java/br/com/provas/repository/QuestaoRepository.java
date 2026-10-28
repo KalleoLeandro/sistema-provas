@@ -25,9 +25,11 @@ public class QuestaoRepository {
             if (html != null) alternativas.put(letra, html);
         }
         return new Questao(rs.getLong("id"), rs.getLong("professor_id"), rs.getLong("materia_id"), rs.getString("ensino"), rs.getInt("ano"), rs.getString("abrangencia"),
-            rs.getString("tipo"), rs.getBigDecimal("peso"), rs.getString("enunciado"), alternativas, rs.getString("resposta_correta"));
+            rs.getString("tipo"), rs.getBigDecimal("peso"), rs.getString("enunciado"), alternativas, rs.getString("resposta_correta"),rs.getLong("assunto_id"));
     };
 
+    public boolean hasSubject(Long assunto,Long materia){return !namedParameterJdbcTemplate.query("SELECT id FROM assuntos WHERE id=:assunto AND materia_id=:materia FOR SHARE",new MapSqlParameterSource().addValue("assunto",assunto).addValue("materia",materia),(rs,n)->rs.getLong("id")).isEmpty();}
+    public String subjectName(Long id){if(id==null)return null;return namedParameterJdbcTemplate.query("SELECT nome FROM assuntos WHERE id=:id",new MapSqlParameterSource().addValue("id",id),(rs,n)->rs.getString("nome")).stream().findFirst().orElse(null);}
     public boolean hasActiveYear(Long professorId, Long materiaId, String ensino, Integer ano) {
         String sql = """
             SELECT pmt.professor_id FROM professores_materias_turmas pmt
@@ -85,16 +87,16 @@ public class QuestaoRepository {
     }
 
     public Questao save(Long professorId, QuestaoRequest request) {
-        var params = new MapSqlParameterSource().addValue("professor_id", professorId).addValue("materia_id", request.materiaId())
+        var params = new MapSqlParameterSource().addValue("professor_id", professorId).addValue("assunto_id",request.assuntoId()).addValue("materia_id", request.materiaId())
             .addValue("ensino", request.ensino()).addValue("ano", request.ano()).addValue("abrangencia", request.abrangencia()).addValue("tipo", request.tipo()).addValue("peso", request.peso())
             .addValue("enunciado", request.enunciado()).addValue("resposta_correta", request.respostaCorreta());
         for (String letra : List.of("A", "B", "C", "D", "E")) {
             params.addValue("alternativa_" + letra.toLowerCase(Locale.ROOT), request.alternativas().get(letra));
         }
         String sql = """
-            INSERT INTO questoes (professor_id, materia_id, ensino, ano, abrangencia, tipo, peso, enunciado,
+            INSERT INTO questoes (professor_id, assunto_id, materia_id, ensino, ano, abrangencia, tipo, peso, enunciado,
               alternativa_a, alternativa_b, alternativa_c, alternativa_d, alternativa_e, resposta_correta)
-            VALUES (:professor_id, :materia_id, :ensino, :ano, :abrangencia, :tipo, :peso, :enunciado,
+            VALUES (:professor_id, :assunto_id, :materia_id, :ensino, :ano, :abrangencia, :tipo, :peso, :enunciado,
               :alternativa_a, :alternativa_b, :alternativa_c, :alternativa_d, :alternativa_e, :resposta_correta)
             """;
         var keyHolder = new GeneratedKeyHolder();
@@ -130,7 +132,7 @@ public class QuestaoRepository {
     public void updateUnusedVersion(Long id, Long versaoId) {
         String sql = """
             UPDATE questoes_versoes v JOIN questoes q ON q.id=v.questao_id
-            SET v.materia_id=q.materia_id, v.ensino=q.ensino, v.ano=q.ano, v.abrangencia=q.abrangencia,
+            SET v.assunto_id=q.assunto_id, v.materia_id=q.materia_id, v.ensino=q.ensino, v.ano=q.ano, v.abrangencia=q.abrangencia,
               v.turmas=COALESCE((SELECT JSON_ARRAYAGG(qt.turma_id) FROM questoes_turmas qt WHERE qt.questao_id=q.id), JSON_ARRAY()),
               v.tipo=q.tipo, v.peso=q.peso, v.enunciado=q.enunciado, v.alternativa_a=q.alternativa_a,
               v.alternativa_b=q.alternativa_b, v.alternativa_c=q.alternativa_c, v.alternativa_d=q.alternativa_d,
@@ -143,10 +145,10 @@ public class QuestaoRepository {
 
     public void saveVersion(Long id) {
         String sql = """
-            INSERT INTO questoes_versoes (questao_id, numero, materia_id, ensino, ano, abrangencia, turmas, tipo, peso, enunciado,
+            INSERT INTO questoes_versoes (questao_id, numero, assunto_id, materia_id, ensino, ano, abrangencia, turmas, tipo, peso, enunciado,
               alternativa_a, alternativa_b, alternativa_c, alternativa_d, alternativa_e, resposta_correta)
             SELECT q.id, (SELECT COALESCE(MAX(v.numero),0)+1 FROM questoes_versoes v WHERE v.questao_id=q.id),
-              q.materia_id, q.ensino, q.ano, q.abrangencia,
+              q.assunto_id, q.materia_id, q.ensino, q.ano, q.abrangencia,
               COALESCE((SELECT JSON_ARRAYAGG(qt.turma_id) FROM questoes_turmas qt WHERE qt.questao_id=q.id), JSON_ARRAY()),
               q.tipo, q.peso, q.enunciado, q.alternativa_a, q.alternativa_b, q.alternativa_c, q.alternativa_d, q.alternativa_e, q.resposta_correta
             FROM questoes q WHERE q.id=:id
@@ -156,12 +158,12 @@ public class QuestaoRepository {
 
     public Questao update(Long id, Long professorId, QuestaoRequest request) {
         var params = new MapSqlParameterSource().addValue("id",id).addValue("professor_id",professorId)
-            .addValue("materia_id",request.materiaId()).addValue("ensino",request.ensino()).addValue("ano",request.ano())
+            .addValue("assunto_id",request.assuntoId()).addValue("materia_id",request.materiaId()).addValue("ensino",request.ensino()).addValue("ano",request.ano())
             .addValue("abrangencia",request.abrangencia()).addValue("tipo",request.tipo()).addValue("peso",request.peso())
             .addValue("enunciado",request.enunciado()).addValue("resposta_correta",request.respostaCorreta());
         for (String letra : List.of("A","B","C","D","E")) params.addValue("alternativa_"+letra.toLowerCase(Locale.ROOT), request.alternativas().get(letra));
         namedParameterJdbcTemplate.update("""
-            UPDATE questoes SET materia_id=:materia_id, ensino=:ensino, ano=:ano, abrangencia=:abrangencia,
+            UPDATE questoes SET assunto_id=:assunto_id, materia_id=:materia_id, ensino=:ensino, ano=:ano, abrangencia=:abrangencia,
               tipo=:tipo, peso=:peso, enunciado=:enunciado, alternativa_a=:alternativa_a, alternativa_b=:alternativa_b,
               alternativa_c=:alternativa_c, alternativa_d=:alternativa_d, alternativa_e=:alternativa_e, resposta_correta=:resposta_correta
             WHERE id=:id AND professor_id=:professor_id
@@ -181,36 +183,40 @@ public class QuestaoRepository {
 
     public List<QuestaoResumo> findAll(Long professorId) {
         String sql = """
-            SELECT q.id, m.nome AS materia, q.ensino, q.ano, q.abrangencia, q.tipo, q.peso,
+            SELECT q.id, q.assunto_id, a.nome AS assunto, m.nome AS materia, q.ensino, q.ano, q.abrangencia, q.tipo, q.peso,
               (SELECT GROUP_CONCAT(t.letra ORDER BY t.letra SEPARATOR ', ') FROM questoes_turmas qt JOIN turmas t ON t.id = qt.turma_id WHERE qt.questao_id = q.id) AS letras,
               LEFT(REGEXP_REPLACE(REGEXP_REPLACE(q.enunciado, '<(script|style|svg)[^>]*>.*?</(script|style|svg)>|<!--.*?-->', ' ', 1, 0, 'in'), '<[^>]*>', ' '), 1024) AS enunciado
-            FROM questoes q JOIN materias m ON m.id = q.materia_id
+            FROM questoes q JOIN assuntos a ON a.id=q.assunto_id JOIN materias m ON m.id = q.materia_id
             WHERE q.professor_id = :professor_id ORDER BY q.id DESC
             """;
         RowMapper<QuestaoResumo> mapper = (rs, rowNum) -> new QuestaoResumo(rs.getLong("id"), rs.getString("materia"),
-            rs.getString("ensino"), rs.getInt("ano"), rs.getString("letras"), rs.getString("abrangencia"), rs.getString("tipo"), rs.getBigDecimal("peso"), rs.getString("enunciado"));
+            rs.getString("ensino"), rs.getInt("ano"), rs.getString("letras"), rs.getString("abrangencia"), rs.getString("tipo"), rs.getBigDecimal("peso"), rs.getString("enunciado"),rs.getLong("assunto_id"),rs.getString("assunto"));
         return namedParameterJdbcTemplate.query(sql, new MapSqlParameterSource().addValue("professor_id", professorId), mapper);
     }
     public List<QuantidadeQuestoesTurma> countByAssignedClass(Long professorId) {
         String sql = """
-            SELECT m.id AS materia_id, m.nome AS materia, t.id AS turma_id, t.ensino, t.ano, t.letra,
-              COALESCE(SUM(q.peso=0.5),0) AS peso05, COALESCE(SUM(q.peso=1.0),0) AS peso10,
-              COALESCE(SUM(q.peso=1.5),0) AS peso15, COALESCE(SUM(q.peso=2.0),0) AS peso20
-            FROM professores_materias_turmas pmt
-            JOIN professores p ON p.id=pmt.professor_id AND p.ativo=TRUE
-            JOIN materias m ON m.id=pmt.materia_id
-            JOIN turmas t ON t.id=pmt.turma_id
-            LEFT JOIN questoes q ON q.professor_id=pmt.professor_id AND q.materia_id=pmt.materia_id
-              AND q.ensino=t.ensino AND q.ano=t.ano
-              AND (q.abrangencia='ano' OR EXISTS (
-                SELECT 1 FROM questoes_turmas qt WHERE qt.questao_id=q.id AND qt.turma_id=t.id))
-            WHERE pmt.professor_id=:professor_id AND pmt.ativo=TRUE
-            GROUP BY m.id,m.nome,t.id,t.ensino,t.ano,t.letra
-            ORDER BY m.nome,t.ensino,t.ano,t.letra
+            WITH estoque AS (
+              SELECT m.id AS materia_id,m.nome AS materia,t.id AS turma_id,t.ensino,t.ano,t.letra,
+                q.assunto_id,a.nome AS assunto,
+                COALESCE(SUM(q.peso=0.5),0) AS peso05,COALESCE(SUM(q.peso=1.0),0) AS peso10,
+                COALESCE(SUM(q.peso=1.5),0) AS peso15,COALESCE(SUM(q.peso=2.0),0) AS peso20
+              FROM professores_materias_turmas pmt JOIN professores p ON p.id=pmt.professor_id AND p.ativo=TRUE
+              JOIN materias m ON m.id=pmt.materia_id JOIN turmas t ON t.id=pmt.turma_id
+              LEFT JOIN questoes q ON q.professor_id=pmt.professor_id AND q.materia_id=pmt.materia_id
+                AND q.ensino=t.ensino AND q.ano=t.ano
+                AND (q.abrangencia='ano' OR EXISTS(SELECT 1 FROM questoes_turmas qt WHERE qt.questao_id=q.id AND qt.turma_id=t.id))
+              LEFT JOIN assuntos a ON a.id=q.assunto_id
+              WHERE pmt.professor_id=:professor_id AND pmt.ativo=TRUE
+              GROUP BY m.id,m.nome,t.id,t.ensino,t.ano,t.letra,q.assunto_id,a.nome
+            ), prioridade AS (
+              SELECT estoque.*,ROW_NUMBER() OVER(PARTITION BY materia_id,turma_id ORDER BY
+                GREATEST(0,4-peso05)+GREATEST(0,3-peso10)+GREATEST(0,2-peso15)+GREATEST(0,1-peso20),assunto_id) AS ordem
+              FROM estoque
+            ) SELECT * FROM prioridade WHERE ordem=1 ORDER BY materia,ensino,ano,letra
             """;
         RowMapper<QuantidadeQuestoesTurma> mapper = (rs,n) -> new QuantidadeQuestoesTurma(
             rs.getLong("materia_id"),rs.getString("materia"),rs.getLong("turma_id"),rs.getString("ensino"),rs.getInt("ano"),rs.getString("letra"),
-            rs.getInt("peso05"),rs.getInt("peso10"),rs.getInt("peso15"),rs.getInt("peso20"));
+            rs.getInt("peso05"),rs.getInt("peso10"),rs.getInt("peso15"),rs.getInt("peso20"),rs.getObject("assunto_id",Long.class),rs.getString("assunto"));
         return namedParameterJdbcTemplate.query(sql,new MapSqlParameterSource().addValue("professor_id",professorId),mapper);
     }
 

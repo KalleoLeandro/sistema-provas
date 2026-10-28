@@ -203,3 +203,23 @@ Alunos aceitam M (Matriculado), T (Transferido), R (Remanejado) e D (Desistente)
 As listas administrativas de professores e alunos oferecem nome/login ou nome/CGM, status e turma. A consulta de alunos do professor mantém o escopo de suas turmas. A pesquisa de alunos é feita no banco antes da contagem e paginação.
 
 Administradores podem editar turmas pela lista e excluir após confirmação. `GET/PUT/DELETE /turmas/{id}` validam o identificador; edição mantém o ID e rejeita combinações duplicadas de ensino/ano/letra. Exclusão bloqueia qualquer aluno ou professor vinculado, inclusive não matriculados e professores inativos. Questões e provas referenciadas também impedem remoção para preservar os dados.
+
+### Ordenação das listas
+
+Clique no cabeçalho de uma coluna para ordenar de forma ascendente; clique novamente para descendente. A seta indica a ordem ativa. Trocar a coluna inicia em ascendente. Disponível nas listas de administradores, professores, alunos, matérias, turmas, questões cadastradas/faltantes, provas, correções e relatórios. Campos de ações não ordenam. Relatórios exportam as linhas na ordem escolhida.
+
+Listas paginadas pelo servidor enviam `ordenacao` e `direcao=ASC|DESC`, mantêm filtros e voltam à primeira página ao trocar a ordem. O backend resolve apenas colunas permitidas, aplica ORDER BY antes de LIMIT/OFFSET e usa ID para desempate. Número de aluno vazio fica ao final em ambos os sentidos. Questões e demais listas carregadas integralmente ordenam o conjunto filtrado antes de separar as páginas no frontend. Componentes compartilhados: `ListSort` e `SortHeaderComponent` no design system, com demonstração no Storybook.
+
+### Alunos considerados nas estatísticas
+
+Transferidos (T) e desistentes (D) não entram nos cards de participação, no total por situação das provas, nas médias gerais ou por turma e nos resumos dos relatórios. Matriculados (M) e remanejados (R) continuam considerados. O status atual é aplicado inclusive às provas já entregues. Listas cadastrais e relatórios preservam as linhas e o histórico, com aviso de que os alunos excluídos não participam dos totais.
+
+### Assuntos das questões e provas
+
+Cada questão deve ter exatamente um assunto da matéria. O formulário sugere assuntos semelhantes ao digitar e permite criar um assunto sem sair da página; a seleção aparece como chip. O catálogo é compartilhado por matéria, ignora diferenças de caixa e acento para evitar duplicações e só pode ser consultado/criado pelo professor com atribuição ativa na matéria. `GET/POST /professor/assuntos` recebe matéria e busca/nome. Questões enviam `assuntoId` obrigatório; a lista oferece filtro e ordenação por assunto.
+
+A liberação exige `assuntos`, uma lista de 1 a 10 IDs da matéria. Todos os assuntos selecionados devem aparecer ao menos uma vez nas dez questões. Pelo menos um dos assuntos selecionados precisa ter, sozinho, 4 questões de peso 0,5; 3 de 1,0; 2 de 1,5; e 1 de 2,0, válidas para o professor/matéria/ano/turma. Somar assuntos incompletos não satisfaz esse mínimo. O cadastro de questões pode ser gradual. `GET /professor/provas/turmas/{turmaId}/assuntos?materiaId=...` mostra o estoque e a completude por assunto antes da liberação.
+
+O sorteio usa associação entre assuntos e vagas dos pesos para garantir cobertura sem violar as capacidades. Combinações impossíveis são recusadas ao liberar/editar e novamente ao iniciar. A prova mantém 4×0,5 + 3×1,0 + 2×1,5 + 1×2,0; a primeira questão vale 0,5 e a de 2,0 fica entre a sétima e a décima posições. Alterar a liberação não refaz tentativas iniciadas. O card de questões faltantes considera o assunto mais próximo de completar o mínimo por matéria/turma.
+
+A estrutura está em `database/init.sql`. Na atualização da base de desenvolvimento, os itens anteriores são classificados em Geral; isso não seleciona assunto automaticamente nos novos formulários.

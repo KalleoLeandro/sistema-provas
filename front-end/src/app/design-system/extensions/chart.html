@@ -1,2 +1,1 @@
 <div class="ds-chart"><canvas #canvas role="img" [attr.aria-label]="label"></canvas></div>
-<details><summary>Ver dados do gráfico</summary><table><thead><tr><th scope="col">Categoria</th><th scope="col">Valor</th></tr></thead><tbody>@for(name of labels;track $index){<tr><th scope="row">{{name}}</th><td>{{values[$index]??'—'}}</td></tr>}</tbody></table></details>

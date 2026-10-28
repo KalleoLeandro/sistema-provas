@@ -269,3 +269,24 @@ CREATE TABLE IF NOT EXISTS provas_tentativas_questoes (
  CONSTRAINT fk_tentativa_questao_versao FOREIGN KEY(versao_id) REFERENCES questoes_versoes(id),
  CONSTRAINT ck_tentativa_numero CHECK(numero BETWEEN 1 AND 10)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Assuntos de questões e provas
+
+CREATE TABLE assuntos (
+ id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,materia_id BIGINT UNSIGNED NOT NULL,nome VARCHAR(120) NOT NULL,
+ PRIMARY KEY(id),UNIQUE KEY uk_assunto_nome(materia_id,nome),UNIQUE KEY uk_assunto_materia(id,materia_id),
+ CONSTRAINT fk_assunto_materia FOREIGN KEY(materia_id) REFERENCES materias(id)
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+ALTER TABLE questoes ADD COLUMN assunto_id BIGINT UNSIGNED NULL;
+ALTER TABLE questoes_versoes ADD COLUMN assunto_id BIGINT UNSIGNED NULL;
+CREATE TABLE provas_liberacoes_assuntos (
+ liberacao_id BIGINT UNSIGNED NOT NULL,assunto_id BIGINT UNSIGNED NOT NULL,PRIMARY KEY(liberacao_id,assunto_id),
+ CONSTRAINT fk_liberacao_assunto_liberacao FOREIGN KEY(liberacao_id) REFERENCES provas_liberacoes(id) ON DELETE CASCADE,
+ CONSTRAINT fk_liberacao_assunto_assunto FOREIGN KEY(assunto_id) REFERENCES assuntos(id)
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+INSERT INTO assuntos(materia_id,nome) SELECT DISTINCT materia_id,'Geral' FROM (SELECT materia_id FROM questoes UNION SELECT materia_id FROM provas_liberacoes UNION SELECT materia_id FROM questoes_versoes) materias_existentes;
+UPDATE questoes q JOIN assuntos a ON a.materia_id=q.materia_id AND a.nome='Geral' SET q.assunto_id=a.id;
+UPDATE questoes_versoes q JOIN assuntos a ON a.materia_id=q.materia_id AND a.nome='Geral' SET q.assunto_id=a.id;
+INSERT INTO provas_liberacoes_assuntos(liberacao_id,assunto_id) SELECT l.id,a.id FROM provas_liberacoes l JOIN assuntos a ON a.materia_id=l.materia_id AND a.nome='Geral';
+ALTER TABLE questoes MODIFY assunto_id BIGINT UNSIGNED NOT NULL,ADD CONSTRAINT fk_questao_assunto FOREIGN KEY(assunto_id,materia_id) REFERENCES assuntos(id,materia_id),ADD INDEX ix_questao_sorteio(professor_id,materia_id,ensino,ano,assunto_id,peso);
+ALTER TABLE questoes_versoes MODIFY assunto_id BIGINT UNSIGNED NOT NULL,ADD CONSTRAINT fk_versao_assunto FOREIGN KEY(assunto_id,materia_id) REFERENCES assuntos(id,materia_id);

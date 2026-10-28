@@ -80,4 +80,16 @@ describe('Redirecionamento após login', () => {
     await f.whenStable();f.nativeElement.querySelector('form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));await f.whenStable();
     expect(login).toHaveBeenCalledWith('00123','','aluno');expect(navigateByUrl).toHaveBeenCalledWith('/aluno/provas');expect(f.componentInstance.cgm).toBe('');
   });
+
+  it('não marca erro ao navegar com Tab ou digitar antes de submeter',async()=>{
+    const f=TestBed.createComponent(LoginComponent);await f.whenStable();
+    (f.nativeElement.querySelectorAll('.perfil')[1] as HTMLButtonElement).click();await f.whenStable();
+    const usuario=f.nativeElement.querySelector('#entrada-usuario') as HTMLInputElement;
+    const senha=f.nativeElement.querySelector('#entrada-senha') as HTMLInputElement;
+    usuario.value='professor';usuario.dispatchEvent(new Event('input'));usuario.dispatchEvent(new Event('blur'));senha.focus();
+    senha.value='123';senha.dispatchEvent(new Event('input'));senha.dispatchEvent(new Event('blur'));await f.whenStable();
+    expect(senha.getAttribute('aria-invalid')).toBeNull();expect(f.nativeElement.querySelector('#entrada-senha-erro')).toBeNull();expect(f.nativeElement.querySelector('visual-aviso')).toBeNull();expect(login).not.toHaveBeenCalled();
+    (f.nativeElement.querySelector('[type=submit]') as HTMLButtonElement).click();await f.whenStable();
+    expect(senha.getAttribute('aria-invalid')).toBe('true');expect(f.nativeElement.querySelector('#entrada-senha-erro').textContent).not.toBe('');expect(login).not.toHaveBeenCalled();
+  });
 });

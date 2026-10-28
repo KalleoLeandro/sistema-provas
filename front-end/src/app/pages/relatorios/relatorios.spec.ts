@@ -26,4 +26,15 @@ describe('Relatórios configuráveis',()=>{
   const c=TestBed.createComponent(RelatoriosComponent).componentInstance;c.carregado.set(true);c.selecionados={};
   const print=vi.spyOn(window,'print').mockImplementation(()=>{});c.export();expect(print).not.toHaveBeenCalled();print.mockRestore();
  });
+
+ it('exclui T e D dos totais e médias sem remover o histórico da lista ou CSV',()=>{
+  const c=TestBed.createComponent(RelatoriosComponent).componentInstance;c.modo='resultados';c.selecionados={nome:true,status:true,nota:true};
+  c.resultados.set((['M','R','T','D'] as const).map((status,i)=>({alunoId:i+1,nome:'Aluno '+status,numero:i+1,cgm:'00'+i,status,tentativaId:i+1,iniciadaEm:null,entregueEm:'2026-10-27T12:00:00Z',pendentes:0,nota:[10,4,0,2][i]})));
+  expect(c.totalEstatistico).toBe(2);expect(c.entregues.length).toBe(2);expect(c.corrigidas.length).toBe(2);expect(c.media).toBe(7);
+  expect(c.linhas.length).toBe(4);expect(c.csv()).toContain('Transferido');expect(c.csv()).toContain('Desistente');
+ });
+ it('mantém a média nula quando somente transferidos e desistentes têm notas',()=>{
+  const c=TestBed.createComponent(RelatoriosComponent).componentInstance;c.modo='resultados';c.resultados.set([{alunoId:1,nome:'Ana',numero:1,cgm:'001',status:'D',tentativaId:1,iniciadaEm:null,entregueEm:'2026-10-27T12:00:00Z',pendentes:0,nota:10}]);
+  expect(c.totalEstatistico).toBe(0);expect(c.media).toBeNull();
+ });
 });

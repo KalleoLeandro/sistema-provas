@@ -35,13 +35,21 @@ public class ProvaAlunoService {
      * @return lista paginada e totais independentes da página atual
      */
     @Transactional(isolation=org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
-    public ProvasAlunoResponse findAvailable(Long alunoId,int pagina,int tamanho){
+    public ProvasAlunoResponse findAvailable(Long alunoId,int pagina,int tamanho){return findAvailable(alunoId,pagina,tamanho,new br.com.provas.model.request.OrdenacaoRequest(null,null));}
+ /** Consulta a lista inteira na ordem escolhida antes de aplicar a página solicitada.
+  * @param order coluna e direção validadas; preserva a ordem padrão quando ausente
+  * @return página no mesmo escopo autorizado, sem modificar os filtros
+  */
+ @Transactional(isolation=org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
+ public ProvasAlunoResponse findAvailable(Long alunoId,int pagina,int tamanho,br.com.provas.model.request.OrdenacaoRequest order){
+ /* A coluna é resolvida por uma lista permitida no repository, sem interpolar entrada livre no SQL. */
+ 
         /* O intervalo é validado no servidor com o mesmo instante nas duas consultas. */
         if(pagina<1 || !Set.of(15,25,50).contains(tamanho))throw new DefaultErrorException("Informe página positiva e 15, 25 ou 50 itens por página.");
         execution.expireForStudent(alunoId);
         var agora=clock.instant();long total=repository.countAvailable(alunoId,agora);
         int atual=(int)Math.min(pagina,Math.max(1,(total+tamanho-1)/tamanho));
-        var provas=new PaginaResponse<>(repository.findAvailable(alunoId,agora,tamanho,(long)(atual-1)*tamanho),total,atual,tamanho);
+        var provas=new PaginaResponse<>((order.ordenacao()==null?repository.findAvailable(alunoId,agora,tamanho,(long)(atual-1)*tamanho):repository.findAvailable(alunoId,agora,tamanho,(long)(atual-1)*tamanho,order)),total,atual,tamanho);
         /* O progresso usa entregas persistidas, incluindo provas encerradas automaticamente. */
         return new ProvasAlunoResponse(provas,total,repository.countCompleted(alunoId,agora));
     }

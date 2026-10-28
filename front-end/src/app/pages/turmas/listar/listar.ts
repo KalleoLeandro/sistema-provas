@@ -1,3 +1,5 @@
+import { ListSort } from '../../../design-system/list-sort';
+import { SortHeaderComponent } from '../../../design-system/sort-header';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ConfirmDialogComponent } from '../../../design-system/confirm-dialog';
 import { Component, OnInit, inject, signal } from '@angular/core';
@@ -12,10 +14,13 @@ import {
 } from '../../../design-system/components';
 @Component({
   selector: 'app-listar-turmas',
-  imports: [ConfirmDialogComponent,RouterLink, AlertComponent, ButtonDirective, CardComponent, RecordNameDirective],
+  imports: [SortHeaderComponent,ConfirmDialogComponent,RouterLink, AlertComponent, ButtonDirective, CardComponent, RecordNameDirective],
   templateUrl: './listar.html',
 })
 export class ListarTurmasComponent implements OnInit {
+ readonly sort=new ListSort();
+ get turmasOrdenadas(){return this.sort.ordered(this.turmas(),(t,c)=>c==='ensino'?(t.ensino==='F'?'Fundamental':'Médio'):[t.ano,t.letra]);}
+
   private readonly api = inject(ApiService);
   readonly turmas = signal<Turma[]>([]);
   readonly loading = signal(true);

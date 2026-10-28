@@ -84,8 +84,8 @@ describe('Lista de questões', () => {
   it('alterna as abas e filtra pendências por ensino, ano e turma', async () => {
     const fixture = TestBed.createComponent(ListarQuestoesComponent); await fixture.whenStable();
     const c=fixture.componentInstance;
-    c.pendencias.set([{materiaId:6,materia:'Matemática',turmaId:5,ensino:'F',ano:1,letra:'A',quantidades:[{peso:0.5,minimo:4,cadastradas:1,faltantes:3}]},
-      {materiaId:6,materia:'Matemática',turmaId:13,ensino:'F',ano:2,letra:'B',quantidades:[{peso:0.5,minimo:4,cadastradas:0,faltantes:4}]}]);
+    c.pendencias.set([{assuntoId:1,assunto:'Frações',materiaId:6,materia:'Matemática',turmaId:5,ensino:'F',ano:1,letra:'A',quantidades:[{peso:0.5,minimo:4,cadastradas:1,faltantes:3}]},
+      {assuntoId:1,assunto:'Frações',materiaId:6,materia:'Matemática',turmaId:13,ensino:'F',ano:2,letra:'B',quantidades:[{peso:0.5,minimo:4,cadastradas:0,faltantes:4}]}]);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.question-deficits')).toBeNull();
     (fixture.nativeElement.querySelector('#questoes-tab-faltantes') as HTMLButtonElement).click(); await fixture.whenStable();
@@ -115,7 +115,7 @@ describe('Lista de questões', () => {
     const fixture=TestBed.createComponent(ListarQuestoesComponent); await fixture.whenStable();
     const c=fixture.componentInstance;
     c.destinos.set([{materiaId:6,materia:'Matemática',turmaId:5,ensino:'F',ano:1,letra:'A'}]);
-    c.questoes.set([{id:10,materia:'Matemática',ensino:'F',ano:1,letras:'B',abrangencia:'turmas',tipo:'discursiva',peso:1,resumo:'Antiga'}]);
+    c.questoes.set([{assuntoId:1,assunto:'Frações',id:10,materia:'Matemática',ensino:'F',ano:1,letras:'B',abrangencia:'turmas',tipo:'discursiva',peso:1,resumo:'Antiga'}]);
     c.ensinoAno='F:1';expect(c.turmasDisponiveis).toEqual(['A']);
   });
 

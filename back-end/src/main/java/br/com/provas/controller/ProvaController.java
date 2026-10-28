@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.*;
 public class ProvaController {
     private final ProvaService service;
     public ProvaController(ProvaService service) { this.service=service; }
+    @GetMapping("/turmas/{turmaId}/assuntos")
+    public java.util.List<AssuntoProvaResponse> subjectOptions(@AuthenticationPrincipal LoginResponse usuario,@PathVariable @Positive Long turmaId,@RequestParam @Positive Long materiaId){return service.subjectOptions(usuario.id(),turmaId,materiaId);}
     @GetMapping("/turmas/{turmaId}")
     public PaginaResponse<LiberacaoProvaResponse> findAll(@AuthenticationPrincipal LoginResponse usuario,
         @PathVariable @Positive(message="Selecione uma turma válida.") Long turmaId,
         @RequestParam(defaultValue="1") @Min(value=1,message="A página deve ser positiva.") int pagina,
-        @RequestParam(defaultValue="15") @Pattern(regexp="15|25|50",message="Selecione 15, 25 ou 50 itens por página.") String tamanho) {
-        return service.findAll(usuario.id(),turmaId,pagina,Integer.parseInt(tamanho));
+        @RequestParam(defaultValue="15") @Pattern(regexp="15|25|50",message="Selecione 15, 25 ou 50 itens por página.") String tamanho,@jakarta.validation.Valid @ModelAttribute br.com.provas.model.request.OrdenacaoRequest order){
+        return service.findAll(usuario.id(),turmaId,pagina,Integer.parseInt(tamanho),order);
     }
     @PostMapping("/turmas/{turmaId}/liberacoes")
     @ResponseStatus(HttpStatus.CREATED)
@@ -30,8 +32,8 @@ public class ProvaController {
     public PaginaResponse<LiberacaoProvaResponse> findByStudent(@AuthenticationPrincipal LoginResponse usuario,
         @PathVariable @Positive(message="Selecione um aluno válido.") Long alunoId,
         @RequestParam(defaultValue="1") @Min(value=1,message="A página deve ser positiva.") int pagina,
-        @RequestParam(defaultValue="15") @Pattern(regexp="15|25|50",message="Selecione 15, 25 ou 50 itens por página.") String tamanho) {
-        return service.findByStudent(usuario.id(),alunoId,pagina,Integer.parseInt(tamanho));
+        @RequestParam(defaultValue="15") @Pattern(regexp="15|25|50",message="Selecione 15, 25 ou 50 itens por página.") String tamanho,@jakarta.validation.Valid @ModelAttribute br.com.provas.model.request.OrdenacaoRequest order){
+        return service.findByStudent(usuario.id(),alunoId,pagina,Integer.parseInt(tamanho),order);
     }
     @PutMapping("/turmas/{turmaId}/liberacoes/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

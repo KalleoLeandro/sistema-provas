@@ -7,7 +7,7 @@ import { vi } from 'vitest';
 import { ApiService } from '../../../services/api.service';
 import { CadastrarQuestoesComponent } from './cadastrar';
 
-const response = { id: 101, versaoId: 1001, revisao: 1, materiaId: 6, ensino: 'F', ano: 1, abrangencia: 'turmas', turmas: [{ id: 5, ensino: 'F', ano: 1, letra: 'A' }], tipo: 'discursiva', peso: 1,
+const response = { assuntoId:1,assunto:'Frações',id: 101, versaoId: 1001, revisao: 1, materiaId: 6, ensino: 'F', ano: 1, abrangencia: 'turmas', turmas: [{ id: 5, ensino: 'F', ano: 1, letra: 'A' }], tipo: 'discursiva', peso: 1,
   enunciado: '<p>Explique sua resposta.</p>', alternativas: {}, respostaCorreta: null };
 describe('Cadastro múltiplo de questões', () => {
   const get = vi.fn(); const post = vi.fn();
@@ -18,7 +18,7 @@ describe('Cadastro múltiplo de questões', () => {
   });
   async function validForm() {
     const fixture = TestBed.createComponent(CadastrarQuestoesComponent); await fixture.whenStable();
-    const c = fixture.componentInstance; c.materiaId = 6; c.anoSelecionado = 'F:1'; c.turmasSelecionadas = [5]; fixture.detectChanges(); await fixture.whenStable();
+    const c = fixture.componentInstance; c.materiaId = 6;c.assuntos=[{id:1,materiaId:6,nome:'Frações'}];c.assuntoSelecionado=[1]; c.anoSelecionado = 'F:1'; c.turmasSelecionadas = [5]; fixture.detectChanges(); await fixture.whenStable();
     const tipo = fixture.nativeElement.querySelector('select[id^="tipo-"]') as HTMLSelectElement;
     tipo.value = 'discursiva'; tipo.dispatchEvent(new Event('change')); await fixture.whenStable();
     const form = fixture.debugElement.query(By.directive(NgForm)).injector.get(NgForm);
@@ -36,7 +36,7 @@ describe('Cadastro múltiplo de questões', () => {
   it('grava, recolhe em accordion e mantém a matéria/turma para a próxima questão', async () => {
     const { fixture, form } = await validForm();
     await fixture.componentInstance.save(form, true); await fixture.whenStable();
-    expect(post).toHaveBeenCalledWith('/questoes', { materiaId: 6, ensino: 'F', ano: 1, abrangencia: 'turmas', turmas: [5], tipo: 'discursiva', peso: 1,
+    expect(post).toHaveBeenCalledWith('/questoes', { assuntoId:1,materiaId: 6, ensino: 'F', ano: 1, abrangencia: 'turmas', turmas: [5], tipo: 'discursiva', peso: 1,
       enunciado: response.enunciado, alternativas: {}, respostaCorreta: null });
     const accordion = fixture.nativeElement.querySelector('visual-accordion details') as HTMLDetailsElement;
     expect(accordion).toBeTruthy(); expect(accordion.open).toBe(false);
@@ -120,12 +120,13 @@ describe('Cadastro múltiplo de questões', () => {
 
   it('carrega a questão existente e salva com PUT e a versão lida, sem duplicar cadastro', async () => {
     TestBed.overrideProvider(ActivatedRoute, { useValue: { snapshot: { paramMap: { get: () => '101' } } } });
-    get.mockImplementation((path: string) => Promise.resolve(path === '/questoes/opcoes'
+    get.mockImplementation((path: string) => Promise.resolve(path.startsWith('/professor/assuntos')?[{id:1,materiaId:6,nome:'Frações'}]:path === '/questoes/opcoes'
       ? [{materiaId:6,materia:'Matemática',turmaId:5,ensino:'F',ano:1,letra:'A'}] : response));
     const put = vi.fn().mockResolvedValue({...response,versaoId:1002});
     Object.assign(TestBed.inject(ApiService), { put });
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     const fixture = TestBed.createComponent(CadastrarQuestoesComponent); await fixture.whenStable();
+    await vi.waitFor(()=>{fixture.detectChanges();expect(fixture.componentInstance.loading()).toBe(false);});await fixture.whenStable();
     const form = fixture.debugElement.query(By.directive(NgForm)).injector.get(NgForm);
     expect(fixture.componentInstance.questoes[0].enunciado).toBe(response.enunciado);
     expect(fixture.nativeElement.querySelector('h2').textContent).toBe('Editar questão');

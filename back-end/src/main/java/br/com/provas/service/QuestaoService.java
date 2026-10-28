@@ -70,6 +70,8 @@ public class QuestaoService {
         if (!repository.hasActiveYear(professorId, request.materiaId(), request.ensino(), request.ano())) {
             throw new DefaultErrorException("Você não possui vínculo ativo com esta matéria neste ensino e ano.", HttpStatus.FORBIDDEN);
         }
+        /* O assunto é obrigatório e pertence à mesma matéria; a classificação nunca é texto livre. */
+        if(request.assuntoId()==null||!repository.hasSubject(request.assuntoId(),request.materiaId()))throw new DefaultErrorException("Selecione um assunto da matéria escolhida.");
         /* Turmas específicas devem existir, não se repetir e pertencer ao mesmo ensino/ano. */
         if ("turmas".equals(request.abrangencia())) {
             if (request.turmas().isEmpty() || new HashSet<>(request.turmas()).size() != request.turmas().size()) {
@@ -96,7 +98,7 @@ public class QuestaoService {
             if (request.respostaCorreta() == null) throw new DefaultErrorException("respostaCorreta: Selecione a resposta correta.");
         } else {
             /* Conteúdo de alternativas ocultas na tela não é gravado em uma questão discursiva. */
-            dados = new QuestaoRequest(request.materiaId(), request.ensino(), request.ano(), request.abrangencia(), request.turmas(), request.tipo(), request.peso(), request.enunciado(), Map.of(), null);
+            dados = new QuestaoRequest(request.materiaId(), request.ensino(), request.ano(), request.abrangencia(), request.turmas(), request.tipo(), request.peso(), request.enunciado(), Map.of(), null,request.assuntoId());
         }
         return dados;
 
@@ -132,7 +134,7 @@ public class QuestaoService {
                 .replaceAll("[\\p{So}\\uFE0E\\uFE0F\\u200D]", "")
                 .replace('\u00a0', ' ').replaceAll("\\s+", " ").strip();
             String resumo = texto.isEmpty() ? "Questão com imagem" : texto.length() > 160 ? texto.substring(0,157).stripTrailing() + "..." : texto;
-            return new QuestaoResumoResponse(q.id(), q.materia(), q.ensino(), q.ano(), q.letras() == null ? "" : q.letras(), q.abrangencia(), q.tipo(), q.peso(), resumo);
+            return new QuestaoResumoResponse(q.id(), q.materia(), q.ensino(), q.ano(), q.letras() == null ? "" : q.letras(), q.abrangencia(), q.tipo(), q.peso(), resumo,q.assuntoId(),q.assunto());
         }).toList();
     }
 
@@ -163,6 +165,6 @@ public class QuestaoService {
         var turmas = repository.findTargets(questao).stream().map(t -> new TurmaResponse(t.id(), t.ensino(), t.ano(), t.letra())).toList();
         Long versaoId = repository.findCurrentVersionId(questao.id());
         return new QuestaoResponse(questao.id(), questao.materiaId(), questao.ensino(), questao.ano(), questao.abrangencia(), turmas, questao.tipo(), questao.peso(),
-            questao.enunciado(), questao.alternativas(), questao.respostaCorreta(), versaoId, repository.findVersionRevision(versaoId));
+            questao.enunciado(), questao.alternativas(), questao.respostaCorreta(), versaoId, repository.findVersionRevision(versaoId),questao.assuntoId(),repository.subjectName(questao.assuntoId()));
     }
 }

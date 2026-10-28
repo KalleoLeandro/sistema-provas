@@ -19,15 +19,17 @@ public class ExecucaoProvaRepository {
  private final RowMapper<TentativaProva> attemptMapper=(rs,n)->new TentativaProva(rs.getLong("id"),rs.getLong("liberacao_id"),rs.getLong("aluno_id"),rs.getString("titulo"),rs.getString("materia"),instant(rs,"iniciada_em"),instant(rs,"encerra_em"),instant(rs,"submetida_em"));
  private Map<String,String> alternatives(java.sql.ResultSet rs)throws java.sql.SQLException {var result=new LinkedHashMap<String,String>();for(String l:List.of("A","B","C","D","E")){var text=rs.getString("alternativa_"+l.toLowerCase(Locale.ROOT));if(text!=null)result.put(l,text);}return result;}
  public Optional<TentativaProva> findAttempt(Long aluno,Long lib){return jdbc.query("SELECT * FROM provas_tentativas WHERE aluno_id=:aluno AND liberacao_id=:lib",params(aluno,lib),attemptMapper).stream().findFirst();}
- public Optional<ConfiguracaoInicioProva> configuration(Long aluno,Long lib){
+ public Optional<ConfiguracaoInicioProva> configuration(Long aluno,Long lib){return configuration(aluno,lib,false);}
+ public Optional<ConfiguracaoInicioProva> configuration(Long aluno,Long lib,boolean lock){
   return jdbc.query("""
    SELECT l.*,m.nome AS materia,t.ensino,t.ano FROM provas_liberacoes l
    JOIN alunos_2026 a ON a.turma_id=l.turma_id AND a.id=:aluno AND a.status='M'
    JOIN turmas t ON t.id=l.turma_id JOIN materias m ON m.id=l.materia_id
    JOIN professores p ON p.id=l.professor_id AND p.ativo=TRUE
    WHERE l.id=:lib AND EXISTS(SELECT 1 FROM professores_materias_turmas pmt WHERE pmt.professor_id=l.professor_id AND pmt.materia_id=l.materia_id AND pmt.turma_id=l.turma_id AND pmt.ativo=TRUE)
-   """,params(aluno,lib),(rs,n)->new ConfiguracaoInicioProva(rs.getLong("id"),rs.getLong("professor_id"),rs.getLong("materia_id"),rs.getLong("turma_id"),rs.getString("ensino"),rs.getInt("ano"),rs.getString("titulo"),rs.getString("materia"),instant(rs,"disponivel_em"),instant(rs,"encerra_em"),rs.getInt("duracao_minutos"),rs.getString("token_hash"))).stream().findFirst();
+   """+(lock?" FOR SHARE":""),params(aluno,lib),(rs,n)->new ConfiguracaoInicioProva(rs.getLong("id"),rs.getLong("professor_id"),rs.getLong("materia_id"),rs.getLong("turma_id"),rs.getString("ensino"),rs.getInt("ano"),rs.getString("titulo"),rs.getString("materia"),instant(rs,"disponivel_em"),instant(rs,"encerra_em"),rs.getInt("duracao_minutos"),rs.getString("token_hash"))).stream().findFirst();
  }
+ public List<Long> subjects(Long lib){return jdbc.query("SELECT assunto_id FROM provas_liberacoes_assuntos WHERE liberacao_id=:lib ORDER BY assunto_id",new MapSqlParameterSource().addValue("lib",lib),(rs,n)->rs.getLong("assunto_id"));}
  public List<QuestaoSorteio> candidates(ConfiguracaoInicioProva c){
   return jdbc.query("""
    SELECT q.*,v.id AS versao_id FROM questoes q JOIN questoes_versoes v ON v.questao_id=q.id
@@ -35,8 +37,8 @@ public class ExecucaoProvaRepository {
    WHERE q.professor_id=:professor AND q.materia_id=:materia AND q.ensino=:ensino AND q.ano=:ano
      AND (q.abrangencia='ano' OR EXISTS(SELECT 1 FROM questoes_turmas qt WHERE qt.questao_id=q.id AND qt.turma_id=:turma))
    ORDER BY q.id FOR SHARE
-   """,new MapSqlParameterSource().addValue("professor",c.professorId()).addValue("materia",c.materiaId()).addValue("ensino",c.ensino()).addValue("ano",c.ano()).addValue("turma",c.turmaId()),
-   (rs,n)->new QuestaoSorteio(rs.getLong("id"),rs.getLong("versao_id"),rs.getString("tipo"),rs.getBigDecimal("peso"),rs.getString("enunciado"),alternatives(rs),rs.getString("resposta_correta")));
+   """,new MapSqlParameterSource().addValue("lib",c.id()).addValue("professor",c.professorId()).addValue("materia",c.materiaId()).addValue("ensino",c.ensino()).addValue("ano",c.ano()).addValue("turma",c.turmaId()),
+   (rs,n)->new QuestaoSorteio(rs.getLong("id"),rs.getLong("versao_id"),rs.getString("tipo"),rs.getBigDecimal("peso"),rs.getString("enunciado"),alternatives(rs),rs.getString("resposta_correta"),rs.getLong("assunto_id")));
  }
  public TentativaProva create(Long aluno,ConfiguracaoInicioProva c,Instant inicio,Instant fim,List<QuestaoSorteio> questions){
   var p=params(aluno,c.id()).addValue("titulo",c.titulo()).addValue("materia",c.materia()).addValue("inicio",date(inicio)).addValue("fim",date(fim));var key=new GeneratedKeyHolder();

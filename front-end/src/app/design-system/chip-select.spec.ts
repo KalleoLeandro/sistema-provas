@@ -60,4 +60,17 @@ describe('Seleção com chips', () => {
     expect(fixture.nativeElement.querySelector('.chip')).toBeNull();
     expect(input.value).toBe('');
   });
+
+  it('sugere assuntos parecidos e limita a questão a um chip',async()=>{
+    const f=TestBed.createComponent(ChipSelectComponent);f.componentRef.setInput('inputId','assunto-teste');f.componentRef.setInput('options',[{value:1,label:'Frações'},{value:2,label:'Geometria'}]);f.componentRef.setInput('fuzzySearch',true);f.componentRef.setInput('maxSelected',1);f.detectChanges();
+    const input=f.nativeElement.querySelector('input') as HTMLInputElement;input.value='fracao';input.dispatchEvent(new Event('input'));f.detectChanges();
+    expect(f.nativeElement.querySelectorAll('[role=option]').length).toBe(1);input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',cancelable:true}));f.detectChanges();
+    expect(f.componentInstance.value).toEqual([1]);expect(input.disabled).toBe(true);f.componentInstance.select(2);expect(f.componentInstance.value).toEqual([1]);
+  });
+  it('solicita criação explícita sem transformar texto em ID e evita duplicar assunto existente',()=>{
+    const f=TestBed.createComponent(ChipSelectComponent);f.componentRef.setInput('inputId','novo-assunto');f.componentRef.setInput('options',[{value:1,label:'Frações'}]);f.componentRef.setInput('allowCreate',true);f.detectChanges();const created:string[]=[];f.componentInstance.createOption.subscribe(nome=>created.push(nome));
+    const input=f.nativeElement.querySelector('input') as HTMLInputElement;input.value='Probabilidade';input.dispatchEvent(new Event('input'));input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',cancelable:true}));
+    expect(created).toEqual(['Probabilidade']);expect(f.componentInstance.value).toEqual([]);
+    input.value='frações';input.dispatchEvent(new Event('input'));expect(f.componentInstance.canCreate).toBe(false);
+  });
 });

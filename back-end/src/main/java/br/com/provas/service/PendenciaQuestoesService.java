@@ -25,11 +25,13 @@ public class PendenciaQuestoesService {
          * A consulta conta apenas questões atuais do próprio professor. Histórico não aumenta o estoque.
          * Questões do ano inteiro contam em cada turma desse ensino/ano; as específicas só nos vínculos escolhidos. */
         return repository.countByAssignedClass(professorId).stream().map(q -> {
-            /* As metas são independentes: excesso em um peso não compensa falta em outro.
+            /* A consulta escolhe o assunto mais próximo de completar dez questões por matéria/turma.
+             * Somar assuntos incompletos não satisfaz a exigência de pelo menos um assunto completo.
+             * As metas são independentes: excesso em um peso não compensa falta em outro.
              * O tipo (objetiva ou discursiva) não altera a contagem, pois a regra exige apenas o peso. */
             var quantidades = List.of(quantity("0.5",4,q.peso05()), quantity("1.0",3,q.peso10()),
                 quantity("1.5",2,q.peso15()), quantity("2.0",1,q.peso20()));
-            return new PendenciaQuestoesResponse(q.materiaId(),q.materia(),q.turmaId(),q.ensino(),q.ano(),q.letra(),quantidades);
+            return new PendenciaQuestoesResponse(q.materiaId(),q.materia(),q.turmaId(),q.ensino(),q.ano(),q.letra(),quantidades,q.assuntoId(),q.assunto());
         }).filter(p -> p.quantidades().stream().anyMatch(q -> q.faltantes()>0)).toList();
     }
 

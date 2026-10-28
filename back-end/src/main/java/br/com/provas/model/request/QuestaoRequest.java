@@ -21,7 +21,7 @@ public record QuestaoRequest(
     Map<@NotBlank(message = "Identifique a alternativa de A a E.") @Pattern(regexp = "[A-E]", message = "A alternativa deve ser identificada de A a E.") String,
         @NotNull(message = "A alternativa não pode ser nula.") @Size(max = 8000000, message = "A alternativa excede o tamanho permitido.") String> alternativas,
     @Pattern(regexp = "[A-E]", message = "Selecione uma resposta correta de A a E.") String respostaCorreta
-) {
+, @NotNull(message="Selecione o assunto da questão.") @Positive(message="Selecione um assunto válido.") Long assuntoId) {
     public QuestaoRequest {
         ensino = ensino == null ? null : ensino.strip().toUpperCase(Locale.ROOT);
         abrangencia = abrangencia == null ? null : abrangencia.strip().toLowerCase(Locale.ROOT);

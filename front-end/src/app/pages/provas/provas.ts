@@ -1,3 +1,7 @@
+import { AssuntoProva } from '../../models/assunto';
+import { ChipSelectComponent } from '../../design-system/chip-select';
+import { ListSort } from '../../design-system/list-sort';
+import { SortHeaderComponent } from '../../design-system/sort-header';
 import { statusAluno } from '../../models/status-aluno';
 import { Component, HostListener, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -17,12 +21,26 @@ import { Professor } from '../../models/professor';
 import { Turma } from '../../models/turma';
 import { LiberacaoProva,LiberacaoDetalhe } from '../../models/prova';
 
-@Component({ selector:'app-provas', imports:[ListarCorrecoesComponent,DateFieldComponent,TabsComponent,FormsModule,DatePipe,AlertComponent,ButtonDirective,CardComponent,FieldComponent,InputDirective,RecordNameDirective,TableScrollComponent,PaginationComponent,InfoTooltipComponent,NotBlankDirective,ValidationMessagePipe],
+@Component({ selector:'app-provas', imports:[ChipSelectComponent,SortHeaderComponent,ListarCorrecoesComponent,DateFieldComponent,TabsComponent,FormsModule,DatePipe,AlertComponent,ButtonDirective,CardComponent,FieldComponent,InputDirective,RecordNameDirective,TableScrollComponent,PaginationComponent,InfoTooltipComponent,NotBlankDirective,ValidationMessagePipe],
   templateUrl:'./provas.html',styleUrls:['../../design-system/list-filters.css','../../design-system/exam-releases.css'] })
 export class ProvasComponent implements OnInit,OnDestroy {
+ readonly sort=new ListSort();
+ readonly studentSort=new ListSort();
+ changeSort(){this.paginaProvas=1;void this.loadProvas();}
+ changeStudentSort(){this.pagina=1;void this.load();}
+
  readonly statusAluno=statusAluno;
   private readonly api=inject(ApiService);
   private readonly route=inject(ActivatedRoute,{optional:true});
+  assuntos:AssuntoProva[]=[];assuntoIds:number[]=[];readonly loadingAssuntos=signal(false);private assuntoVisit=0;
+  get opcoesAssuntos(){return this.assuntos.map(a=>({value:a.id,label:a.nome}));}
+  get assuntosEscolhidos(){return this.assuntos.filter(a=>this.assuntoIds.includes(a.id));}
+  get assuntosValidos(){return this.assuntoIds.length>0&&this.assuntoIds.length<=10&&this.assuntoIds.every(id=>this.assuntos.some(a=>a.id===id))&&this.assuntosEscolhidos.some(a=>a.completo);}
+  assuntosLabel(p:LiberacaoProva){return p.assuntos?.map(a=>a.nome).join(', ')??'';}
+  changeMateriaProva(){this.assuntoIds=[];void this.loadAssuntos();}
+  async loadAssuntos(){const turma=this.turmaLiberacaoId,materia=this.materiaId,visit=++this.assuntoVisit;this.assuntos=[];this.loadingAssuntos.set(true);
+    try{if(turma&&materia){const rows=await this.api.get<AssuntoProva[]>('/professor/provas/turmas/'+turma+'/assuntos?materiaId='+materia);if(visit===this.assuntoVisit)this.assuntos=rows;}}
+    catch{if(visit===this.assuntoVisit)this.erroProvas.set('Não foi possível carregar os assuntos e suas quantidades.');}finally{if(visit===this.assuntoVisit)this.loadingAssuntos.set(false);}}
   readonly alunos=signal<Aluno[]>([]);
   readonly turmas=signal<Turma[]>([]);
   readonly loading=signal(false);
@@ -64,7 +82,7 @@ export class ProvasComponent implements OnInit,OnDestroy {
   /** Pesquisa alunos com paginação, descartando respostas de filtros anteriores. */
   async load(){
     if(this.busy())return;this.close();const visit=++this.visit;this.loading.set(true);this.erro.set('');this.alunos.set([]);
-    try{const r=await this.api.get<Pagina<Aluno>>('/professor/alunos?pagina='+this.pagina+'&tamanho='+this.tamanhoPagina+(this.turmaId?'&turmaId='+this.turmaId:''));
+    try{const r=await this.api.get<Pagina<Aluno>>('/professor/alunos?pagina='+this.pagina+'&tamanho='+this.tamanhoPagina+(this.turmaId?'&turmaId='+this.turmaId:'')+this.studentSort.query());
       if(visit!==this.visit)return;this.alunos.set(r.itens);this.total=r.total;this.pagina=r.pagina;
     }catch{if(visit===this.visit){this.total=0;this.erro.set('Não foi possível carregar os alunos. Tente novamente.');}}
     finally{if(visit===this.visit)this.loading.set(false);}
@@ -78,7 +96,7 @@ export class ProvasComponent implements OnInit,OnDestroy {
   /** Consulta apenas liberações próprias; a atualização periódica não apaga o formulário. */
   async loadProvas(){
     const id=this.modo==='turmas'?this.turmaLiberacaoId:this.selecionado()?.id;if(!id)return;const visit=++this.proofVisit;this.loadingProvas.set(true);this.erroProvas.set('');
-    try{const r=await this.api.get<Pagina<LiberacaoProva>>('/professor/provas/'+(this.modo==='turmas'?'turmas/':'alunos/')+id+'?pagina='+this.paginaProvas+'&tamanho='+this.tamanhoProvas);
+    try{const r=await this.api.get<Pagina<LiberacaoProva>>('/professor/provas/'+(this.modo==='turmas'?'turmas/':'alunos/')+id+'?pagina='+this.paginaProvas+'&tamanho='+this.tamanhoProvas+this.sort.query());
       if(visit!==this.proofVisit)return;this.provas.set(r.itens);this.totalProvas=r.total;this.paginaProvas=r.pagina;
     }catch(error){if(visit===this.proofVisit){this.provas.set([]);this.totalProvas=0;this.erroProvas.set(this.errorMessage(error));}}
     finally{if(visit===this.proofVisit)this.loadingProvas.set(false);}
@@ -86,9 +104,9 @@ export class ProvasComponent implements OnInit,OnDestroy {
   /** Grava o prazo em UTC, preservando o preenchimento quando a API recusa a operação. */
   async release(form:NgForm){
     const turmaId=this.turmaLiberacaoId;if(this.modo!=='turmas'||!turmaId||this.busy()||!this.formOpen())return;form.control.markAllAsTouched();this.mensagem.set('');
-    if(form.invalid||!this.periodoValido||!this.materiasTurma.some(m=>m.materiaId===this.materiaId))return;
+    if(form.invalid||!this.assuntosValidos||this.loadingAssuntos()||!this.periodoValido||!this.materiasTurma.some(m=>m.materiaId===this.materiaId))return;
     this.busy.set(true);this.erroProvas.set('');
-    try{const editing=this.editingId;const body={titulo:this.titulo.trim(),materiaId:this.materiaId,disponivelEm:new Date(this.disponivelEm).toISOString(),encerraEm:new Date(this.encerraEm).toISOString(),duracaoMinutos:this.duracaoMinutos,token:this.token||null};
+    try{const editing=this.editingId;const body={titulo:this.titulo.trim(),materiaId:this.materiaId,assuntos:[...this.assuntoIds],disponivelEm:new Date(this.disponivelEm).toISOString(),encerraEm:new Date(this.encerraEm).toISOString(),duracaoMinutos:this.duracaoMinutos,token:this.token||null};
       const path='/professor/provas/turmas/'+turmaId+'/liberacoes';
       if(editing)await this.api.put(path+'/'+editing,body);else await this.api.post(path,body);
       this.reset(form);this.cancelEditor();this.mensagem.set(editing?'Liberação atualizada com sucesso.':'Liberação registrada com sucesso.');this.paginaProvas=1;await this.loadProvas();
@@ -96,8 +114,8 @@ export class ProvasComponent implements OnInit,OnDestroy {
     finally{this.busy.set(false);}
   }
   /** Limpa os dados temporários sem alterar liberações já registradas. */
-  reset(form:NgForm){this.tokenIndisponivel=false;this.token='';this.duracaoMinutos=60;this.editingId=null;this.titulo='';this.encerraEm='';this.disponivelEm=this.localNow();this.materiaId=this.materiasTurma.length===1?this.materiasTurma[0].materiaId:null;
-    form.resetForm({titulo:'',materiaId:this.materiaId,disponivelEm:this.disponivelEm,encerraEm:'',duracaoMinutos:60,token:''});this.mensagem.set('');}
+  reset(form:NgForm){this.assuntoIds=[];this.tokenIndisponivel=false;this.token='';this.duracaoMinutos=60;this.editingId=null;this.titulo='';this.encerraEm='';this.disponivelEm=this.localNow();this.materiaId=this.materiasTurma.length===1?this.materiasTurma[0].materiaId:null;
+    void this.loadAssuntos();form.resetForm({assuntos:[],titulo:'',materiaId:this.materiaId,disponivelEm:this.disponivelEm,encerraEm:'',duracaoMinutos:60,token:''});this.mensagem.set('');}
   /** Descarta a seleção e invalida consultas em andamento ao fechar ou sair. */
   close(){this.cancelEditor();this.proofVisit++;this.selecionado.set(null);this.provas.set([]);this.erroProvas.set('');this.mensagem.set('');this.loadingProvas.set(false);
     this.token='';this.duracaoMinutos=60;this.editingId=null;this.titulo='';this.materiaId=null;this.disponivelEm='';this.encerraEm='';this.paginaProvas=1;this.totalProvas=0;}
@@ -106,14 +124,14 @@ export class ProvasComponent implements OnInit,OnDestroy {
   /** Alterna liberação coletiva e consulta individual sem manter rascunhos. */
   changeMode(mode:string){if(this.busy())return;this.close();this.turmaLiberacaoId=null;this.modo=mode;if(mode==='alunos')void this.load();}
   /** Abre um cadastro vazio apenas por ação explícita do professor. */
-  newRelease(){if(this.busy()||this.editingBusy()||!this.turmaLiberacaoId)return;this.cancelEditor();this.disponivelEm=new Date().toISOString();this.materiaId=this.materiasTurma.length===1?this.materiasTurma[0].materiaId:null;this.mensagem.set('');this.formOpen.set(true);}
+  newRelease(){if(this.busy()||this.editingBusy()||!this.turmaLiberacaoId)return;this.cancelEditor();this.disponivelEm=new Date().toISOString();this.materiaId=this.materiasTurma.length===1?this.materiasTurma[0].materiaId:null;this.mensagem.set('');void this.loadAssuntos();this.formOpen.set(true);}
   /** Fecha e descarta campos temporários, preservando a lista consultada. */
-  cancelEditor(){this.editVisit++;this.formOpen.set(false);this.editingBusy.set(false);this.editingId=null;this.token='';this.tokenIndisponivel=false;this.titulo='';this.materiaId=null;this.disponivelEm='';this.encerraEm='';this.duracaoMinutos=60;}
+  cancelEditor(){this.assuntoVisit++;this.assuntos=[];this.assuntoIds=[];this.loadingAssuntos.set(false);this.editVisit++;this.formOpen.set(false);this.editingBusy.set(false);this.editingId=null;this.token='';this.tokenIndisponivel=false;this.titulo='';this.materiaId=null;this.disponivelEm='';this.encerraEm='';this.duracaoMinutos=60;}
   /** Reconsulta a liberação pelo ID para preencher dados atuais, inclusive o token consultável. */
   async edit(prova:LiberacaoProva){
     if(this.busy()||this.editingBusy()||!this.turmaLiberacaoId)return;this.cancelEditor();const visit=++this.editVisit;this.editingBusy.set(true);this.erroProvas.set('');
     try{const p=await this.api.get<LiberacaoDetalhe>('/professor/provas/turmas/'+this.turmaLiberacaoId+'/liberacoes/'+prova.id);if(visit!==this.editVisit)return;
-      this.editingId=p.id;this.titulo=p.titulo;this.materiaId=p.materiaId;this.duracaoMinutos=p.duracaoMinutos;this.token=p.token??'';this.tokenIndisponivel=p.precisaNovoToken;
+      this.editingId=p.id;this.titulo=p.titulo;this.materiaId=p.materiaId;await this.loadAssuntos();if(visit!==this.editVisit)return;this.assuntoIds=(p.assuntos??[]).map(a=>a.id);this.duracaoMinutos=p.duracaoMinutos;this.token=p.token??'';this.tokenIndisponivel=p.precisaNovoToken;
       this.disponivelEm=p.disponivelEm;this.encerraEm=p.encerraEm;this.mensagem.set('');this.formOpen.set(true);
     }catch(error){if(visit===this.editVisit)this.erroProvas.set(this.errorMessage(error));}
     finally{if(visit===this.editVisit)this.editingBusy.set(false);}

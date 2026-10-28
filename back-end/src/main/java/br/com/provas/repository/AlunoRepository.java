@@ -29,13 +29,24 @@ public class AlunoRepository {
     private MapSqlParameterSource filtros(Long professor,br.com.provas.model.request.AlunoFiltroRequest filtro){
         return new MapSqlParameterSource().addValue("professor_id",professor).addValue("turma_id",filtro.turmaId()).addValue("status",filtro.status()).addValue("busca",filtro.busca());
     }
+    private String orderBy(br.com.provas.model.request.AlunoFiltroRequest filtro){
+        // Apenas expressões conhecidas entram no SQL; nenhum identificador recebido é interpolado.
+        String direction="DESC".equals(filtro.direcao())?" DESC":" ASC";
+        String column=switch(filtro.ordenacao()){
+            case "numero" -> "a.numero";case "cgm" -> "a.cgm";
+            case "status" -> "CASE a.status WHEN 'D' THEN 'Desistente' WHEN 'M' THEN 'Matriculado' WHEN 'R' THEN 'Remanejado' ELSE 'Transferido' END";
+            case "turma" -> "t.ensino"+direction+",t.ano"+direction+",t.letra";
+            default -> "a.nome";
+        };
+        return " ORDER BY "+("numero".equals(filtro.ordenacao())?"a.numero IS NULL ASC,":"")+column+direction+",a.id"+direction;
+    }
     public long countFiltered(Long professor,br.com.provas.model.request.AlunoFiltroRequest filtro){
         String from=professor==null?"FROM alunos_2026 a JOIN turmas t ON t.id=a.turma_id WHERE (:turma_id IS NULL OR a.turma_id=:turma_id) ":FILTRO;
         return namedParameterJdbcTemplate.query("SELECT COUNT(*) AS total "+from+PESQUISA,filtros(professor,filtro),(rs,n)->rs.getLong("total")).getFirst();
     }
     public List<AlunoResponse> findFiltered(Long professor,br.com.provas.model.request.AlunoFiltroRequest filtro,int tamanho,long offset){
         String from=professor==null?"FROM alunos_2026 a JOIN turmas t ON t.id=a.turma_id WHERE (:turma_id IS NULL OR a.turma_id=:turma_id) ":FILTRO;
-        return namedParameterJdbcTemplate.query("SELECT a.id,a.nome,a.numero,a.cgm,a.status,a.turma_id,t.ensino,t.ano,t.letra "+from+PESQUISA+" ORDER BY a.nome,a.id LIMIT :tamanho OFFSET :offset",filtros(professor,filtro).addValue("tamanho",tamanho).addValue("offset",offset),mapper);
+        return namedParameterJdbcTemplate.query("SELECT a.id,a.nome,a.numero,a.cgm,a.status,a.turma_id,t.ensino,t.ano,t.letra "+from+PESQUISA+orderBy(filtro)+" LIMIT :tamanho OFFSET :offset",filtros(professor,filtro).addValue("tamanho",tamanho).addValue("offset",offset),mapper);
     }
     public long countByProfessor(Long professorId, Long turmaId) {
         var params = new MapSqlParameterSource().addValue("professor_id",professorId).addValue("turma_id",turmaId);

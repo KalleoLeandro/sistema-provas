@@ -18,7 +18,7 @@ public class DashboardService {
     private final Clock clock;
 
     /**
-     * Consulta indicadores das avaliações já disponibilizadas para alunos matriculados.
+     * Consulta indicadores das avaliações já disponibilizadas para alunos matriculados e remanejados.
      * @param usuario identidade autenticada; o escopo nunca é recebido por parâmetro da tela
      * @return alunos distintos, médias concluídas e contagem de avaliações por situação
      */
@@ -30,6 +30,8 @@ public class DashboardService {
         else if("professor".equals(usuario.perfil()))professor=usuario.id();
         else throw new DefaultErrorException("Acesso não permitido ao dashboard.",HttpStatus.FORBIDDEN);
 
+        /* Transferidos e desistentes são excluídos na base comum dos cards, médias e gráficos,
+           mesmo que possuam provas entregues. Matriculados e remanejados permanecem no cálculo. */
         /* Usa o mesmo instante e a mesma transação nas consultas para manter cards e gráficos coerentes. */
         var agora=clock.instant();var resumo=repository.resumo(professor,agora);
         var medias=repository.medias(professor,agora);

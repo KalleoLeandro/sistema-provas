@@ -10,8 +10,7 @@ public record LiberarProvaRequest(
     @NotNull(message="Informe quando o prazo termina.") @Future(message="O encerramento deve estar no futuro.") Instant encerraEm,
     @NotNull(message="Informe a duração.") @Min(value=1,message="A duração mínima é de 1 minuto.") @Max(value=480,message="A duração máxima é de 480 minutos.") Integer duracaoMinutos,
     @Size(min=4,max=64,message="O token deve conter de 4 a 64 caracteres.") String token
-) {
-    public LiberarProvaRequest(String titulo,Long materiaId,Instant disponivelEm,Instant encerraEm){this(titulo,materiaId,disponivelEm,encerraEm,60,"TokenTeste");}
+, @NotEmpty(message="Selecione pelo menos um assunto.") @Size(max=10,message="Selecione até dez assuntos para as dez questões.") java.util.List<@NotNull(message="O assunto não pode ser nulo.") @Positive(message="Selecione um assunto válido.") Long> assuntos) {
     @Override public String toString(){return "LiberarProvaRequest[token omitido]";}
     public LiberarProvaRequest { token=token==null||token.isBlank()?null:token.strip();titulo=titulo==null?null:titulo.strip(); }
     @AssertTrue(message="O encerramento deve ser posterior ao início da disponibilidade.")

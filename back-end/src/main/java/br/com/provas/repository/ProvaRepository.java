@@ -38,6 +38,11 @@ public class ProvaRepository {
             WHERE l.professor_id=:professor_id AND l.turma_id=:turma_id ORDER BY l.id DESC LIMIT :tamanho OFFSET :offset
             """,params(professorId,turmaId).addValue("tamanho",tamanho).addValue("offset",offset),mapper);
     }
+    public List<LiberacaoProva> findAll(Long professorId,Long turmaId,int tamanho,long offset,br.com.provas.model.request.OrdenacaoRequest order,java.time.Instant now){
+        return jdbc.query("SELECT l.*,m.nome AS materia FROM provas_liberacoes l JOIN materias m ON m.id=l.materia_id WHERE l.professor_id=:professor_id AND l.turma_id=:turma_id"+
+            SqlOrder.clause(order,java.util.Map.of("titulo","l.titulo","materia","m.nome","disponivelEm","l.disponivel_em","encerraEm","l.encerra_em","situacao","CASE WHEN l.disponivel_em>:agora THEN 'Agendada' WHEN l.encerra_em<=:agora THEN 'Encerrada' ELSE 'Disponível' END"),"l.id")+" LIMIT :tamanho OFFSET :offset",
+            params(professorId,turmaId).addValue("agora",java.time.LocalDateTime.ofInstant(now,ZoneOffset.UTC)).addValue("tamanho",tamanho).addValue("offset",offset),mapper);
+    }
     public LiberacaoProva save(Long professorId,Long turmaId,LiberarProvaRequest request,String tokenHash,String tokenCifrado) {
         var parameters=params(professorId,turmaId).addValue("turma_id",turmaId).addValue("materia_id",request.materiaId()).addValue("titulo",request.titulo()).addValue("duracao",request.duracaoMinutos()).addValue("token_hash",tokenHash).addValue("token_cifrado",tokenCifrado)
             .addValue("disponivel_em",java.time.LocalDateTime.ofInstant(request.disponivelEm(),ZoneOffset.UTC))
@@ -49,6 +54,18 @@ public class ProvaRepository {
             """,parameters,key,new String[]{"id"});
         return jdbc.query("SELECT l.*,m.nome AS materia FROM provas_liberacoes l JOIN materias m ON m.id=l.materia_id WHERE l.id=:id",
             new MapSqlParameterSource().addValue("id",java.util.Objects.requireNonNull(key.getKey()).longValue()),mapper).getFirst();
+    }
+    public List<br.com.provas.model.response.AssuntoResponse> subjects(Long lib){return jdbc.query("SELECT a.id,a.materia_id,a.nome FROM assuntos a JOIN provas_liberacoes_assuntos pla ON pla.assunto_id=a.id WHERE pla.liberacao_id=:lib ORDER BY a.nome,a.id",new MapSqlParameterSource().addValue("lib",lib),(rs,n)->new br.com.provas.model.response.AssuntoResponse(rs.getLong("id"),rs.getLong("materia_id"),rs.getString("nome")));}
+    public List<br.com.provas.model.response.AssuntoResponse> subjectOptions(Long professor,Long turma,Long materia){
+        return jdbc.query("SELECT a.id,a.materia_id,a.nome FROM assuntos a WHERE a.materia_id=:materia AND EXISTS(SELECT 1 FROM professores_materias_turmas pmt JOIN professores p ON p.id=pmt.professor_id AND p.ativo=TRUE WHERE pmt.professor_id=:professor AND pmt.turma_id=:turma AND pmt.materia_id=a.materia_id AND pmt.ativo=TRUE) ORDER BY a.nome,a.id",new MapSqlParameterSource().addValue("professor",professor).addValue("turma",turma).addValue("materia",materia),(rs,n)->new br.com.provas.model.response.AssuntoResponse(rs.getLong("id"),rs.getLong("materia_id"),rs.getString("nome")));
+    }
+    public int validSubjects(Long materia,List<Long> ids){return jdbc.query("SELECT id FROM assuntos WHERE materia_id=:materia AND id IN (:ids) FOR SHARE",new MapSqlParameterSource().addValue("materia",materia).addValue("ids",ids),(rs,n)->rs.getLong("id")).size();}
+    public List<br.com.provas.model.entity.QuestaoSorteio> subjectCandidates(Long professor,Long turma,Long materia){
+        return jdbc.query("SELECT q.id,q.tipo,q.peso,q.assunto_id FROM questoes q JOIN turmas t ON t.id=:turma AND t.ensino=q.ensino AND t.ano=q.ano WHERE q.professor_id=:professor AND q.materia_id=:materia AND (q.abrangencia='ano' OR EXISTS(SELECT 1 FROM questoes_turmas qt WHERE qt.questao_id=q.id AND qt.turma_id=t.id)) ORDER BY q.id",new MapSqlParameterSource().addValue("professor",professor).addValue("turma",turma).addValue("materia",materia),(rs,n)->new br.com.provas.model.entity.QuestaoSorteio(rs.getLong("id"),rs.getLong("id"),rs.getString("tipo"),rs.getBigDecimal("peso"),"",java.util.Map.of(),null,rs.getLong("assunto_id")));
+    }
+    public void saveSubjects(Long lib,List<Long> ids){
+        var p=new MapSqlParameterSource().addValue("lib",lib);jdbc.update("DELETE FROM provas_liberacoes_assuntos WHERE liberacao_id=:lib",p);
+        jdbc.batchUpdate("INSERT INTO provas_liberacoes_assuntos(liberacao_id,assunto_id) VALUES(:lib,:assunto)",ids.stream().sorted().map(id->new MapSqlParameterSource().addValue("lib",lib).addValue("assunto",id)).toArray(MapSqlParameterSource[]::new));
     }
     private MapSqlParameterSource params(Long professorId,Long turmaId) { return new MapSqlParameterSource().addValue("professor_id",professorId).addValue("turma_id",turmaId); }
     public boolean update(Long professorId,Long turmaId,Long id,LiberarProvaRequest request,String tokenHash,String tokenCifrado){

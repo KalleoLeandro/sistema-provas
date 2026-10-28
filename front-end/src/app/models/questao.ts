@@ -9,6 +9,7 @@ export interface QuestaoRascunho {
   respostaCorreta: LetraAlternativa;
 }
 export interface QuestaoResponse {
+ assuntoId:number;assunto:string;
   versaoId: number;
   revisao: number;
   id: number;
@@ -29,6 +30,7 @@ export interface QuestaoCadastrada {
   resumo: string;
 }
 export interface QuestaoResumo {
+ assuntoId:number;assunto:string;
   id: number;
   materia: string;
   ensino: 'F' | 'M';

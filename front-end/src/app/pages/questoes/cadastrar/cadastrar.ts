@@ -1,3 +1,4 @@
+import { Assunto } from '../../../models/assunto';
 import { InfoTooltipComponent } from '../../../design-system/info-tooltip';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AccordionComponent } from '../../../design-system/accordion';
@@ -43,6 +44,15 @@ export class CadastrarQuestoesComponent implements OnInit, OnDestroy {
   turmasSelecionadas: number[] = [];
 
   /** Turmas vazias representam o ano inteiro, sem exigir outra seleção na tela. */
+  assuntos:Assunto[]=[];assuntoSelecionado:number[]=[];
+  readonly loadingAssuntos=signal(false);readonly creatingAssunto=signal(false);private assuntoVisit=0;
+  get opcoesAssuntos(){return this.assuntos.map(a=>({value:a.id,label:a.nome}));}
+  async loadAssuntos(){const materia=this.materiaId,visit=++this.assuntoVisit;this.assuntos=[];this.loadingAssuntos.set(true);
+    try{if(materia){const rows=await this.api.get<Assunto[]>('/professor/assuntos?materiaId='+materia);if(visit===this.assuntoVisit)this.assuntos=rows;}}
+    catch{if(visit===this.assuntoVisit)this.erro.set('Não foi possível carregar os assuntos.');}finally{if(visit===this.assuntoVisit)this.loadingAssuntos.set(false);}}
+  async createAssunto(nome:string){if(!this.materiaId||this.creatingAssunto())return;const materia=this.materiaId,visit=this.assuntoVisit;this.creatingAssunto.set(true);
+    try{const a=await this.api.post<Assunto>('/professor/assuntos',{materiaId:materia,nome});if(visit!==this.assuntoVisit)return;this.assuntos=[...this.assuntos.filter(x=>x.id!==a.id),a].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));this.assuntoSelecionado=[a.id];}
+    catch{if(visit===this.assuntoVisit)this.erro.set('Não foi possível criar o assunto. Tente novamente.');}finally{this.creatingAssunto.set(false);}}
   get abrangencia(): 'turmas' | 'ano' {
     /* O escopo é derivado dos chips para manter o envio consistente com o formulário. */
     return this.turmasSelecionadas.length ? 'turmas' : 'ano';
@@ -57,7 +67,7 @@ export class CadastrarQuestoesComponent implements OnInit, OnDestroy {
   get turmasDisponiveis() { return this.destinos().filter(d => d.materiaId === this.materiaId && d.ensino + ':' + d.ano === this.anoSelecionado).map(d => ({ value: d.turmaId, label: d.letra })); }
 
   /** Descarta ano e turmas ao trocar a matéria para não reaproveitar uma seleção incompatível. */
-  changeMateria() { /* A nova matéria determina os anos disponíveis. */ this.anoSelecionado = ''; this.turmasSelecionadas = []; }
+  changeMateria() { /* A nova matéria determina os anos disponíveis. */ this.anoSelecionado = ''; this.turmasSelecionadas = [];this.assuntoSelecionado=[];void this.loadAssuntos(); }
   /** Mantém as turmas selecionadas dentro de um único ensino e ano. */
   changeAno() { /* Qualquer seleção anterior é descartada na mudança de contexto. */ this.turmasSelecionadas = []; }
 
@@ -70,13 +80,13 @@ export class CadastrarQuestoesComponent implements OnInit, OnDestroy {
   async load() {
     /* A API fornece matérias e anos autorizados, com as turmas escolares do mesmo ano. */
     if (this.loading()) return;
-    this.loading.set(true); this.erro.set('');
+    const visit=this.visit;this.loading.set(true); this.erro.set('');
     try {
-      this.destinos.set(await this.api.get<QuestaoDestino[]>('/questoes/opcoes'));
+      const destinos=await this.api.get<QuestaoDestino[]>('/questoes/opcoes');if(visit!==this.visit)return;this.destinos.set(destinos);
       if (this.editId) {
         /* O formulário de edição usa a versão lida para detectar alterações simultâneas. */
-        const q = await this.api.get<QuestaoResponse>('/questoes/' + this.editId);
-        this.versaoId = q.versaoId; this.revisao = q.revisao; this.materiaId = q.materiaId;
+        const q = await this.api.get<QuestaoResponse>('/questoes/' + this.editId);if(visit!==this.visit)return;
+        this.versaoId = q.versaoId; this.revisao = q.revisao; this.materiaId = q.materiaId;this.assuntoSelecionado=[q.assuntoId];await this.loadAssuntos();if(visit!==this.visit)return;
         this.anoSelecionado = q.ensino + ':' + q.ano;
         this.turmasSelecionadas = q.abrangencia === 'ano' ? [] : q.turmas.map(t => t.id);
         this.questoes = [{ id: q.id, tipo: q.tipo, peso: q.peso, enunciado: q.enunciado,
@@ -110,24 +120,24 @@ export class CadastrarQuestoesComponent implements OnInit, OnDestroy {
   /** Grava a questão e retorna à lista ou prepara um novo cadastro na mesma tela. */
   async save(form: NgForm, continuar = false) {
     /* Apenas uma questão é enviada por vez; o bloqueio impede cadastros repetidos por duplo clique. */
-    if (this.saving() || this.loading()) return;
+    if (this.saving() || this.loading() || this.loadingAssuntos() || this.creatingAssunto()) return;
     this.erro.set('');
     form.control.markAllAsTouched();
     const ano = this.anoAtual;
-    if (form.invalid || !ano || !this.materiaId || this.turmasSelecionadas.some(id => !this.turmasDisponiveis.some(t => t.value === id))) {
+    if (form.invalid || this.assuntoSelecionado.length!==1 || !this.assuntos.some(a=>a.id===this.assuntoSelecionado[0]) || !ano || !this.materiaId || this.turmasSelecionadas.some(id => !this.turmasDisponiveis.some(t => t.value === id))) {
       this.mensagem.set('Preencha os campos destacados para cadastrar a questão.');
       return;
     }
     const q = this.questoes[0];
     const materiaId = this.materiaId;
     const materia = this.materiasDisponiveis.find(m => m.id === materiaId)!;
-    const descricao = materia.nome + ' — ' + ano.label + ' — ' + (this.abrangencia === 'ano' ? 'Todas as turmas' : 'Turmas ' + this.turmasDisponiveis.filter(t => this.turmasSelecionadas.includes(t.value)).map(t => t.label).join(', '));
+    const descricao = materia.nome + ' — ' + (this.assuntos.find(a=>a.id===this.assuntoSelecionado[0])?.nome??'') + ' — ' + ano.label + ' — ' + (this.abrangencia === 'ano' ? 'Todas as turmas' : 'Turmas ' + this.turmasDisponiveis.filter(t => this.turmasSelecionadas.includes(t.value)).map(t => t.label).join(', '));
     this.saving.set(true); this.mensagem.set('');
     const visit = this.visit;
     try {
       /* O accordion usa a resposta do banco e só aparece após a confirmação de gravação. */
       const dados = {
-        materiaId, ensino: ano.ensino, ano: ano.ano, abrangencia: this.abrangencia, turmas: this.abrangencia === 'ano' ? [] : [...this.turmasSelecionadas], tipo: q.tipo, peso: q.peso, enunciado: q.enunciado,
+        materiaId, assuntoId:this.assuntoSelecionado[0], ensino: ano.ensino, ano: ano.ano, abrangencia: this.abrangencia, turmas: this.abrangencia === 'ano' ? [] : [...this.turmasSelecionadas], tipo: q.tipo, peso: q.peso, enunciado: q.enunciado,
         alternativas: q.tipo === 'objetiva' ? { ...q.alternativas } : {},
         respostaCorreta: q.tipo === 'objetiva' ? q.respostaCorreta : null,
       };
@@ -149,7 +159,7 @@ export class CadastrarQuestoesComponent implements OnInit, OnDestroy {
       this.cadastradas.update(lista => [...lista, { questao, vinculo: descricao, resumo: texto.length > 120 ? texto.slice(0, 117).trimEnd() + '...' : texto || 'Questão com imagem' }]);
       /* Mantém matéria/turma e abre um novo editor, sem perder os registros já cadastrados nesta tela. */
       this.questoes = [this.newQuestion()];
-      form.resetForm({ materiaId: this.materiaId, anoSelecionado: this.anoSelecionado, turmas: [...this.turmasSelecionadas] });
+      form.resetForm({ assuntos:[...this.assuntoSelecionado], materiaId: this.materiaId, anoSelecionado: this.anoSelecionado, turmas: [...this.turmasSelecionadas] });
       this.mensagem.set('Questão cadastrada com sucesso. Preencha a próxima.');
     } catch (error) {
       /* Falhas preservam o rascunho completo e não acrescentam questões à lista de confirmadas. */
@@ -161,8 +171,8 @@ export class CadastrarQuestoesComponent implements OnInit, OnDestroy {
   reset(form: NgForm) {
     /* Os dados não ficam em storage; o formulário retorna ao estado inicial. */
     if (this.saving()) return;
-    this.questoes = [this.newQuestion()]; this.materiaId = null; this.anoSelecionado = ''; this.turmasSelecionadas = []; this.erro.set(''); this.mensagem.set('');
-    form.resetForm({ materiaId: null, anoSelecionado: '', turmas: [] }); this.preview = true;
+    this.questoes = [this.newQuestion()]; this.assuntoVisit++;this.loadingAssuntos.set(false);this.assuntos=[];this.assuntoSelecionado=[];this.materiaId = null; this.anoSelecionado = ''; this.turmasSelecionadas = []; this.erro.set(''); this.mensagem.set('');
+    form.resetForm({ assuntos:[],materiaId: null, anoSelecionado: '', turmas: [] }); this.preview = true;
   }
 
   /** Descarta os dados locais ao sair da página ou fechar a aba. */

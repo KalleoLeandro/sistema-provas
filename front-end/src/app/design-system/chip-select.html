@@ -9,16 +9,17 @@
     <input [id]="id" type="text" role="combobox" [attr.aria-label]="label" [attr.aria-expanded]="open"
       [attr.aria-invalid]="invalid ? 'true' : null" [attr.aria-describedby]="invalid ? id + '-erro' : null"
       [attr.aria-controls]="id + '-sugestoes'" aria-autocomplete="list" aria-haspopup="listbox"
-      [attr.aria-activedescendant]="open && filteredOptions.length ? id + '-opcao-' + activeIndex : null"
-      [placeholder]="placeholder" [value]="query" [disabled]="disabled" autocomplete="off" autocapitalize="none" spellcheck="false"
+      [attr.aria-activedescendant]="open && (filteredOptions.length || canCreate) ? id + '-opcao-' + activeIndex : null"
+      [placeholder]="placeholder" [value]="query" [disabled]="disabled || value.length>=maxSelected" [attr.maxlength]="allowCreate?120:null" autocomplete="off" autocapitalize="none" spellcheck="false"
       data-lpignore="true" data-1p-ignore="true" (input)="search($event)" (focus)="open = true" (keydown)="keydown($event)" />
   </div>
-  @if (open && !disabled) {
-    <div class="sugestoes" [id]="id + '-sugestoes'" role="listbox" [attr.aria-label]="label" aria-multiselectable="true">
+  @if (open && !disabled && value.length<maxSelected) {
+    <div class="sugestoes" [id]="id + '-sugestoes'" role="listbox" [attr.aria-label]="label" [attr.aria-multiselectable]="maxSelected!==1">
       @for (option of filteredOptions; track option.value; let index = $index) {
         <button type="button" role="option" aria-selected="false" [id]="id + '-opcao-' + index" tabindex="-1"
           [class.destacada]="activeIndex === index" (mousedown)="$event.preventDefault()" (click)="select(option.value)">{{ option.label }}</button>
-      } @empty { <p role="status">{{ emptyMessage }}</p> }
+      } @empty { @if(!canCreate){<p role="status">{{ emptyMessage }}</p>} }
+      @if(canCreate){<button [id]="id + '-opcao-' + filteredOptions.length" type="button" role="option" aria-selected="false" tabindex="-1" [class.destacada]="activeIndex===filteredOptions.length" (mousedown)="$event.preventDefault()" (click)="requestCreate()">{{createLabel}} “{{query.trim()}}”</button>}
     </div>
   }
 </div>

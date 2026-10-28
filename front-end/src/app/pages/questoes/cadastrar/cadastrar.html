@@ -16,6 +16,10 @@
             @for (m of materiasDisponiveis; track m.id) { <option [ngValue]="m.id">{{ m.nome }}</option> }
           </select>
         </visual-campo>
+        <visual-campo rotulo="Assunto" identificador="questoes-assunto" orientacao="Busque assuntos parecidos ou crie um novo. Ao menos um assunto da matéria/ano/turma precisa de 4×0,5; 3×1,0; 2×1,5 e 1×2,0 para liberar a prova." [erro]="assuntoControl|validationMessage:form.submitted">
+          <visual-chip-select inputId="questoes-assunto" name="assuntos" label="Assunto da questão" placeholder="Digite o assunto" [options]="opcoesAssuntos" [(ngModel)]="assuntoSelecionado" #assuntoControl="ngModel" required [maxSelected]="1" [fuzzySearch]="true" [allowCreate]="true" createLabel="Criar assunto" (createOption)="createAssunto($event)" [invalid]="!!(assuntoControl|validationMessage:form.submitted)" [disabled]="!materiaId||loadingAssuntos()||creatingAssunto()||saving()" />
+          @if(creatingAssunto()){<p role="status">Criando assunto…</p>}
+        </visual-campo>
         <visual-campo rotulo="Ensino e ano" identificador="questoes-ano" [erro]="anoControl | validationMessage:form.submitted">
           <select campoVisual id="questoes-ano" name="anoSelecionado" [(ngModel)]="anoSelecionado" #anoControl="ngModel" (ngModelChange)="changeAno()" required [disabled]="!materiaId || saving()"
             aria-describedby="questoes-ano-erro" [attr.aria-invalid]="(anoControl | validationMessage:form.submitted) ? 'true' : null">
@@ -70,7 +74,7 @@
                     [name]="'alternativa-' + q.id + '-' + letra" [ngModel]="q.alternativas[letra]" (ngModelChange)="updateAlternative(q.id, letra, $event)" #alternativaControl="ngModel" richTextRequired [allowImages]="true" [disabled]="saving()" [invalid]="!!(alternativaControl | validationMessage:form.submitted)" />
                 </visual-campo>
               }
-              <visual-campo rotulo="Resposta correta" [identificador]="'resposta-' + q.id">
+              <visual-campo class="question-answer-field" rotulo="Resposta correta" [identificador]="'resposta-' + q.id">
                 <select campoVisual [id]="'resposta-' + q.id" [name]="'resposta-' + q.id" [ngModel]="q.respostaCorreta" (ngModelChange)="updateQuestion(q.id, { respostaCorreta: $event })" required [allowedValues]="letras" [disabled]="saving()">
                   @for (letra of letras; track letra) { <option [value]="letra">{{ letra }}</option> }
                 </select>

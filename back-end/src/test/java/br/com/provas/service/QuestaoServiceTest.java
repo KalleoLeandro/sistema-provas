@@ -15,8 +15,9 @@ import static org.mockito.Mockito.*;
 class QuestaoServiceTest {
     private final QuestaoRepository repository = mock(QuestaoRepository.class);
     private final QuestaoService service = new QuestaoService(repository);
+    @org.junit.jupiter.api.BeforeEach void subjects(){when(repository.hasSubject(anyLong(),anyLong())).thenReturn(true);}
     private QuestaoRequest request(String tipo, String enunciado, Map<String,String> alternativas) {
-        return new QuestaoRequest(6L, "F", 1, "turmas", List.of(5L), tipo, BigDecimal.ONE, enunciado, alternativas, "C");
+        return new QuestaoRequest(6L, "F", 1, "turmas", List.of(5L), tipo, BigDecimal.ONE, enunciado, alternativas, "C", 1L);
     }
     private Map<String,String> alternativas() { return Map.of("A","<p>1</p>","B","<p>2</p>","C","<p>3</p>","D","<p>4</p>","E","<p>5</p>"); }
 
@@ -81,19 +82,19 @@ class QuestaoServiceTest {
             return new Questao(20L,7L,6L,r.ensino(),r.ano(),r.abrangencia(),r.tipo(),r.peso(),r.enunciado(),Map.of(),null);
         });
         when(repository.findTargets(any())).thenReturn(turmas);
-        var specific = new QuestaoRequest(6L,"F",1,"turmas",List.of(5L,13L),"discursiva",BigDecimal.ONE,"<p>Texto</p>",Map.of(),null);
+        var specific = new QuestaoRequest(6L,"F",1,"turmas",List.of(5L,13L),"discursiva",BigDecimal.ONE,"<p>Texto</p>",Map.of(),null, 1L);
         assertEquals(2,service.create(7L,specific).turmas().size());
-        var year = new QuestaoRequest(6L,"F",1,"ano",List.of(),"discursiva",BigDecimal.ONE,"<p>Texto</p>",Map.of(),null);
+        var year = new QuestaoRequest(6L,"F",1,"ano",List.of(),"discursiva",BigDecimal.ONE,"<p>Texto</p>",Map.of(),null, 1L);
         assertEquals("ano",service.create(7L,year).abrangencia());
         verify(repository,times(2)).save(eq(7L),any());
     }
     @Test void rejectsEmptyDuplicateAndHiddenClassSelections() {
         when(repository.hasActiveYear(7L,6L,"F",1)).thenReturn(true);
         for (var ids : List.of(List.<Long>of(),List.of(5L,5L))) {
-            var r = new QuestaoRequest(6L,"F",1,"turmas",ids,"discursiva",BigDecimal.ONE,"<p>Texto</p>",Map.of(),null);
+            var r = new QuestaoRequest(6L,"F",1,"turmas",ids,"discursiva",BigDecimal.ONE,"<p>Texto</p>",Map.of(),null, 1L);
             assertThrows(DefaultErrorException.class,() -> service.create(7L,r));
         }
-        var r = new QuestaoRequest(6L,"F",1,"ano",List.of(5L),"discursiva",BigDecimal.ONE,"<p>Texto</p>",Map.of(),null);
+        var r = new QuestaoRequest(6L,"F",1,"ano",List.of(5L),"discursiva",BigDecimal.ONE,"<p>Texto</p>",Map.of(),null, 1L);
         assertThrows(DefaultErrorException.class,() -> service.create(7L,r));
         verify(repository,never()).save(anyLong(),any());
     }
@@ -105,7 +106,7 @@ class QuestaoServiceTest {
         when(repository.findVersionRevision(100L)).thenReturn(1L);
         when(repository.isVersionUsedInAnsweredExam(100L)).thenReturn(true);
         when(repository.hasActiveYear(7L,6L,"F",1)).thenReturn(true);
-        var edited = new QuestaoRequest(6L,"F",1,"ano",List.of(),"discursiva",new BigDecimal("2"),"<p>Alterada</p>",Map.of(),null);
+        var edited = new QuestaoRequest(6L,"F",1,"ano",List.of(),"discursiva",new BigDecimal("2"),"<p>Alterada</p>",Map.of(),null, 1L);
         when(repository.update(eq(10L),eq(7L),any())).thenReturn(new Questao(10L,7L,6L,"F",1,"ano","discursiva",new BigDecimal("2"),edited.enunciado(),Map.of(),null));
         var result = service.update(10L,7L,new br.com.provas.model.request.AtualizarQuestaoRequest(100L,1L,edited));
         assertEquals(10L,result.id()); assertEquals(101L,result.versaoId()); assertEquals("<p>Alterada</p>",result.enunciado());
@@ -133,7 +134,7 @@ class QuestaoServiceTest {
         when(repository.findCurrentVersionId(10L)).thenReturn(100L);
         when(repository.findVersionRevision(100L)).thenReturn(1L,2L);
         when(repository.hasActiveYear(7L,6L,"F",1)).thenReturn(true);
-        var r = new QuestaoRequest(6L,"F",1,"ano",List.of(),"discursiva",BigDecimal.ONE,"Alterada",Map.of(),null);
+        var r = new QuestaoRequest(6L,"F",1,"ano",List.of(),"discursiva",BigDecimal.ONE,"Alterada",Map.of(),null, 1L);
         when(repository.update(eq(10L),eq(7L),any())).thenReturn(new Questao(10L,7L,6L,"F",1,"ano","discursiva",BigDecimal.ONE,"Alterada",Map.of(),null));
         var result = service.update(10L,7L,new br.com.provas.model.request.AtualizarQuestaoRequest(100L,1L,r));
         assertEquals(100L,result.versaoId()); assertEquals(2L,result.revisao());
@@ -151,7 +152,7 @@ class QuestaoServiceTest {
     @Test void rejectsAClassOfTheSameYearWithoutAnAssignmentToTheSubject() {
         when(repository.hasActiveYear(7L,6L,"F",1)).thenReturn(true);
         when(repository.findTurmasByIds(List.of(13L),7L,6L)).thenReturn(List.of());
-        var r=new QuestaoRequest(6L,"F",1,"turmas",List.of(13L),"discursiva",BigDecimal.ONE,"Texto",Map.of(),null);
+        var r=new QuestaoRequest(6L,"F",1,"turmas",List.of(13L),"discursiva",BigDecimal.ONE,"Texto",Map.of(),null, 1L);
         assertEquals(HttpStatus.FORBIDDEN,assertThrows(DefaultErrorException.class,()->service.create(7L,r)).getStatus());
         verify(repository,never()).save(anyLong(),any());
     }

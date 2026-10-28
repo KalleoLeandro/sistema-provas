@@ -4,7 +4,6 @@ import br.com.provas.model.entity.*;
 import br.com.provas.model.request.*;
 import br.com.provas.model.response.*;
 import br.com.provas.repository.*;
-import java.security.SecureRandom;
 import java.time.*;
 import java.util.*;
 import org.springframework.http.HttpStatus;
@@ -17,7 +16,7 @@ import org.springframework.transaction.support.*;
 @Service
 public class ExecucaoProvaService {
  private final ExecucaoProvaRepository repository;private final ProvaRedisRepository redis;private final EntregaProvaService delivery;
- private final Clock clock;private final PasswordEncoder encoder;private final SecureRandom random=new SecureRandom();
+ private final Clock clock;private final PasswordEncoder encoder;
  public ExecucaoProvaService(ExecucaoProvaRepository repository,Clock clock,PasswordEncoder encoder,ProvaRedisRepository redis,EntregaProvaService delivery){this.repository=repository;this.clock=clock;this.encoder=encoder;this.redis=redis;this.delivery=delivery;}
  /**
   * Consulta regras sem iniciar cronômetro nem revelar questões/token.
@@ -46,8 +45,8 @@ public class ExecucaoProvaService {
   try{
    if(repository.findAttempt(aluno,lib).isPresent())return get(aluno,lib);
    if(!Boolean.TRUE.equals(request.aceitouRegras()))throw new DefaultErrorException("Confirme a leitura das regras.");
-   var c=available(aluno,lib,clock.instant());if(c.tokenHash()==null||request.token()==null||!encoder.matches(request.token(),c.tokenHash()))throw new DefaultErrorException("Token de início inválido. Confira com o professor.",HttpStatus.FORBIDDEN);
-   var selected=draw(repository.candidates(c));Instant now=clock.instant();
+   var c=available(aluno,lib,clock.instant(),true);if(c.tokenHash()==null||request.token()==null||!encoder.matches(request.token(),c.tokenHash()))throw new DefaultErrorException("Token de início inválido. Confira com o professor.",HttpStatus.FORBIDDEN);
+   var selected=QuestionDrawService.draw(repository.candidates(c),repository.subjects(c.id()));Instant now=clock.instant();
    if(!now.isBefore(c.encerraEm())||!redis.ownsStart(aluno,lib,lease))throw new DefaultErrorException("Não foi possível confirmar o início. Tente novamente.",HttpStatus.CONFLICT);
    Instant end=now.plus(Duration.ofMinutes(c.duracaoMinutos()));if(end.isAfter(c.encerraEm()))end=c.encerraEm();
    var attempt=repository.create(aluno,c,now,end,selected);
@@ -128,20 +127,15 @@ public class ExecucaoProvaService {
   * @return sequência fixa a ser copiada para a tentativa
   */
  public List<QuestaoSorteio> draw(List<QuestaoSorteio> candidates){
-  /* Composição totaliza dez pontos: 4×0,5, 3×1,0, 2×1,5 e 1×2,0. */
-  var selected=new ArrayList<QuestaoSorteio>();int[] weights={5,10,15,20},counts={4,3,2,1};
-  for(int i=0;i<weights.length;i++){final int w=weights[i];var pool=new ArrayList<>(candidates.stream().filter(q->q.peso().compareTo(java.math.BigDecimal.valueOf(w,1))==0).toList());
-   if(pool.size()<counts[i])throw new DefaultErrorException("Não há questões suficientes de peso "+(w/10.0)+" para iniciar esta prova. Avise o professor.",HttpStatus.CONFLICT);
-   Collections.shuffle(pool,random);selected.addAll(pool.subList(0,counts[i]));}
-  /* Primeira posição é sempre de 0,5; a questão de 2,0 fica aleatoriamente da sétima à décima. */
-  var first=selected.removeFirst();var highest=selected.removeLast();Collections.shuffle(selected,random);
-  var result=new ArrayList<QuestaoSorteio>(Collections.nCopies(10,null));result.set(0,first);result.set(6+random.nextInt(4),highest);
-  var iterator=selected.iterator();for(int i=0;i<10;i++)if(result.get(i)==null)result.set(i,iterator.next());return List.copyOf(result);
+  /* A mesma regra valida os pesos e a cobertura no cadastro da liberação e no início da tentativa. */
+  return QuestionDrawService.draw(candidates,candidates.stream().map(QuestaoSorteio::assuntoId).distinct().toList());
  }
  /** @param aluno identidade autenticada @param lib liberação @param now instante atual @return configuração autorizada */
- private ConfiguracaoInicioProva available(Long aluno,Long lib,Instant now){
+ private ConfiguracaoInicioProva available(Long aluno,Long lib,Instant now){return available(aluno,lib,now,false);}
+ private ConfiguracaoInicioProva available(Long aluno,Long lib,Instant now,boolean lock){
   /* O cadastro define turma, matéria e professor; IDs fornecidos pelo aluno não ampliam seu acesso. */
-  var c=repository.configuration(aluno,lib).orElseThrow(()->new DefaultErrorException("Prova não encontrada.",HttpStatus.NOT_FOUND));
+  /* O início bloqueia a configuração para congelar também a seleção de assuntos durante o sorteio. */
+  var c=(lock?repository.configuration(aluno,lib,true):repository.configuration(aluno,lib)).orElseThrow(()->new DefaultErrorException("Prova não encontrada.",HttpStatus.NOT_FOUND));
   if(now.isBefore(c.disponivelEm())||!now.isBefore(c.encerraEm()))throw new DefaultErrorException("Esta prova não está disponível para iniciar.",HttpStatus.CONFLICT);return c;
  }
 }

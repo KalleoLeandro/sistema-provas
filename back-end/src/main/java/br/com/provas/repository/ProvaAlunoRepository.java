@@ -26,5 +26,11 @@ public class ProvaAlunoRepository {
    CASE WHEN tentativa.submetida_em IS NOT NULL THEN 'submetida' WHEN tentativa.id IS NOT NULL THEN 'em_andamento' ELSE 'pendente' END AS situacao,
    l.duracao_minutos,l.token_hash IS NOT NULL AS token_configurado
   """+FILTER+" ORDER BY (tentativa.submetida_em IS NOT NULL),encerra_em,l.id LIMIT :tamanho OFFSET :offset",params(alunoId,agora).addValue("tamanho",tamanho).addValue("offset",offset),mapper);}
+ public List<ProvaAlunoResponse> findAvailable(Long alunoId,Instant agora,int tamanho,long offset,br.com.provas.model.request.OrdenacaoRequest order){return jdbc.query("""
+  SELECT l.id,COALESCE(tentativa.titulo,l.titulo) AS titulo,COALESCE(tentativa.materia,m.nome) AS materia,p.nome AS professor,
+   COALESCE(tentativa.iniciada_em,l.disponivel_em) AS disponivel_em,COALESCE(tentativa.encerra_em,l.encerra_em) AS encerra_em,
+   CASE WHEN tentativa.submetida_em IS NOT NULL THEN 'submetida' WHEN tentativa.id IS NOT NULL THEN 'em_andamento' ELSE 'pendente' END AS situacao,
+   l.duracao_minutos,l.token_hash IS NOT NULL AS token_configurado
+  """+FILTER+SqlOrder.clause(order,java.util.Map.of("titulo","titulo","materia","materia","professor","professor","disponivelEm","disponivel_em","encerraEm","encerra_em","situacao","CASE WHEN tentativa.submetida_em IS NOT NULL THEN 'Enviada' WHEN tentativa.id IS NOT NULL THEN 'Em andamento' ELSE 'Não iniciada' END"),"l.id")+" LIMIT :tamanho OFFSET :offset",params(alunoId,agora).addValue("tamanho",tamanho).addValue("offset",offset),mapper);}
  private MapSqlParameterSource params(Long alunoId,Instant agora){return new MapSqlParameterSource().addValue("aluno_id",alunoId).addValue("agora",LocalDateTime.ofInstant(agora,ZoneOffset.UTC));}
 }

@@ -28,3 +28,5 @@
 .question-saved-count { padding: 5px 10px; border-radius: var(--raio-padrao); background: var(--cor-info-fundo); color: var(--cor-texto); font-size: 13px; font-weight: 600; }
 @media(max-width:900px) { .question-info-grid { grid-template-columns: 1fr 1fr; } .question-info-grid > :nth-child(3) { grid-column: 1 / -1; } }
 @media(max-width:600px) { .question-info-grid { grid-template-columns: 1fr; } .question-info-grid > :nth-child(3) { grid-column: auto; } }
+
+.question-answer-field{width:140px;max-width:100%;justify-self:start}

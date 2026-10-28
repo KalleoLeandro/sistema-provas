@@ -24,7 +24,7 @@ public class DashboardRepository {
           SELECT a.id AS aluno_id,l.turma_id,t.ensino,t.ano,t.letra,pt.id AS tentativa_id,pt.submetida_em,
             COALESCE(n.pendentes,0) AS pendentes,COALESCE(n.nota,0) AS nota
           FROM provas_liberacoes l JOIN turmas t ON t.id=l.turma_id
-          JOIN alunos_2026 a ON a.turma_id=l.turma_id AND a.status='M'
+          JOIN alunos_2026 a ON a.turma_id=l.turma_id AND a.status IN ('M','R')
           LEFT JOIN provas_tentativas pt ON pt.liberacao_id=l.id AND pt.aluno_id=a.id
           LEFT JOIN notas n ON n.tentativa_id=pt.id
           WHERE l.disponivel_em<=:agora AND (:professor IS NULL OR (l.professor_id=:professor AND EXISTS (

@@ -28,23 +28,23 @@
                 </fieldset>
                 <div class="campos">
                     @if(perfil==='aluno'){
-                    <visual-campo rotulo="CGM do aluno" identificador="entrada-cgm" [erro]="cgmControl | validationMessage:formulario.submitted"
+                    <visual-campo rotulo="CGM do aluno" identificador="entrada-cgm" [erro]="formulario.submitted ? (cgmControl | validationMessage:true) : ''"
                         orientacao="Utilize o número do seu Cadastro Geral de Matrícula."><input autocomplete="off"
                             campoVisual id="entrada-cgm" name="cgm" [(ngModel)]="cgm" #cgmControl="ngModel" required pattern="[0-9]+"
                             maxlength="30" inputmode="numeric" placeholder="Digite seu CGM"
-                            aria-describedby="entrada-cgm-orientacao entrada-cgm-erro" [attr.aria-invalid]="(cgmControl | validationMessage:formulario.submitted) ? 'true' : null" [disabled]="ocupado" /></visual-campo>
+                            aria-describedby="entrada-cgm-orientacao entrada-cgm-erro" [attr.aria-invalid]="formulario.submitted && (cgmControl | validationMessage:true) ? 'true' : null" [disabled]="ocupado" /></visual-campo>
                     }@else{
-                    <visual-campo rotulo="Login" identificador="entrada-usuario" [erro]="loginControl | validationMessage:formulario.submitted"><input autocomplete="off" campoVisual
+                    <visual-campo rotulo="Login" identificador="entrada-usuario" [erro]="formulario.submitted ? (loginControl | validationMessage:true) : ''"><input autocomplete="off" campoVisual
                             id="entrada-usuario" name="usuario" [(ngModel)]="usuario" #loginControl="ngModel" required notBlank [trimmedMinlength]="3" maxlength="120"
-                            aria-describedby="entrada-usuario-erro" [attr.aria-invalid]="(loginControl | validationMessage:formulario.submitted) ? 'true' : null"
+                            aria-describedby="entrada-usuario-erro" [attr.aria-invalid]="formulario.submitted && (loginControl | validationMessage:true) ? 'true' : null"
                             placeholder="Digite seu login" [disabled]="ocupado" /></visual-campo>
-                    <visual-campo rotulo="Senha" identificador="entrada-senha" [erro]="senhaControl | validationMessage:formulario.submitted"><input autocomplete="off" campoVisual
+                    <visual-campo rotulo="Senha" identificador="entrada-senha" [erro]="formulario.submitted ? (senhaControl | validationMessage:true) : ''"><input autocomplete="off" campoVisual
                             id="entrada-senha" name="senha" type="password" [(ngModel)]="senha" #senhaControl="ngModel" required notBlank minlength="8" maxlength="128"
-                            aria-describedby="entrada-senha-erro" [attr.aria-invalid]="(senhaControl | validationMessage:formulario.submitted) ? 'true' : null"
+                            aria-describedby="entrada-senha-erro" [attr.aria-invalid]="formulario.submitted && (senhaControl | validationMessage:true) ? 'true' : null"
                             placeholder="Digite sua senha" [disabled]="ocupado" /></visual-campo>
                     }
                 </div>
-                @if(formulario.touched&&formulario.invalid){<visual-aviso>{{ perfil==='aluno' ? 'Informe um CGM contendo
+                @if(formulario.submitted&&formulario.invalid){<visual-aviso>{{ perfil==='aluno' ? 'Informe um CGM contendo
                     apenas números.' : 'Preencha seu login e sua senha.' }}</visual-aviso>}
                 @if(mensagem){<p role="status">{{ mensagem }}</p>}
                 <button botaoVisual type="submit" class="enviar" [disabled]="ocupado">{{ ocupado ?

@@ -1,4 +1,6 @@
-import { statusAluno } from '../../models/status-aluno';
+import { ListSort } from '../../design-system/list-sort';
+import { SortHeaderComponent } from '../../design-system/sort-header';
+import { statusAluno, participaEstatisticas } from '../../models/status-aluno';
 import { Component, HostListener, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,8 +13,10 @@ import { TabsComponent } from '../../design-system/tabs';
 
 export interface ProvaRelatorio { id:number; titulo:string; materia:string; professor:string; turmaId:number; disponivelEm:string; encerraEm:string; }
 export interface ResultadoRelatorio { alunoId:number; nome:string; numero:number|null; cgm:string; status:'M'|'T'|'R'|'D'; tentativaId:number|null; iniciadaEm:string|null; entregueEm:string|null; pendentes:number; nota:number|null; }
-@Component({selector:'app-relatorios',imports:[FormsModule,DatePipe,AlertComponent,ButtonDirective,FieldComponent,InputDirective,RecordNameDirective,TableScrollComponent,TabsComponent],templateUrl:'./relatorios.html',styleUrl:'../../design-system/reports.css'})
+@Component({selector:'app-relatorios',imports: [SortHeaderComponent,FormsModule,DatePipe,AlertComponent,ButtonDirective,FieldComponent,InputDirective,RecordNameDirective,TableScrollComponent,TabsComponent],templateUrl:'./relatorios.html',styleUrl:'../../design-system/reports.css'})
 export class RelatoriosComponent implements OnInit,OnDestroy {
+ readonly sort=new ListSort();
+
  readonly api=inject(ApiService);
  readonly turmas=signal<Turma[]>([]);readonly provas=signal<ProvaRelatorio[]>([]);readonly alunos=signal<Aluno[]>([]);readonly resultados=signal<ResultadoRelatorio[]>([]);
  readonly loading=signal(false);readonly erro=signal('');readonly carregado=signal(false);
@@ -23,7 +27,7 @@ export class RelatoriosComponent implements OnInit,OnDestroy {
  selecionados:Record<string,boolean>={numero:true,nome:true,cgm:true,status:true,turma:false,prova:false,materia:false,professor:false,situacao:true,entregueEm:true,nota:true};
  get campos(){return this.modo==='alunos'?this.camposAlunos:this.camposResultados;}
  get colunas(){return this.campos.filter(c=>this.selecionados[c.id]);}
- get linhas():Array<Aluno|ResultadoRelatorio>{return this.modo==='alunos'?this.alunos():this.resultados();}
+ get linhas():Array<Aluno|ResultadoRelatorio>{return this.sort.ordered<Aluno|ResultadoRelatorio>(this.modo==='alunos'?this.alunos():this.resultados(),(item,c)=>c==='numero'?item.numero:c==='nota'?(item as ResultadoRelatorio).nota:c==='entregueEm'?(item as ResultadoRelatorio).entregueEm:this.valor(item,c));}
  get matriculados(){return this.alunos().filter(a=>a.status==='M').length;}
  get remanejados(){return this.alunos().filter(a=>a.status==='R').length;}
  get desistentes(){return this.alunos().filter(a=>a.status==='D').length;}
@@ -31,7 +35,8 @@ export class RelatoriosComponent implements OnInit,OnDestroy {
  modo='alunos';turmaId:number|null=null;provaId:number|null=null;geradoEm=new Date();private visit=0;
  get turma(){return this.turmas().find(t=>t.id===this.turmaId);}
  get prova(){return this.provas().find(p=>p.id===this.provaId);}
- get entregues(){return this.resultados().filter(r=>r.entregueEm);}
+ get totalEstatistico(){return this.linhas.filter(r=>participaEstatisticas(r.status)).length;}
+ get entregues(){return this.resultados().filter(r=>participaEstatisticas(r.status)&&r.entregueEm);}
  get corrigidas(){return this.entregues.filter(r=>!r.pendentes);}
  get media(){const itens=this.corrigidas;return itens.length?itens.reduce((s,r)=>s+(r.nota??0),0)/itens.length:null;}
  ngOnInit(){void this.init();}ngOnDestroy(){this.clear();}

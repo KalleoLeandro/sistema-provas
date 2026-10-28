@@ -25,11 +25,19 @@ public class CorrecaoService {
   * @return página de entregas, sem incluir provas em andamento
   */
  @Transactional(readOnly=true)
- public PaginaResponse<ProvaCorrecaoResumoResponse> findAll(Long professor,Long turma,String situacao,int pagina,int tamanho){
+ public PaginaResponse<ProvaCorrecaoResumoResponse> findAll(Long professor,Long turma,String situacao,int pagina,int tamanho){return findAll(professor,turma,situacao,pagina,tamanho,new br.com.provas.model.request.OrdenacaoRequest(null,null));}
+ /** Consulta a lista inteira na ordem escolhida antes de aplicar a página solicitada.
+  * @param order coluna e direção validadas; preserva a ordem padrão quando ausente
+  * @return página no mesmo escopo autorizado, sem modificar os filtros
+  */
+ @Transactional(readOnly=true)
+ public PaginaResponse<ProvaCorrecaoResumoResponse> findAll(Long professor,Long turma,String situacao,int pagina,int tamanho,br.com.provas.model.request.OrdenacaoRequest order){
+ /* A coluna é resolvida por uma lista permitida no repository, sem interpolar entrada livre no SQL. */
+ 
   /* Autoria integra todas as consultas; a turma informada nunca amplia acesso a outro professor. */
   if(pagina<1||!Set.of(15,25,50).contains(tamanho)||!Set.of("todas","pendentes","corrigidas").contains(situacao))throw new DefaultErrorException("Informe filtros e paginação válidos.");
   long total=repository.count(professor,turma,situacao);int atual=(int)Math.min(pagina,Math.max(1,(total+tamanho-1)/tamanho));
-  return new PaginaResponse<>(repository.findAll(professor,turma,situacao,tamanho,(long)(atual-1)*tamanho),total,atual,tamanho);
+  return new PaginaResponse<>((order.ordenacao()==null?repository.findAll(professor,turma,situacao,tamanho,(long)(atual-1)*tamanho):repository.findAll(professor,turma,situacao,tamanho,(long)(atual-1)*tamanho,order)),total,atual,tamanho);
  }
  /**
   * Carrega a cópia entregue e as respostas originais para correção.

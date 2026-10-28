@@ -18,7 +18,7 @@ class ExecucaoProvaServiceTest {
  private final EntregaProvaService delivery=mock(EntregaProvaService.class);
  private final PasswordEncoder encoder=mock(PasswordEncoder.class);
  private final ExecucaoProvaService service=new ExecucaoProvaService(repository,Clock.fixed(now,ZoneOffset.UTC),encoder,redis,delivery);
- private List<QuestaoSorteio> bank(){var bank=new ArrayList<QuestaoSorteio>();long id=0;for(String peso:List.of("0.5","1.0","1.5","2.0"))for(int i=0;i<10;i++)bank.add(new QuestaoSorteio(++id,id,"objetiva",new BigDecimal(peso),"Texto",Map.of("A","a","B","b"),"A"));return bank;}
+ private List<QuestaoSorteio> bank(){var bank=new ArrayList<QuestaoSorteio>();long id=0;for(String peso:List.of("0.5","1.0","1.5","2.0"))for(int i=0;i<10;i++)bank.add(new QuestaoSorteio(++id,id,"objetiva",new BigDecimal(peso),"Texto",Map.of("A","a","B","b"),"A",1L));return bank;}
  private EstadoProvaRedis state(boolean sealed,boolean persisted,Instant end,String answer,long revision){
   var copy=new TentativaProvaResponse(5L,"Prova","Matemática",now.minusSeconds(60),end,now,"em_andamento",false,List.of(new QuestaoExecucaoResponse(1,"objetiva",new BigDecimal("0.5"),"Texto",Map.of("A","a","B","b"),null,0)));
   return new EstadoProvaRedis(1L,copy,Map.of(1,answer),Map.of(1,revision),sealed,persisted,sealed?now:null,false);

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, forwardRef, inject, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, forwardRef, inject, Input, Output, EventEmitter } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface ChipSelectOption { value: number; label: string; }
@@ -15,6 +15,15 @@ export class ChipSelectComponent implements ControlValueAccessor {
   @Input() placeholder = 'Digite para buscar';
   @Input() emptyMessage = 'Nenhuma opção encontrada.';
   @Input() invalid = false;
+  @Input() maxSelected=Number.POSITIVE_INFINITY;
+  @Input() allowCreate=false;
+  @Input() createLabel='Criar opção';
+  @Input() fuzzySearch=false;
+  @Output() createOption=new EventEmitter<string>();
+  get canCreate(){const normalize=(s:string)=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();return this.allowCreate&&this.value.length<this.maxSelected&&!!this.query.trim()&&this.query.trim().length<=120&&!this.options.some(o=>normalize(o.label)===normalize(this.query));}
+  requestCreate(){if(!this.disabled&&this.canCreate)this.createOption.emit(this.query.trim().replace(/\s+/g,' '));}
+  private distance(a:string,b:string){let row=Array.from({length:b.length+1},(_,i)=>i);for(let i=1;i<=a.length;i++){const next=[i];for(let j=1;j<=b.length;j++)next[j]=Math.min(next[j-1]+1,row[j]+1,row[j-1]+(a[i-1]===b[j-1]?0:1));row=next;}return row[b.length];}
+
   @Input() options: ChipSelectOption[] = [];
   private readonly element = inject(ElementRef<HTMLElement>);
   private readonly changeDetector = inject(ChangeDetectorRef);
@@ -31,7 +40,8 @@ export class ChipSelectComponent implements ControlValueAccessor {
     /* Texto digitado filtra o catálogo; nunca cria valores livres ou IDs desconhecidos. */
     const normalize = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     const query = normalize(this.query.trim());
-    return this.options.filter(option => !this.value.includes(option.value) && normalize(option.label).includes(query));
+    if(this.value.length>=this.maxSelected)return [];
+    return this.options.filter(option => !this.value.includes(option.value) && (normalize(option.label).includes(query)||this.fuzzySearch&&query.split(/\s+/).every(term=>normalize(option.label).includes(term)||term.length>=4&&normalize(option.label).split(/\s+/).some(word=>word.replace(/(?:oes|ao)$/,'').startsWith(term.replace(/(?:oes|ao)$/,''))||this.distance(term,word)<=Math.min(2,Math.floor(term.length/3))))));
   }
 
   /** Retorna os rótulos dos chips na ordem de seleção. */
@@ -65,9 +75,9 @@ export class ChipSelectComponent implements ControlValueAccessor {
   /** Seleciona somente uma opção válida, sem repetir chips. */
   select(value: number): void {
     /* Após selecionar, a busca é limpa para facilitar a escolha de outros itens. */
-    if (this.disabled || this.value.includes(value) || !this.options.some(option => option.value === value)) return;
+    if (this.disabled || this.value.length>=this.maxSelected || this.value.includes(value) || !this.options.some(option => option.value === value)) return;
     this.value = [...this.value, value];
-    this.query = ''; this.activeIndex = 0;
+    this.query = ''; this.activeIndex = 0;if(this.value.length>=this.maxSelected)this.open=false;
     this.onChange([...this.value]); this.onTouched();
   }
 
@@ -83,11 +93,11 @@ export class ChipSelectComponent implements ControlValueAccessor {
   /** Permite navegar, selecionar e fechar as sugestões sem mouse. */
   keydown(event: KeyboardEvent): void {
     /* Enter nunca envia o formulário ao tentar selecionar; texto livre não vira chip. */
-    if (this.disabled) return;
-    const count = this.filteredOptions.length;
+    if (this.disabled || this.value.length>=this.maxSelected) return;
+    const count = this.filteredOptions.length+(this.canCreate?1:0);
     if (event.key === 'Enter') {
       event.preventDefault();
-      if (this.open && count) this.select(this.filteredOptions[this.activeIndex]?.value ?? this.filteredOptions[0].value);
+      if(this.open&&count){if(this.canCreate&&this.activeIndex===this.filteredOptions.length)this.requestCreate();else this.select(this.filteredOptions[this.activeIndex]?.value??this.filteredOptions[0].value);}
     } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       this.activeIndex = !this.open ? 0 : count ? (this.activeIndex + (event.key === 'ArrowDown' ? 1 : count - 1)) % count : 0;

@@ -17,7 +17,7 @@
     @else if (!erro()) {
       <visual-table-scroll><div class="tabela-visual"><table>
         <caption class="sr-only">Alunos das turmas do professor</caption>
-        <thead><tr><th scope="col">Nome</th><th scope="col">Número</th><th scope="col">CGM</th><th scope="col">Turma</th><th scope="col">Status</th></tr></thead>
+        <thead><tr><th scope="col" sortColumn="nome" [sort]="sort" (sortChange)="changeSort()">Nome</th><th scope="col" sortColumn="numero" [sort]="sort" (sortChange)="changeSort()">Número</th><th scope="col" sortColumn="cgm" [sort]="sort" (sortChange)="changeSort()">CGM</th><th scope="col" sortColumn="turma" [sort]="sort" (sortChange)="changeSort()">Turma</th><th scope="col" sortColumn="status" [sort]="sort" (sortChange)="changeSort()">Status</th></tr></thead>
         <tbody>@for (a of alunos(); track a.id) {
           <tr><th nomeRegistro scope="row">{{ a.nome }}</th><td>{{ a.numero ?? '—' }}</td><td>{{ a.cgm }}</td><td>{{ a.ensino === 'F' ? 'Fundamental' : 'Médio' }} — {{ a.ano }}º ano {{ a.letra }}</td><td><span class="status-visual" [class.inativo]="a.status !== 'M'">{{ statusAluno(a.status) }}</span></td></tr>
         } @empty { <tr><td colspan="5">Nenhum aluno encontrado nas turmas selecionadas.</td></tr> }</tbody>

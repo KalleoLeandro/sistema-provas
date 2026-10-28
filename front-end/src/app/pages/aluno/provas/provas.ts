@@ -1,3 +1,5 @@
+import { ListSort } from '../../../design-system/list-sort';
+import { SortHeaderComponent } from '../../../design-system/sort-header';
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -9,8 +11,11 @@ import { ApiService } from '../../../services/api.service';
 import { Pagina } from '../../../models/aluno';
 export interface ProvaDisponivel {id:number;titulo:string;materia:string;professor:string;disponivelEm:string;encerraEm:string;situacao:string;duracaoMinutos:number;tokenConfigurado:boolean;}
 export interface ProvasAluno {provas:Pagina<ProvaDisponivel>;total:number;concluidas:number;}
-@Component({selector:'app-provas-aluno',imports:[RouterLink,DatePipe,AlertComponent,ButtonDirective,CardComponent,RecordNameDirective,ProgressComponent,PaginationComponent,TableScrollComponent],templateUrl:'./provas.html'})
+@Component({selector:'app-provas-aluno',imports:[SortHeaderComponent,RouterLink,DatePipe,AlertComponent,ButtonDirective,CardComponent,RecordNameDirective,ProgressComponent,PaginationComponent,TableScrollComponent],templateUrl:'./provas.html'})
 export class ProvasAlunoComponent implements OnInit,OnDestroy {
+ readonly sort=new ListSort();
+ changeSort(){this.pagina=1;void this.load();}
+
   private readonly api=inject(ApiService);
   readonly dados=signal<ProvasAluno|null>(null);
   readonly loading=signal(false);
@@ -23,7 +28,7 @@ export class ProvasAlunoComponent implements OnInit,OnDestroy {
   /** Consulta a identidade da sessão; o navegador não escolhe o aluno destinatário. */
   async load(){
     const visit=++this.visit;this.loading.set(true);this.erro.set('');
-    try{const dados=await this.api.get<ProvasAluno>('/aluno/provas?pagina='+this.pagina+'&tamanho='+this.tamanho);
+    try{const dados=await this.api.get<ProvasAluno>('/aluno/provas?pagina='+this.pagina+'&tamanho='+this.tamanho+this.sort.query());
       if(visit!==this.visit)return;this.dados.set(dados);this.pagina=dados.provas.pagina;
     }catch{if(visit===this.visit){this.dados.set(null);this.erro.set('Não foi possível carregar suas provas. Tente novamente.');}}
     finally{if(visit===this.visit)this.loading.set(false);}
