@@ -25,6 +25,14 @@ docker compose down
 
 `down` encerra os serviços e mantém o banco. Para atualizar as imagens das aplicações após mudanças, execute novamente `docker compose up --build -d`.
 
+## Backup automático do banco
+
+O Compose inclui o serviço `backup`, que gera `database/backups/dump.sql` no
+servidor ao iniciar e a cada quatro horas. Mantém somente o último dump
+concluído: o anterior só é substituído depois que o novo termina sem erro,
+com conteúdo e marcador de conclusão. Consulte [operação e restauração](database/backup/README.md)
+para mudar o destino, executar manualmente ou verificar o serviço.
+
 ## Imagens das aplicações
 
 Cada aplicação possui seu próprio Dockerfile e .dockerignore. O front-end compila com Node 24 e serve os arquivos com Nginx, incluindo acesso direto às rotas Angular. O back-end compila com Maven Wrapper e Java 27, conforme o pom.xml, e executa como usuário sem privilégios. O empacotamento da imagem não executa os testes que dependem do contexto do banco.

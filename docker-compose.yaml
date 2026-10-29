@@ -32,6 +32,28 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  backup:
+    build:
+      context: ./database/backup
+    environment:
+      MYSQL_HOST: banco
+      MYSQL_DATABASE: ${BANCO_NOME:-sgp}
+      MYSQL_USER: ${BANCO_USUARIO:-provas}
+      MYSQL_PASSWORD: ${BANCO_SENHA:?Defina BANCO_SENHA no arquivo .env}
+      TZ: America/Sao_Paulo
+    volumes:
+      - ${BACKUP_DIRETORIO:-./database/backups}:/backups
+    depends_on:
+      banco:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/backup-healthcheck.sh"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 5m
+
   redis:
     image: redis:8.2-alpine
     command: ["redis-server", "--appendonly", "yes", "--appendfsync", "always", "--maxmemory-policy", "noeviction"]

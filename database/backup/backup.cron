@@ -1,0 +1,4 @@
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+CRON_TZ=America/Sao_Paulo
+0 */4 * * * root /usr/local/bin/backup.sh >> /proc/1/fd/1 2>> /proc/1/fd/2
