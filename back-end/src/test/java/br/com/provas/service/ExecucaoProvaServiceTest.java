@@ -23,8 +23,8 @@ class ExecucaoProvaServiceTest {
   var copy=new TentativaProvaResponse(5L,"Prova","Matemática",now.minusSeconds(60),end,now,"em_andamento",false,List.of(new QuestaoExecucaoResponse(1,"objetiva",new BigDecimal("0.5"),"Texto",Map.of("A","a","B","b"),null,0)));
   return new EstadoProvaRedis(1L,copy,Map.of(1,answer),Map.of(1,revision),sealed,persisted,sealed?now:null,false);
  }
- @Test void drawAlwaysRespectsCompositionAndOrderWithoutRepeating(){for(int i=0;i<500;i++){var result=service.draw(bank());assertEquals(10,result.size());assertEquals(10,result.stream().map(QuestaoSorteio::id).distinct().count());assertEquals(0,result.getFirst().peso().compareTo(new BigDecimal("0.5")));for(int n=0;n<6;n++)assertTrue(result.get(n).peso().compareTo(new BigDecimal("2.0"))<0);int[] counts={4,3,2,1};for(int n=0;n<4;n++){final int w=n+1;assertEquals(counts[n],result.stream().filter(q->q.peso().multiply(BigDecimal.valueOf(2)).intValue()==w).count());}}}
- @Test void missingWeightDoesNotProducePartialExam(){assertThrows(DefaultErrorException.class,()->service.draw(bank().stream().filter(q->q.peso().doubleValue()!=2).toList()));}
+ @Test void drawAlwaysRespectsCompositionAndOrderWithoutRepeating(){for(int i=0;i<500;i++){var result=QuestionDrawService.draw(bank(),br.com.provas.support.TestProofConfig.plan(List.of(1L)));assertEquals(10,result.size());assertEquals(10,result.stream().map(QuestaoSorteio::id).distinct().count());int[] counts={4,3,2,1};for(int n=0;n<4;n++){final int w=n+1;assertEquals(counts[n],result.stream().filter(q->q.peso().multiply(BigDecimal.valueOf(2)).intValue()==w).count());}}}
+ @Test void missingWeightDoesNotProducePartialExam(){assertThrows(DefaultErrorException.class,()->QuestionDrawService.draw(bank().stream().filter(q->q.peso().doubleValue()!=2).toList(),br.com.provas.support.TestProofConfig.plan(List.of(1L))));}
  @Test void answerUsesRedisWithoutAnyMysqlOperation(){
   when(redis.find(9L,5L)).thenReturn(Optional.of(state(false,false,now.plusSeconds(100),"",0)),Optional.of(state(false,false,now.plusSeconds(100),"A",1)));
   when(redis.answer(9L,5L,1,"A",0)).thenReturn(1L);

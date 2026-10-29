@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 public class ProvaController {
     private final ProvaService service;
     public ProvaController(ProvaService service) { this.service=service; }
+    @PostMapping("/turmas/{turmaId}/analisar")
+    public PlanejamentoProvaResponse analyze(@AuthenticationPrincipal LoginResponse usuario,@PathVariable @Positive Long turmaId,@Valid @RequestBody br.com.provas.model.request.PlanejarProvaRequest request){return service.analyze(usuario.id(),turmaId,request);}
     @GetMapping("/turmas/{turmaId}/assuntos")
     public java.util.List<AssuntoProvaResponse> subjectOptions(@AuthenticationPrincipal LoginResponse usuario,@PathVariable @Positive Long turmaId,@RequestParam @Positive Long materiaId){return service.subjectOptions(usuario.id(),turmaId,materiaId);}
     @GetMapping("/turmas/{turmaId}")

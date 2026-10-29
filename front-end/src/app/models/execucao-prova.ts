@@ -1,3 +1,3 @@
 export interface QuestaoExecucao {numero:number;tipo:'objetiva'|'discursiva';peso:number;enunciado:string;alternativas:Record<string,string>;resposta:string|null;revisao:number;}
 export interface TentativaProva {liberacaoId:number;titulo:string;materia:string;iniciadaEm:string;encerraEm:string;agora:string;situacao:'em_andamento'|'submetida';enviadaAgora:boolean;questoes:QuestaoExecucao[];progresso?:{total:number;concluidas:number}|null;}
-export interface RegrasProva {id:number;titulo:string;materia:string;duracaoMinutos:number;encerraEm:string;iniciada:boolean;submetida:boolean;}
+export interface RegrasProva {quantidadeQuestoes:number;valorTotal:number;id:number;titulo:string;materia:string;duracaoMinutos:number;encerraEm:string;iniciada:boolean;submetida:boolean;}

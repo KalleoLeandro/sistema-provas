@@ -1,34 +1,6 @@
 package br.com.provas.service;
-
-import br.com.provas.model.entity.QuantidadeQuestoesTurma;
-import br.com.provas.repository.QuestaoRepository;
-import java.util.List;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
+import br.com.provas.repository.QuestaoRepository;import br.com.provas.model.entity.PendenciaComposicao;import org.junit.jupiter.api.Test;import java.util.List;import java.math.BigDecimal;import static org.junit.jupiter.api.Assertions.*;import static org.mockito.Mockito.*;
 class PendenciaQuestoesServiceTest {
-    private final QuestaoRepository repository=mock(QuestaoRepository.class);
-    private final PendenciaQuestoesService service=new PendenciaQuestoesService(repository);
-
-    @Test void emptyClassNeedsFourThreeTwoAndOneQuestions() {
-        when(repository.countByAssignedClass(7L)).thenReturn(List.of(new QuantidadeQuestoesTurma(6L,"Matemática",5L,"F",1,"A",0,0,0,0)));
-        var result=service.findAll(7L);
-        assertEquals(List.of(4,3,2,1),result.getFirst().quantidades().stream().map(q->q.faltantes()).toList());
-        assertEquals(6L,result.getFirst().materiaId()); assertEquals(5L,result.getFirst().turmaId());
-        verify(repository).countByAssignedClass(7L);
-    }
-    @Test void removesCompleteClassesAndDoesNotCompensateBetweenWeights() {
-        when(repository.countByAssignedClass(7L)).thenReturn(List.of(
-            new QuantidadeQuestoesTurma(6L,"Matemática",5L,"F",1,"A",4,3,2,1),
-            new QuantidadeQuestoesTurma(6L,"Matemática",13L,"F",1,"B",10,2,0,0)));
-        var result=service.findAll(7L);
-        assertEquals(1,result.size()); assertEquals("B",result.getFirst().letra());
-        assertEquals(List.of(0,1,2,1),result.getFirst().quantidades().stream().map(q->q.faltantes()).toList());
-        assertEquals(10,result.getFirst().quantidades().getFirst().cadastradas());
-    }
-    @Test void noAssignedClassesMeansNoPendingRows() {
-        when(repository.countByAssignedClass(7L)).thenReturn(List.of());
-        assertTrue(service.findAll(7L).isEmpty());
-    }
+ @Test void usesSavedQuantitiesInsteadOfFixedWeights(){var repo=mock(QuestaoRepository.class);when(repo.countMissingPlans(7L)).thenReturn(List.of(new PendenciaComposicao(1L,"Prova",6L,"Matemática",5L,"F",1,"A",2L,"Frações",new BigDecimal("1.25"),7,3)));var rows=new PendenciaQuestoesService(repo).findAll(7L);assertEquals(4,rows.getFirst().quantidades().getFirst().faltantes());assertEquals(1L,rows.getFirst().liberacaoId());}
+ @Test void withoutReleasesThereIsNoGenericMinimum(){var repo=mock(QuestaoRepository.class);when(repo.countMissingPlans(7L)).thenReturn(List.of());assertTrue(new PendenciaQuestoesService(repo).findAll(7L).isEmpty());}
 }

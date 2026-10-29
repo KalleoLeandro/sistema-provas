@@ -14,8 +14,8 @@ public record QuestaoRequest(
     @NotNull(message = "Informe a lista de turmas, vazia para ano inteiro.") @Size(max = 26, message = "Selecione até 26 turmas do mesmo ano.")
     List<@NotNull(message = "A turma não pode ser nula.") @Positive(message = "Informe uma turma válida.") Long> turmas,
     @NotBlank(message = "O tipo é obrigatório.") @Pattern(regexp = "objetiva|discursiva", message = "Selecione um tipo de questão válido.") String tipo,
-    @NotNull(message = "O peso é obrigatório.") @DecimalMin(value = "0.1", message = "O peso deve ser positivo.")
-    @Digits(integer = 3, fraction = 1, message = "O peso deve ter até três inteiros e uma casa decimal.") BigDecimal peso,
+    @NotNull(message = "O peso é obrigatório.") @DecimalMin(value = "0.01", message = "O peso deve ser positivo.")
+    @Digits(integer = 6, fraction = 2, message = "O peso deve ter até seis inteiros e duas casas decimais.") BigDecimal peso,
     @NotBlank(message = "O enunciado é obrigatório.") @Size(max = 8000000, message = "O enunciado excede o tamanho permitido.") String enunciado,
     @NotNull(message = "Informe as alternativas, mesmo quando vazias na questão discursiva.") @Size(max = 5, message = "Informe no máximo cinco alternativas.")
     Map<@NotBlank(message = "Identifique a alternativa de A a E.") @Pattern(regexp = "[A-E]", message = "A alternativa deve ser identificada de A a E.") String,

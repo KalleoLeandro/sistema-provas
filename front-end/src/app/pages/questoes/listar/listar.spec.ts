@@ -58,7 +58,7 @@ describe('Lista de questões', () => {
     const c = fixture.componentInstance; const base = c.questoes()[0];
     c.questoes.set([{...base,id:1,peso:0.5}, {...base,id:2,peso:2,tipo:'discursiva',abrangencia:'ano'},
       {...base,id:3,peso:2,tipo:'discursiva',letras:'B'}, {...base,id:4,peso:2,tipo:'discursiva',ano:2}]);
-    expect(c.pesosDisponiveis).toEqual([0.5,2]);
+
     c.peso = 2; c.tipo = 'discursiva';
     expect(c.questoesFiltradas.map(q => q.id)).toEqual([2,3,4]);
     c.ensinoAno = 'F:1'; c.turma = 'A';
@@ -84,19 +84,19 @@ describe('Lista de questões', () => {
   it('alterna as abas e filtra pendências por ensino, ano e turma', async () => {
     const fixture = TestBed.createComponent(ListarQuestoesComponent); await fixture.whenStable();
     const c=fixture.componentInstance;
-    c.pendencias.set([{assuntoId:1,assunto:'Frações',materiaId:6,materia:'Matemática',turmaId:5,ensino:'F',ano:1,letra:'A',quantidades:[{peso:0.5,minimo:4,cadastradas:1,faltantes:3}]},
-      {assuntoId:1,assunto:'Frações',materiaId:6,materia:'Matemática',turmaId:13,ensino:'F',ano:2,letra:'B',quantidades:[{peso:0.5,minimo:4,cadastradas:0,faltantes:4}]}]);
+    c.pendencias.set([{liberacaoId:1,titulo:'Prova',assuntoId:1,assunto:'Frações',materiaId:6,materia:'Matemática',turmaId:5,ensino:'F',ano:1,letra:'A',quantidades:[{peso:0.5,minimo:4,cadastradas:1,faltantes:3}]},
+      {liberacaoId:1,titulo:'Prova',assuntoId:1,assunto:'Frações',materiaId:6,materia:'Matemática',turmaId:13,ensino:'F',ano:2,letra:'B',quantidades:[{peso:0.5,minimo:4,cadastradas:0,faltantes:4}]}]);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.question-deficits')).toBeNull();
     (fixture.nativeElement.querySelector('#questoes-tab-faltantes') as HTMLButtonElement).click(); await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('visual-pagination')).toBeNull();
     expect(fixture.nativeElement.querySelector('#questoes-tab-faltantes').getAttribute('aria-selected')).toBe('true');
-    expect(fixture.nativeElement.querySelector('.question-deficits').textContent).toContain('Faltam 3');
+    expect(fixture.nativeElement.querySelector('.question-deficits tbody tr td:last-child').textContent).toBe('3');
     expect(c.anosDisponiveis.some(a=>a.value==='F:2')).toBe(true);
     const select=fixture.nativeElement.querySelector('#questoes-filtro-ano') as HTMLSelectElement;
     select.value='F:1';select.dispatchEvent(new Event('change',{bubbles:true}));await fixture.whenStable();
     expect(c.pendenciasFiltradas).toHaveLength(1);
-    expect(fixture.nativeElement.querySelector('.question-deficits').textContent).not.toContain('Faltam 4');
+    expect(fixture.nativeElement.querySelectorAll('.question-deficits tbody tr')).toHaveLength(1);
     (fixture.nativeElement.querySelector('#questoes-tab-cadastradas') as HTMLButtonElement).click(); await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('visual-pagination')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.question-deficits')).toBeNull();
@@ -119,4 +119,14 @@ describe('Lista de questões', () => {
     c.ensinoAno='F:1';expect(c.turmasDisponiveis).toEqual(['A']);
   });
 
+  it('filtra por peso decimal digitado com vírgula e restaura a lista ao limpar',async()=>{
+    const fixture=TestBed.createComponent(ListarQuestoesComponent);await fixture.whenStable();
+    const c=fixture.componentInstance,base=c.questoes()[0];c.questoes.set([{...base,id:1,peso:1.5},{...base,id:2,peso:2}]);fixture.detectChanges();
+    const input=fixture.nativeElement.querySelector('#questoes-filtro-peso') as HTMLInputElement;
+    input.value='1,5';input.dispatchEvent(new Event('input',{bubbles:true}));await fixture.whenStable();fixture.detectChanges();
+    expect(c.peso).toBe(1.5);expect(c.questoesFiltradas.map(q=>q.id)).toEqual([1]);
+    input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));await fixture.whenStable();
+    expect(c.peso).toBeNull();expect(c.questoesFiltradas).toHaveLength(2);
+  });
 });
+

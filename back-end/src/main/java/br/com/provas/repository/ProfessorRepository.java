@@ -132,7 +132,7 @@ public class ProfessorRepository {
             new MapSqlParameterSource().addValue("id", id).addValue("ativo", ativo));
     }
     public void update(Long id,String nome,String login,String senhaHash){
-        namedParameterJdbcTemplate.update("UPDATE professores SET nome=:nome,login=:login,senha_hash=:senha WHERE id=:id",
+        namedParameterJdbcTemplate.update("UPDATE professores SET trocar_senha=IF(senha_hash <> :senha, TRUE, trocar_senha), nome=:nome,login=:login,senha_hash=:senha WHERE id=:id",
             new MapSqlParameterSource().addValue("id",id).addValue("nome",nome).addValue("login",login).addValue("senha",senhaHash));
     }
     public void replaceMaterias(Long id,List<ProfessorMateriaRequest> materias,boolean ativo){
@@ -141,4 +141,11 @@ public class ProfessorRepository {
         namedParameterJdbcTemplate.update("DELETE FROM professores_turmas WHERE professor_id=:id",params);
         saveMaterias(id,materias,ativo);
     }
+
+ public boolean requiresPasswordChange(Long id) {
+  return Boolean.TRUE.equals(namedParameterJdbcTemplate.queryForObject("SELECT trocar_senha FROM professores WHERE id=:id", new MapSqlParameterSource("id",id), Boolean.class));
+ }
+ public int changePassword(Long id,String anterior,String nova) {
+  return namedParameterJdbcTemplate.update("UPDATE professores SET senha_hash=:nova,trocar_senha=FALSE WHERE id=:id AND senha_hash=:anterior AND ativo=TRUE",new MapSqlParameterSource("id",id).addValue("anterior",anterior).addValue("nova",nova));
+ }
 }

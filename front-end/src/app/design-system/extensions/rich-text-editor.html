@@ -7,9 +7,16 @@
   }
   <div class="rich-math-tools" (keydown.escape)="symbolsOpen=false">
     <button type="button" class="rich-symbol-toggle" [disabled]="isDisabled" [attr.aria-expanded]="symbolsOpen"
-      (mousedown)="$event.preventDefault()" (click)="symbolsOpen=!symbolsOpen">Ω Símbolos matemáticos</button>
+      (mousedown)="$event.preventDefault()" (click)="symbolsOpen=!symbolsOpen">Ω Símbolos e fórmulas</button>
     @if (symbolsOpen) {
-      <div class="rich-symbol-panel" role="group" aria-label="Inserir símbolo matemático">
+      <div class="rich-symbol-panel" role="group" aria-label="Inserir símbolo ou fórmula">
+        <div class="rich-symbol-categories" role="group" aria-label="Categorias de símbolos">
+          @for (group of symbolGroups; track group.label) {
+            <button type="button" [disabled]="isDisabled" [attr.aria-pressed]="symbolCategory === group.label"
+              (mousedown)="$event.preventDefault()" (click)="symbolCategory=group.label">{{group.label}}</button>
+          }
+        </div>
+        @if (symbolCategory === 'Matemática') {
         <button type="button" [disabled]="isDisabled" aria-label="Raiz quadrada" title="Raiz quadrada"
           (mousedown)="$event.preventDefault()" (click)="insertRoot('2')">√</button>
         <button type="button" [disabled]="isDisabled" aria-label="Raiz cúbica" title="Raiz cúbica"
@@ -18,13 +25,19 @@
           aria-label="Índice da raiz" [disabled]="isDisabled" /></label>
         <button type="button" [disabled]="isDisabled" aria-label="Inserir raiz enésima"
           (mousedown)="$event.preventDefault()" (click)="insertRoot(rootDegree.value)">ⁿ√ Inserir raiz</button>
+        }
         @for (symbol of symbols; track symbol.text) {
           <button type="button" [disabled]="isDisabled" [attr.aria-label]="symbol.label" [title]="symbol.label"
             (mousedown)="$event.preventDefault()" (click)="insertSymbol(symbol)">{{symbol.text}}</button>
         }
+        @if (symbolCategory === 'Matemática') {
         @if (rootError) { <p class="rich-editor-error" role="alert">{{rootError}}</p> }
         <p>Após inserir uma raiz, digite o radicando: a barra termina ao digitar um espaço. O índice pode ser de 2 a 999 ou n.</p>
+        }
+        <p>Os símbolos são inseridos como texto editável. Para limites de integrais, índices e fórmulas químicas, use sobrescrito e subscrito na barra do editor.</p>
+        @if (symbolCategory === 'Matemática') {
         <p>Use sobrescrito (x²) para potências e subscrito (x₂) para bases. Exemplo: log₂(8), x² e √(9).</p>
+        }
       </div>
     }
   </div>

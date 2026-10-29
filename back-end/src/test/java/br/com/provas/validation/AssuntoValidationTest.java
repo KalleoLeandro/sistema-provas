@@ -10,6 +10,6 @@ class AssuntoValidationTest {
  @Test void rejectsQuestionWithoutSubjectAndReleaseWithoutExplicitSelection(){try(var factory=Validation.buildDefaultValidatorFactory()){
   var validator=factory.getValidator();var q=new QuestaoRequest(6L,"F",8,"ano",List.of(),"discursiva",BigDecimal.ONE,"<p>Pergunta</p>",Map.of(),null,null);
   assertTrue(validator.validate(q).stream().anyMatch(e->e.getPropertyPath().toString().equals("assuntoId")));
-  for(List<Long> topics:List.of(List.<Long>of(),java.util.stream.LongStream.rangeClosed(1,11).boxed().toList(),List.of(-1L))){var r=new LiberarProvaRequest("Prova",6L,Instant.now(),Instant.now().plusSeconds(3600),60,"Token",topics);assertTrue(validator.validate(r).stream().anyMatch(e->e.getPropertyPath().toString().startsWith("assuntos")));}
+  for(List<Long> topics:List.of(List.<Long>of(),java.util.stream.LongStream.rangeClosed(1,11).boxed().toList(),List.of(-1L))){var r=new LiberarProvaRequest("Prova",6L,Instant.now(),Instant.now().plusSeconds(3600),60,"Token",br.com.provas.support.TestProofConfig.config(topics),br.com.provas.support.TestProofConfig.plan(topics));assertTrue(validator.validate(r).stream().anyMatch(e->e.getPropertyPath().toString().contains("assuntos")));}
  }}
 }

@@ -52,7 +52,7 @@ public class UsuarioAdministrativoRepository {
     }
 
     public void update(Long id, String login, String senhaHash) {
-        String sql = "UPDATE usuarios_administrativos SET login = :login, senha_hash = :senha_hash WHERE id = :id";
+        String sql = "UPDATE usuarios_administrativos SET trocar_senha=IF(senha_hash <> :senha_hash, TRUE, trocar_senha), login = :login, senha_hash = :senha_hash WHERE id = :id";
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("id", id)
             .addValue("login", login).addValue("senha_hash", senhaHash);
         namedParameterJdbcTemplate.update(sql, params);
@@ -71,4 +71,11 @@ public class UsuarioAdministrativoRepository {
         return namedParameterJdbcTemplate.queryForObject(sqlSelect,
             new MapSqlParameterSource().addValue("id", id), usuarioAdministrativoMapper);
     }
+
+ public boolean requiresPasswordChange(Long id) {
+  return Boolean.TRUE.equals(namedParameterJdbcTemplate.queryForObject("SELECT trocar_senha FROM usuarios_administrativos WHERE id=:id", new MapSqlParameterSource("id",id), Boolean.class));
+ }
+ public int changePassword(Long id,String anterior,String nova) {
+  return namedParameterJdbcTemplate.update("UPDATE usuarios_administrativos SET senha_hash=:nova,trocar_senha=FALSE WHERE id=:id AND senha_hash=:anterior AND ativo=TRUE",new MapSqlParameterSource("id",id).addValue("anterior",anterior).addValue("nova",nova));
+ }
 }

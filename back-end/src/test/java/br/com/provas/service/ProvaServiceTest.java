@@ -15,7 +15,8 @@ class ProvaServiceTest {
     private final br.com.provas.security.TokenCipher cipher=mock(br.com.provas.security.TokenCipher.class);
     private final ProvaService service=new ProvaService(repository,Clock.fixed(now,ZoneOffset.UTC),encoder,cipher);
     @org.junit.jupiter.api.BeforeEach void subjects(){
-        when(repository.validSubjects(anyLong(),anyList())).thenReturn(1);
+        when(repository.hasSubjectAssignment(anyLong(),anyLong(),anyLong())).thenReturn(true);
+        when(repository.subjectOptions(anyLong(),anyLong(),anyLong())).thenReturn(List.of(new br.com.provas.model.response.AssuntoResponse(1L,6L,"Assunto")));
         var pool=new java.util.ArrayList<br.com.provas.model.entity.QuestaoSorteio>();long id=1;
         for(String weight:List.of("0.5","0.5","0.5","0.5","1.0","1.0","1.0","1.5","1.5","2.0"))pool.add(new br.com.provas.model.entity.QuestaoSorteio(id,id++,"discursiva",new java.math.BigDecimal(weight),"Pergunta",java.util.Map.of(),null,1L));
         when(repository.subjectCandidates(anyLong(),anyLong(),anyLong())).thenReturn(pool);
@@ -36,13 +37,13 @@ class ProvaServiceTest {
         assertThrows(DefaultErrorException.class,()->service.findAll(7L,1L,1,20));
     }
     @Test void requiresFutureEndAndStrictlyIncreasingPeriod(){
-        for(var request:List.of(new LiberarProvaRequest("Prova",6L,now,now,60,"TokenTeste",java.util.List.of(1L)),new LiberarProvaRequest("Prova",6L,now.minusSeconds(60),now,60,"TokenTeste",java.util.List.of(1L)))){
+        for(var request:List.of(new LiberarProvaRequest("Prova",6L,now,now,60,"TokenTeste",br.com.provas.support.TestProofConfig.config(java.util.List.of(1L)),br.com.provas.support.TestProofConfig.plan(java.util.List.of(1L))),new LiberarProvaRequest("Prova",6L,now.minusSeconds(60),now,60,"TokenTeste",br.com.provas.support.TestProofConfig.config(java.util.List.of(1L)),br.com.provas.support.TestProofConfig.plan(java.util.List.of(1L))))){
             assertThrows(DefaultErrorException.class,()->service.release(7L,1L,request));
         }
         verify(repository,never()).save(any(),any(),any(),any(),any());
     }
     @Test void rejectsInactiveTransferredOrUnrelatedSubjectAndSavesValidRelease(){
-        var request=new LiberarProvaRequest("Prova",6L,now.minusSeconds(10),now.plusSeconds(60),60,"TokenTeste",java.util.List.of(1L));
+        var request=new LiberarProvaRequest("Prova",6L,now.minusSeconds(10),now.plusSeconds(60),60,"TokenTeste",br.com.provas.support.TestProofConfig.config(java.util.List.of(1L)),br.com.provas.support.TestProofConfig.plan(java.util.List.of(1L)));
         when(repository.lockClassSubject(7L,1L,6L)).thenReturn(false);
         assertEquals(org.springframework.http.HttpStatus.FORBIDDEN,assertThrows(DefaultErrorException.class,()->service.release(7L,1L,request)).getStatus());
         verify(repository,never()).save(any(),any(),any(),any(),any());

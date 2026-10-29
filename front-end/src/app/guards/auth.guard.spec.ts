@@ -14,6 +14,19 @@ describe('Acesso ao dashboard', () => {
     { data: { perfis: ['administrador'] } } as unknown as ActivatedRouteSnapshot,
     { url: '/cadastro/materias/listar' } as RouterStateSnapshot));
 
+  it('exige troca de senha antes de acessar uma rota protegida', async () => {
+    restore.mockResolvedValue({ perfil: 'administrador', trocarSenha: true });
+    const result = await check();
+    expect(TestBed.inject(Router).serializeUrl(result as ReturnType<Router['createUrlTree']>)).toBe('/trocar-senha');
+  });
+
+  it('permite abrir a troca de senha sem redirecionamento circular', async () => {
+    restore.mockResolvedValue({ perfil: 'professor', trocarSenha: true });
+    const result = await TestBed.runInInjectionContext(() => authGuard(
+      { data: {} } as ActivatedRouteSnapshot, { url: '/trocar-senha' } as RouterStateSnapshot));
+    expect(result).toBe(true);
+  });
+
   it('preserva o destino e não envia ao login durante falha de conexão', async () => {
     restore.mockRejectedValue(new Error('Servidor indisponível'));
     const result = await check();

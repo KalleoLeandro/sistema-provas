@@ -14,7 +14,7 @@
    <button botaoVisual type="submit" variant="secondary" [disabled]="loading()">Pesquisar</button><button botaoVisual type="button" variant="secondary" (click)="clearFilters()">Limpar filtros</button>
   </form>}
   @if (erro()) { <visual-aviso>{{ erro() }}</visual-aviso> }
-  @if (mensagem()) { <p role="status">{{ mensagem() }}</p> }
+  @if (mensagem()) { <visual-aviso variant="success">{{ mensagem() }}</visual-aviso> }
   <visual-cartao density="compact" class="table-scroll-card">
     @if (loading()) { <p role="status">Carregando usuários…</p> }
     @else if (perfil() === 'administrador') {

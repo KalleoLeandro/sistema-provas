@@ -3,6 +3,7 @@ import { authGuard, guestGuard } from './guards/auth.guard';
 import { masterGuard } from './guards/master.guard';
 export const rotas: Routes = [
     { path: 'indisponivel', loadComponent: () => import('./pages/indisponivel/indisponivel').then(modulo => modulo.IndisponivelComponent) },
+    { path: 'trocar-senha', canActivate: [authGuard], loadComponent: () => import('./pages/trocar-senha/trocar-senha').then(m => m.TrocarSenhaComponent) },
     { path: 'login', canActivate: [guestGuard], loadComponent: () => import('./pages/login/login').then(modulo => modulo.LoginComponent) },
     { path: 'design-system', canActivate: [authGuard, masterGuard], data: { perfis: ['administrador'] }, loadComponent: () => import('./pages/design-system/design-system').then(modulo => modulo.DesignSystemComponent) },
     { path: '', pathMatch: 'full', redirectTo: 'dashboard' },

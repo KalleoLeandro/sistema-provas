@@ -54,7 +54,7 @@ public class ProvaService {
         if(!repository.lockClassSubject(professorId,turmaId,request.materiaId())) throw new DefaultErrorException("Selecione uma turma e uma matéria em que você possui vínculo ativo.",HttpStatus.FORBIDDEN);
         /* Esta etapa registra a autorização e seu prazo; a composição e a realização da prova pertencem ao módulo de execução. */
         if(request.token()==null)throw new DefaultErrorException("Informe um token de início de 4 a 64 caracteres.");
-        /* A liberação só é gravada se cada assunto puder aparecer sem violar os quatro pesos. */
+        /* A liberação só é gravada se cada assunto puder aparecer sem alterar a distribuição conferida. */
         validateSubjects(professorId,turmaId,request);
         var saved=repository.save(professorId,turmaId,request,encoder.encode(request.token()),tokenCipher.encrypt(request.token()));
         repository.saveSubjects(saved.id(),request.assuntos());return toResponse(saved,now);
@@ -95,7 +95,7 @@ public class ProvaService {
         var l=repository.findById(professorId,turmaId,id).orElseThrow(()->new DefaultErrorException("Liberação não encontrada.",HttpStatus.NOT_FOUND));
         /* A chave privada local recupera somente tokens novos; hashes legados exigem definição de um novo token. */
         String token=l.tokenCifrado()==null?null:tokenCipher.decrypt(l.tokenCifrado());
-        return new LiberacaoDetalheResponse(l.id(),l.titulo(),l.materiaId(),l.materia(),l.disponivelEm(),l.encerraEm(),l.duracaoMinutos(),token,token==null,repository.subjects(l.id()));
+        return new LiberacaoDetalheResponse(l.id(),l.titulo(),l.materiaId(),l.materia(),l.disponivelEm(),l.encerraEm(),l.duracaoMinutos(),token,token==null,repository.subjects(l.id()),l.configuracao(),l.composicao(),l.valorTotal(),l.quantidadeQuestoes());
     }
 
     /**
@@ -122,33 +122,50 @@ public class ProvaService {
         return findAll(professorId,turmaId,pagina,tamanho,order);
     }
 
-    /** Mostra o estoque por assunto para orientar a seleção antes da liberação.
-     * @param professor professor autenticado @param turma turma autorizada @param materia matéria escolhida
-     * @return catálogo com os quatro pesos e indicação de assunto completo
+    /** Consulta o estoque atual por assunto e peso sem impor pesos ou mínimos fixos.
+     * @param professor identidade autenticada @param turma destino @param materia matéria
+     * @return assuntos e quantidades disponíveis de cada peso
      */
-    @Transactional(readOnly=true)
+    @Transactional
     public java.util.List<AssuntoProvaResponse> subjectOptions(Long professor,Long turma,Long materia){
-        /* O catálogo usa apenas questões atuais do autor válidas para o ano e a turma selecionados. */
-        if(!repository.hasClass(professor,turma))throw new DefaultErrorException("Turma não autorizada.",HttpStatus.FORBIDDEN);
+        /* O catálogo nunca inclui contagens de questões de outro professor ou outra turma. */
+        if(!repository.hasSubjectAssignment(professor,turma,materia))throw new DefaultErrorException("Vínculo não autorizado.",HttpStatus.FORBIDDEN);
+        repository.ensureGeneralSubject(materia);
         var pool=repository.subjectCandidates(professor,turma,materia);
         return repository.subjectOptions(professor,turma,materia).stream().map(a->{
-            var questions=pool.stream().filter(q->a.id().equals(q.assuntoId())).toList();
-            var quantities=new java.util.ArrayList<QuantidadeQuestoesResponse>();String[] weights={"0.5","1.0","1.5","2.0"};int[] required={4,3,2,1};
-            for(int i=0;i<4;i++){var weight=new java.math.BigDecimal(weights[i]);int count=(int)questions.stream().filter(q->weight.compareTo(q.peso())==0).count();quantities.add(new QuantidadeQuestoesResponse(weight,required[i],count,Math.max(0,required[i]-count)));}
-            return new AssuntoProvaResponse(a.id(),a.materiaId(),a.nome(),quantities,QuestionDrawService.complete(questions));
+            var quantities=pool.stream().filter(q->"Geral".equalsIgnoreCase(a.nome())||a.id().equals(q.assuntoId())).map(q->q.peso().stripTrailingZeros()).distinct().sorted().map(weight->new QuantidadeQuestoesResponse(weight,0,(int)pool.stream().filter(q->("Geral".equalsIgnoreCase(a.nome())||a.id().equals(q.assuntoId()))&&weight.compareTo(q.peso())==0).count(),0)).toList();
+            return new AssuntoProvaResponse(a.id(),a.materiaId(),a.nome(),quantities,false);
         }).toList();
     }
-    /** @param professor autor @param turma destino @param request seleção explícita de assuntos */
+    /** Calcula a distribuição antes de gravar uma liberação.
+     * @param professor autor @param turma destino @param request valor, número e pesos permitidos por assunto
+     * @return combinação disponível ou quantidade mínima de questões faltantes
+     */
+    @Transactional(readOnly=true)
+    public PlanejamentoProvaResponse analyze(Long professor,Long turma,br.com.provas.model.request.PlanejarProvaRequest request){
+        /* A prévia é somente leitura; a liberação repete a conferência de estoque na gravação. */
+        var names=subjectNames(professor,turma,request.materiaId(),request.configuracao());
+        return ProofPlanningService.analyze(request.configuracao(),repository.subjectCandidates(professor,turma,request.materiaId()),names);
+    }
+    /** @param professor autor @param turma destino @param request critérios e distribuição conferida */
     private void validateSubjects(Long professor,Long turma,LiberarProvaRequest request){
-        /* Ausência, repetição ou assunto de outra matéria nunca significam todos os assuntos. */
-        var ids=request.assuntos();if(ids==null||ids.isEmpty()||ids.size()>10||ids.stream().anyMatch(java.util.Objects::isNull)||new java.util.HashSet<>(ids).size()!=ids.size())throw new DefaultErrorException("Selecione de um a dez assuntos sem repetições.");
-        if(repository.validSubjects(request.materiaId(),ids)!=ids.size())throw new DefaultErrorException("Selecione apenas assuntos da matéria escolhida.");
-        QuestionDrawService.validate(repository.subjectCandidates(professor,turma,request.materiaId()),ids);
+        /* Quantidades são escolhidas automaticamente na análise, mas a composição apresentada é
+         * preservada na liberação; não é trocada silenciosamente por outra distribuição. */
+        var names=subjectNames(professor,turma,request.materiaId(),request.configuracao());
+        ProofPlanningService.validatePlan(request.configuracao(),request.composicao(),repository.subjectCandidates(professor,turma,request.materiaId()),names);
+    }
+    /** @param professor autor @param turma destino @param materia contexto @param config assuntos escolhidos @return catálogo autorizado */
+    private java.util.Map<Long,String> subjectNames(Long professor,Long turma,Long materia,br.com.provas.model.request.ConfiguracaoProvaRequest config){
+        /* IDs da tela não ampliam o vínculo do professor. */
+        if(!repository.hasSubjectAssignment(professor,turma,materia))throw new DefaultErrorException("Vínculo não autorizado.",HttpStatus.FORBIDDEN);
+        if(config==null||config.assuntos()==null)throw new DefaultErrorException("Informe os assuntos e os pesos permitidos.");
+        var names=repository.subjectOptions(professor,turma,materia).stream().collect(java.util.stream.Collectors.toMap(AssuntoResponse::id,AssuntoResponse::nome));
+        if(config.assuntos().stream().anyMatch(a->!names.containsKey(a.assuntoId())))throw new DefaultErrorException("Selecione apenas assuntos da matéria escolhida.");return names;
     }
     /** @param liberacao registro persistido @param now instante único da consulta @return situação derivada, sem depender de atualização agendada no banco */
     private LiberacaoProvaResponse toResponse(LiberacaoProva liberacao,Instant now) {
         /* O intervalo inclui o início e exclui o encerramento: no instante final o prazo já está encerrado. */
         String situacao=now.isBefore(liberacao.disponivelEm())?"agendada":!now.isBefore(liberacao.encerraEm())?"encerrada":"disponivel";
-        return new LiberacaoProvaResponse(liberacao.id(),liberacao.titulo(),liberacao.materiaId(),liberacao.materia(),liberacao.disponivelEm(),liberacao.encerraEm(),situacao,liberacao.duracaoMinutos(),liberacao.tokenConfigurado(),repository.subjects(liberacao.id()));
+        return new LiberacaoProvaResponse(liberacao.id(),liberacao.titulo(),liberacao.materiaId(),liberacao.materia(),liberacao.disponivelEm(),liberacao.encerraEm(),situacao,liberacao.duracaoMinutos(),liberacao.tokenConfigurado(),repository.subjects(liberacao.id()),liberacao.valorTotal(),liberacao.quantidadeQuestoes());
     }
 }

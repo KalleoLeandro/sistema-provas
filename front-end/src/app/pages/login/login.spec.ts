@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { vi } from 'vitest';
 import { LoginComponent } from './login';
 import { AuthService } from '../../services/auth.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('Redirecionamento após login', () => {
   const login = vi.fn();
@@ -46,6 +47,14 @@ describe('Redirecionamento após login', () => {
     expect(navigateByUrl).not.toHaveBeenCalled();
     expect(fixture.componentInstance.senha).toBe('');
     expect(fixture.componentInstance.mensagem).toContain('Não foi possível entrar');
+    expect(fixture.nativeElement.querySelector('visual-aviso[role="alert"]').textContent).toContain('Não foi possível entrar');
+  });
+  it('destaca credenciais inválidas na caixa de erro', async () => {
+    login.mockRejectedValue(new HttpErrorResponse({status:401,error:{mensagem:'Credenciais inválidas.'}}));
+    const fixture = await submit();
+    const aviso = fixture.nativeElement.querySelector('visual-aviso[role="alert"]');
+    expect(aviso.textContent).toContain('Credenciais inválidas.');
+    expect(aviso.classList.contains('aviso-sucesso')).toBe(false);
   });
   it('autentica professor no perfil selecionado e abre dashboard', async () => {
     login.mockResolvedValue(undefined);

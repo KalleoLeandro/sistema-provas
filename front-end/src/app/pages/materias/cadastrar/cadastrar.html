@@ -6,6 +6,6 @@
           placeholder="Ex.: Matemática" [disabled]="busy()" aria-describedby="materia-nome-erro" [attr.aria-invalid]="(nomeControl | validationMessage:form.submitted) ? 'true' : null" />
       </visual-campo>
       @if (erro()) { <visual-aviso>{{ erro() }}</visual-aviso> }
-      @if (mensagem()) { <p class="form-feedback" role="status">{{ mensagem() }}</p> }
+      @if (mensagem()) { <visual-aviso variant="success">{{ mensagem() }}</visual-aviso> }
       <visual-form-actions [busy]="busy()" [invalid]="!!form.invalid || !nome.trim()" (clear)="reset(form)" (saveAndContinue)="save(form, true)" />
     </form></visual-cartao></section>

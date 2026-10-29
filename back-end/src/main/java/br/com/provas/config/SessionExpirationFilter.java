@@ -30,6 +30,15 @@ public class SessionExpirationFilter extends OncePerRequestFilter {
             if (session != null) session.invalidate();
             SecurityContextHolder.clearContext();
         }
+        var current = SecurityContextHolder.getContext().getAuthentication();
+        if(current != null && current.getPrincipal() instanceof LoginResponse usuario
+            && loginService.current(usuario).trocarSenha()
+            && !java.util.Set.of("/login/me","/login/csrf","/login/logout","/login/trocar-senha","/login/validar-login").contains(request.getServletPath())) {
+            response.setStatus(403);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"mensagem\":\"Troque sua senha para continuar.\"}");
+            return;
+        }
         chain.doFilter(request, response);
     }
 }

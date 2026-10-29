@@ -8,3 +8,6 @@
 .exam-status-open { background: #e6f4ea; color: #22653a; }
 .exam-status-closed { background: #eceff2; color: #525c66; }
 @media(max-width:1199px){ .exam-release-form { grid-template-columns: minmax(0,1fr); } .exam-details{padding:10px;} }
+
+.exam-composition{grid-column:1 / -1;min-width:0}
+.exam-analysis-result { margin: 12px 0; }

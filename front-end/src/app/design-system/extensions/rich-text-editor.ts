@@ -1,3 +1,4 @@
+import { scientificSymbolGroups } from './scientific-symbols';
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -61,18 +62,9 @@ export class RichTextEditorComponent implements AfterViewInit, OnDestroy, OnChan
   symbolsOpen = false;
   rootError = '';
   private normalizingRoot = false;
-  readonly symbols = [
-    { text: 'log', label: 'Logaritmo', value: 'log()', offset: 4 },
-    { text: 'ln', label: 'Logaritmo natural', value: 'ln()', offset: 3 },
-    ...[
-      ['π', 'Pi'], ['θ', 'Teta'], ['α', 'Alfa'], ['β', 'Beta'], ['Δ', 'Delta'],
-      ['±', 'Mais ou menos'], ['×', 'Multiplicação'], ['÷', 'Divisão'], ['·', 'Produto'],
-      ['≠', 'Diferente'], ['≤', 'Menor ou igual'], ['≥', 'Maior ou igual'],
-      ['≈', 'Aproximadamente igual'], ['∞', 'Infinito'], ['∑', 'Somatório'],
-      ['∫', 'Integral'], ['∈', 'Pertence'], ['∉', 'Não pertence'], ['∪', 'União'],
-      ['∩', 'Interseção'], ['∅', 'Conjunto vazio'], ['°', 'Graus'], ['½', 'Um meio'],
-    ].map(([text, label]) => ({ text, label, value: text, offset: text.length })),
-  ];
+  readonly symbolGroups = scientificSymbolGroups;
+  symbolCategory = 'Matemática';
+  get symbols() { return this.symbolGroups.find(group => group.label === this.symbolCategory)!.symbols; }
   get isDisabled() { return this.disabled; }
   private reader?: FileReader;
   @ViewChild('editor', { static: true }) element!: ElementRef<HTMLDivElement>;

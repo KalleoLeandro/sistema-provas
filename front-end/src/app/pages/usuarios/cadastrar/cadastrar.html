@@ -54,7 +54,7 @@
           </fieldset>
         }
         @if (erro()) { <visual-aviso>{{ erro() }}</visual-aviso> }
-        @if (mensagem()) { <p class="form-feedback" role="status">{{ mensagem() }}</p> }
+        @if (mensagem()) { <visual-aviso variant="success">{{ mensagem() }}</visual-aviso> }
         <visual-form-actions [busy]="busy()" [invalid]="!!form.invalid || login.trim().length < 3 || !senha.trim() || (perfil === 'professor' && (!nome.trim() || !materias.length || loadingCatalogos() || turmasDisponiveis() === null || materiasDisponiveis() === null))"
           (clear)="reset(form)" (saveAndContinue)="save(form, true)" />
       } @else {
@@ -85,7 +85,7 @@
         </visual-campo>
         @if(turmasDisponiveis() === null && !loadingCatalogos()) { <button botaoVisual variant="secondary" type="button" (click)="loadTurmas()">Carregar turmas novamente</button> }
         @if(erro()) { <visual-aviso>{{erro()}}</visual-aviso> }
-        @if(mensagem()) { <p class="form-feedback" role="status">{{mensagem()}}</p> }
+        @if(mensagem()) { <visual-aviso variant="success">{{mensagem()}}</visual-aviso> }
         <visual-form-actions [busy]="busy()" [invalid]="!!form.invalid || loadingCatalogos() || turmasDisponiveis() === null" (clear)="reset(form)" (saveAndContinue)="save(form,true)" />
         }
       }

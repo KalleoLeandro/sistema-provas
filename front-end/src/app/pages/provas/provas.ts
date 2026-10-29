@@ -19,7 +19,7 @@ import { ApiService } from '../../services/api.service';
 import { Aluno, Pagina } from '../../models/aluno';
 import { Professor } from '../../models/professor';
 import { Turma } from '../../models/turma';
-import { LiberacaoProva,LiberacaoDetalhe } from '../../models/prova';
+import { LiberacaoProva,LiberacaoDetalhe,ConfiguracaoProva,PlanejamentoProva } from '../../models/prova';
 
 @Component({ selector:'app-provas', imports:[ChipSelectComponent,SortHeaderComponent,ListarCorrecoesComponent,DateFieldComponent,TabsComponent,FormsModule,DatePipe,AlertComponent,ButtonDirective,CardComponent,FieldComponent,InputDirective,RecordNameDirective,TableScrollComponent,PaginationComponent,InfoTooltipComponent,NotBlankDirective,ValidationMessagePipe],
   templateUrl:'./provas.html',styleUrls:['../../design-system/list-filters.css','../../design-system/exam-releases.css'] })
@@ -32,12 +32,26 @@ export class ProvasComponent implements OnInit,OnDestroy {
  readonly statusAluno=statusAluno;
   private readonly api=inject(ApiService);
   private readonly route=inject(ActivatedRoute,{optional:true});
+  exigirTodosPesos:Record<number,boolean>={};
+  changeExigirTodosPesos(id:number,value:boolean){this.exigirTodosPesos={...this.exigirTodosPesos,[id]:value};this.invalidateAnalysis();}
+  valorTotal:number|null=10;quantidadeQuestoes:number|null=10;pesosPermitidos:Record<number,number[]>={};analise:PlanejamentoProva|null=null;readonly analyzing=signal(false);private analysisVisit=0;
+  get configuracao():ConfiguracaoProva{return {valorTotal:this.valorTotal??0,quantidadeQuestoes:this.quantidadeQuestoes??0,assuntos:this.assuntoIds.map(assuntoId=>({assuntoId,pesos:[...(this.pesosPermitidos[assuntoId]??[])],...(this.exigirTodosPesos[assuntoId]?{exigirTodosPesos:true}:{})}))};}
+  get configuracaoValida(){return this.assuntosValidos&&!!this.valorTotal&&this.valorTotal>0&&Number.isInteger(this.quantidadeQuestoes)&&this.quantidadeQuestoes!>=3&&this.quantidadeQuestoes!<=200&&this.assuntoIds.length<=this.quantidadeQuestoes!&&this.assuntoIds.every(id=>(this.pesosPermitidos[id]?.length??0)>0);}
+  invalidateAnalysis(){this.analysisVisit++;this.analise=null;}
+  changeAssuntos(ids:number[]){const geral=this.assuntos.find(a=>a.nome.toLocaleLowerCase('pt-BR')==='geral');if(geral&&ids.includes(geral.id)){ids=this.assuntoIds.includes(geral.id)&&ids.length>1?ids.filter(id=>id!==geral.id):[geral.id];}this.assuntoIds=[...ids];this.exigirTodosPesos=Object.fromEntries(ids.map(id=>[id,this.exigirTodosPesos[id]??false]));this.pesosPermitidos=Object.fromEntries(ids.map(id=>[id,this.pesosPermitidos[id]??this.assuntos.find(a=>a.id===id)?.quantidades.map(q=>q.peso)??[]]));this.invalidateAnalysis();}
+  changePesos(id:number,pesos:number[]){this.pesosPermitidos={...this.pesosPermitidos,[id]:[...pesos]};this.invalidateAnalysis();}
+  opcoesPesos(id:number){return [...new Set([...(this.assuntos.find(a=>a.id===id)?.quantidades.map(q=>q.peso)??[]),...(this.pesosPermitidos[id]??[])])].sort((a,b)=>a-b).map(value=>({value,label:this.formatPeso(value)}));}
+  formatPeso(value:number){return value.toLocaleString('pt-BR',{maximumFractionDigits:2});}
+  createPeso(id:number,text:string){const normalized=text.trim().replace(',','.');if(!/^\d+(?:\.\d{1,2})?$/.test(normalized)||Number(normalized)<=0||Number(normalized)>999999.99){this.erroProvas.set('Informe um peso positivo com até duas casas decimais.');return;}this.changePesos(id,[...new Set([...(this.pesosPermitidos[id]??[]),Number(normalized)])]);}
+  async analyze(){if(!this.turmaLiberacaoId||!this.materiaId||!this.configuracaoValida||this.analyzing())return;const visit=++this.analysisVisit;this.analyzing.set(true);this.erroProvas.set('');this.analise=null;
+    try{const result=await this.api.post<PlanejamentoProva>('/professor/provas/turmas/'+this.turmaLiberacaoId+'/analisar',{materiaId:this.materiaId,configuracao:this.configuracao});if(visit===this.analysisVisit)this.analise=result;}
+    catch(e){if(visit===this.analysisVisit)this.erroProvas.set(this.errorMessage(e));}finally{this.analyzing.set(false);}}
   assuntos:AssuntoProva[]=[];assuntoIds:number[]=[];readonly loadingAssuntos=signal(false);private assuntoVisit=0;
   get opcoesAssuntos(){return this.assuntos.map(a=>({value:a.id,label:a.nome}));}
   get assuntosEscolhidos(){return this.assuntos.filter(a=>this.assuntoIds.includes(a.id));}
-  get assuntosValidos(){return this.assuntoIds.length>0&&this.assuntoIds.length<=10&&this.assuntoIds.every(id=>this.assuntos.some(a=>a.id===id))&&this.assuntosEscolhidos.some(a=>a.completo);}
+  get assuntosValidos(){return this.assuntoIds.length>0&&this.assuntoIds.length<=10&&this.assuntoIds.every(id=>this.assuntos.some(a=>a.id===id));}
   assuntosLabel(p:LiberacaoProva){return p.assuntos?.map(a=>a.nome).join(', ')??'';}
-  changeMateriaProva(){this.assuntoIds=[];void this.loadAssuntos();}
+  changeMateriaProva(){this.pesosPermitidos={};this.exigirTodosPesos={};this.invalidateAnalysis();this.assuntoIds=[];void this.loadAssuntos();}
   async loadAssuntos(){const turma=this.turmaLiberacaoId,materia=this.materiaId,visit=++this.assuntoVisit;this.assuntos=[];this.loadingAssuntos.set(true);
     try{if(turma&&materia){const rows=await this.api.get<AssuntoProva[]>('/professor/provas/turmas/'+turma+'/assuntos?materiaId='+materia);if(visit===this.assuntoVisit)this.assuntos=rows;}}
     catch{if(visit===this.assuntoVisit)this.erroProvas.set('Não foi possível carregar os assuntos e suas quantidades.');}finally{if(visit===this.assuntoVisit)this.loadingAssuntos.set(false);}}
@@ -104,9 +118,9 @@ export class ProvasComponent implements OnInit,OnDestroy {
   /** Grava o prazo em UTC, preservando o preenchimento quando a API recusa a operação. */
   async release(form:NgForm){
     const turmaId=this.turmaLiberacaoId;if(this.modo!=='turmas'||!turmaId||this.busy()||!this.formOpen())return;form.control.markAllAsTouched();this.mensagem.set('');
-    if(form.invalid||!this.assuntosValidos||this.loadingAssuntos()||!this.periodoValido||!this.materiasTurma.some(m=>m.materiaId===this.materiaId))return;
+    if(form.invalid||!this.analise?.possivel||!this.configuracaoValida||this.loadingAssuntos()||!this.periodoValido||!this.materiasTurma.some(m=>m.materiaId===this.materiaId))return;
     this.busy.set(true);this.erroProvas.set('');
-    try{const editing=this.editingId;const body={titulo:this.titulo.trim(),materiaId:this.materiaId,assuntos:[...this.assuntoIds],disponivelEm:new Date(this.disponivelEm).toISOString(),encerraEm:new Date(this.encerraEm).toISOString(),duracaoMinutos:this.duracaoMinutos,token:this.token||null};
+    try{const editing=this.editingId;const body={titulo:this.titulo.trim(),materiaId:this.materiaId,configuracao:this.configuracao,composicao:this.analise.composicao.map(i=>({assuntoId:i.assuntoId,peso:i.peso,quantidade:i.quantidade})),disponivelEm:new Date(this.disponivelEm).toISOString(),encerraEm:new Date(this.encerraEm).toISOString(),duracaoMinutos:this.duracaoMinutos,token:this.token||null};
       const path='/professor/provas/turmas/'+turmaId+'/liberacoes';
       if(editing)await this.api.put(path+'/'+editing,body);else await this.api.post(path,body);
       this.reset(form);this.cancelEditor();this.mensagem.set(editing?'Liberação atualizada com sucesso.':'Liberação registrada com sucesso.');this.paginaProvas=1;await this.loadProvas();
@@ -114,8 +128,8 @@ export class ProvasComponent implements OnInit,OnDestroy {
     finally{this.busy.set(false);}
   }
   /** Limpa os dados temporários sem alterar liberações já registradas. */
-  reset(form:NgForm){this.assuntoIds=[];this.tokenIndisponivel=false;this.token='';this.duracaoMinutos=60;this.editingId=null;this.titulo='';this.encerraEm='';this.disponivelEm=this.localNow();this.materiaId=this.materiasTurma.length===1?this.materiasTurma[0].materiaId:null;
-    void this.loadAssuntos();form.resetForm({assuntos:[],titulo:'',materiaId:this.materiaId,disponivelEm:this.disponivelEm,encerraEm:'',duracaoMinutos:60,token:''});this.mensagem.set('');}
+  reset(form:NgForm){this.invalidateAnalysis();this.pesosPermitidos={};this.exigirTodosPesos={};this.valorTotal=10;this.quantidadeQuestoes=10;this.assuntoIds=[];this.tokenIndisponivel=false;this.token='';this.duracaoMinutos=60;this.editingId=null;this.titulo='';this.encerraEm='';this.disponivelEm=this.localNow();this.materiaId=this.materiasTurma.length===1?this.materiasTurma[0].materiaId:null;
+    void this.loadAssuntos();form.resetForm({valorTotal:this.valorTotal,quantidadeQuestoes:this.quantidadeQuestoes,assuntos:[],titulo:'',materiaId:this.materiaId,disponivelEm:this.disponivelEm,encerraEm:'',duracaoMinutos:60,token:''});this.mensagem.set('');}
   /** Descarta a seleção e invalida consultas em andamento ao fechar ou sair. */
   close(){this.cancelEditor();this.proofVisit++;this.selecionado.set(null);this.provas.set([]);this.erroProvas.set('');this.mensagem.set('');this.loadingProvas.set(false);
     this.token='';this.duracaoMinutos=60;this.editingId=null;this.titulo='';this.materiaId=null;this.disponivelEm='';this.encerraEm='';this.paginaProvas=1;this.totalProvas=0;}
@@ -126,12 +140,12 @@ export class ProvasComponent implements OnInit,OnDestroy {
   /** Abre um cadastro vazio apenas por ação explícita do professor. */
   newRelease(){if(this.busy()||this.editingBusy()||!this.turmaLiberacaoId)return;this.cancelEditor();this.disponivelEm=new Date().toISOString();this.materiaId=this.materiasTurma.length===1?this.materiasTurma[0].materiaId:null;this.mensagem.set('');void this.loadAssuntos();this.formOpen.set(true);}
   /** Fecha e descarta campos temporários, preservando a lista consultada. */
-  cancelEditor(){this.assuntoVisit++;this.assuntos=[];this.assuntoIds=[];this.loadingAssuntos.set(false);this.editVisit++;this.formOpen.set(false);this.editingBusy.set(false);this.editingId=null;this.token='';this.tokenIndisponivel=false;this.titulo='';this.materiaId=null;this.disponivelEm='';this.encerraEm='';this.duracaoMinutos=60;}
+  cancelEditor(){this.invalidateAnalysis();this.analyzing.set(false);this.valorTotal=10;this.quantidadeQuestoes=10;this.pesosPermitidos={};this.exigirTodosPesos={};this.assuntoVisit++;this.assuntos=[];this.assuntoIds=[];this.loadingAssuntos.set(false);this.editVisit++;this.formOpen.set(false);this.editingBusy.set(false);this.editingId=null;this.token='';this.tokenIndisponivel=false;this.titulo='';this.materiaId=null;this.disponivelEm='';this.encerraEm='';this.duracaoMinutos=60;}
   /** Reconsulta a liberação pelo ID para preencher dados atuais, inclusive o token consultável. */
   async edit(prova:LiberacaoProva){
     if(this.busy()||this.editingBusy()||!this.turmaLiberacaoId)return;this.cancelEditor();const visit=++this.editVisit;this.editingBusy.set(true);this.erroProvas.set('');
     try{const p=await this.api.get<LiberacaoDetalhe>('/professor/provas/turmas/'+this.turmaLiberacaoId+'/liberacoes/'+prova.id);if(visit!==this.editVisit)return;
-      this.editingId=p.id;this.titulo=p.titulo;this.materiaId=p.materiaId;await this.loadAssuntos();if(visit!==this.editVisit)return;this.assuntoIds=(p.assuntos??[]).map(a=>a.id);this.duracaoMinutos=p.duracaoMinutos;this.token=p.token??'';this.tokenIndisponivel=p.precisaNovoToken;
+      this.editingId=p.id;this.titulo=p.titulo;this.materiaId=p.materiaId;await this.loadAssuntos();if(visit!==this.editVisit)return;this.assuntoIds=(p.assuntos??[]).map(a=>a.id);this.valorTotal=p.configuracao?.valorTotal??p.valorTotal??10;this.quantidadeQuestoes=p.configuracao?.quantidadeQuestoes??p.quantidadeQuestoes??10;this.pesosPermitidos=Object.fromEntries(this.assuntoIds.map(id=>[id,p.configuracao?.assuntos.find(a=>a.assuntoId===id)?.pesos??this.assuntos.find(a=>a.id===id)?.quantidades.map(q=>q.peso)??[]]));this.exigirTodosPesos=Object.fromEntries(this.assuntoIds.map(id=>[id,p.configuracao?.assuntos.find(a=>a.assuntoId===id)?.exigirTodosPesos??false]));this.duracaoMinutos=p.duracaoMinutos;this.token=p.token??'';this.tokenIndisponivel=p.precisaNovoToken;
       this.disponivelEm=p.disponivelEm;this.encerraEm=p.encerraEm;this.mensagem.set('');this.formOpen.set(true);
     }catch(error){if(visit===this.editVisit)this.erroProvas.set(this.errorMessage(error));}
     finally{if(visit===this.editVisit)this.editingBusy.set(false);}

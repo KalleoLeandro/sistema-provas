@@ -22,7 +22,7 @@ export class ExecucaoProvaComponent implements OnInit,OnDestroy {
  private serverTime=0;private measuredAt=0;private retryAfter=0;
  get readonly(){return this.attempt()?.situacao==='submetida';}
  get answered(){return Object.entries(this.answers).filter(([,value])=>!!value.trim()).map(([number])=>Number(number));}
- get missing(){return (this.attempt()?.questoes.length??10)-this.answered.length;}
+ get missing(){return (this.attempt()?.questoes.length??0)-this.answered.length;}
  get clock(){const seconds=Math.ceil(this.remaining()/1000);return Math.floor(seconds/3600).toString().padStart(2,'0')+':'+Math.floor(seconds%3600/60).toString().padStart(2,'0')+':'+(seconds%60).toString().padStart(2,'0');}
  ngOnInit(){void this.load();this.ticker=setInterval(()=>this.tick(),500);this.syncer=setInterval(()=>{if(this.attempt()&&!this.readonly&&!this.saving()&&!this.pendingCount()&&!this.finishing())void this.sync();},15000);}
  ngOnDestroy(){this.destroyed=true;clearInterval(this.ticker);clearInterval(this.syncer);for(const timer of this.timers.values())clearTimeout(timer);this.token='';}

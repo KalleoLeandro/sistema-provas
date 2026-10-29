@@ -4,7 +4,7 @@
     <a botaoVisual routerLink="/cadastro/materias/cadastrar">Cadastrar matéria</a>
   </div>
   @if (mensagem()) {
-    <p role="status" class="form-feedback">{{ mensagem() }}</p>
+    <visual-aviso variant="success">{{ mensagem() }}</visual-aviso>
   }
   <visual-confirm-dialog
     [open]="!!deleteTarget()"

@@ -38,6 +38,6 @@ describe('Tela de login', () => {
         elemento.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
         await tela.whenStable();
         expect(campo.value).toBe('');
-        expect(elemento.querySelector('[role="status"]')?.textContent).toContain('Não foi possível entrar');
+        expect(elemento.querySelector('visual-aviso[role="alert"]')?.textContent).toContain('Não foi possível entrar');
     });
 });

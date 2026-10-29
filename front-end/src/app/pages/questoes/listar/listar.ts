@@ -1,3 +1,4 @@
+import { WeightMaskDirective } from '../../../design-system/weight-mask';
 import { ListSort } from '../../../design-system/list-sort';
 import { SortHeaderComponent } from '../../../design-system/sort-header';
 import { TableScrollComponent } from '../../../design-system/table-scroll';
@@ -15,7 +16,7 @@ import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-listar-questoes',
-  imports: [SortHeaderComponent,TableScrollComponent, InfoTooltipComponent, TabsComponent, PaginationComponent, FormsModule, FieldComponent, InputDirective, RouterLink, AlertComponent, ButtonDirective, CardComponent, RecordNameDirective, QuestionPreviewComponent],
+  imports: [WeightMaskDirective, SortHeaderComponent,TableScrollComponent, InfoTooltipComponent, TabsComponent, PaginationComponent, FormsModule, FieldComponent, InputDirective, RouterLink, AlertComponent, ButtonDirective, CardComponent, RecordNameDirective, QuestionPreviewComponent],
   templateUrl: './listar.html',
   styleUrls: ['../../../design-system/list-filters.css', '../../../design-system/question-deficits.css', '../../../design-system/table-detail.css', '../../../design-system/screen-title.css'],
 })
@@ -48,7 +49,6 @@ export class ListarQuestoesComponent implements OnInit {
   tipo = '';
 
   get filtrosAtivos() { return !!this.assuntoId || !!this.ensinoAno || !!this.turma || this.peso !== null || !!this.tipo; }
-  get pesosDisponiveis() { return [...new Set(this.questoes().map(q => q.peso))].sort((a, b) => a - b); }
 
   get anosDisponiveis() {
     return [...new Map([...this.destinos(), ...this.pendencias()].map(q => [q.ensino + ':' + q.ano, {
@@ -70,11 +70,8 @@ export class ListarQuestoesComponent implements OnInit {
       && (!this.tipo || q.tipo === this.tipo) && (!this.assuntoId||q.assuntoId===this.assuntoId)),(q,c)=>c==='assunto'?q.assunto:c==='resumo'?q.resumo:c==='turma'?[q.ensino,q.ano,q.abrangencia==='ano'?'Todas as turmas':q.letras]:c==='tipo'?(q.tipo==='objetiva'?'Objetiva':'Discursiva'):c==='peso'?q.peso:q.materia);
   }
 
-  get pendenciasFiltradas() {
-    /* As metas são por matéria/turma e peso, considerando questões objetivas e discursivas juntas. */
-    return this.pendingSort.ordered(this.pendencias().filter(p => (!this.ensinoAno || p.ensino + ':' + p.ano === this.ensinoAno) && (!this.turma || p.letra === this.turma)),(p,c)=>c==='assunto'?p.assunto:c==='materia'?p.materia:c==='ano'?[p.ensino,p.ano]:c==='turma'?p.letra:p.quantidades.find(q=>q.peso===Number(c))?.faltantes??0);
-  }
-
+  get pendenciasFiltradas(){return this.pendencias().filter(p=>(!this.ensinoAno||p.ensino+':'+p.ano===this.ensinoAno)&&(!this.turma||p.letra===this.turma));}
+  get linhasPendentes(){return this.pendingSort.ordered(this.pendenciasFiltradas.flatMap(p=>p.quantidades.map(quantidade=>({...p,quantidade}))), (p,c)=>c==='titulo'?p.titulo:c==='materia'?p.materia:c==='assunto'?p.assunto:c==='ano'?[p.ensino,p.ano]:c==='turma'?p.letra:c==='peso'?p.quantidade.peso:c==='minimo'?p.quantidade.minimo:c==='cadastradas'?p.quantidade.cadastradas:p.quantidade.faltantes);}
   get paginaAtual() { return Math.min(this.pagina, Math.max(1, Math.ceil(this.questoesFiltradas.length / this.tamanhoPagina))); }
   get questoesDaPagina() { return this.questoesFiltradas.slice((this.paginaAtual - 1) * this.tamanhoPagina, this.paginaAtual * this.tamanhoPagina); }
   changePageSize(size: number) { this.tamanhoPagina = size; this.closeDetail(); }

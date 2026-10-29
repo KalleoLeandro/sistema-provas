@@ -1,3 +1,4 @@
+import { WeightMaskDirective } from '../../../design-system/weight-mask';
 import { Assunto } from '../../../models/assunto';
 import { InfoTooltipComponent } from '../../../design-system/info-tooltip';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -16,7 +17,7 @@ import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-cadastrar-questoes',
-  imports: [InfoTooltipComponent, FormsModule, RouterLink, AlertComponent, ButtonDirective, CardComponent, FieldComponent, InputDirective,
+  imports: [WeightMaskDirective, InfoTooltipComponent, FormsModule, RouterLink, AlertComponent, ButtonDirective, CardComponent, FieldComponent, InputDirective,
     RichTextEditorComponent, QuestionPreviewComponent, AccordionComponent, FormActionsComponent, ChipSelectComponent, AllowedValuesDirective, RichTextRequiredDirective, ValidationMessagePipe],
   templateUrl: './cadastrar.html',
   styleUrls: ['../../../design-system/question-form.css', '../../../design-system/screen-title.css'],
@@ -31,7 +32,6 @@ export class CadastrarQuestoesComponent implements OnInit, OnDestroy {
   private nextId = 1;
   private visit = 0;
   readonly letras: LetraAlternativa[] = ['A', 'B', 'C', 'D', 'E'];
-  readonly pesos = [0.5, 1, 1.5, 2];
   readonly tipos = ['objetiva', 'discursiva'];
   readonly loading = signal(false);
   readonly saving = signal(false);
@@ -125,7 +125,7 @@ export class CadastrarQuestoesComponent implements OnInit, OnDestroy {
     form.control.markAllAsTouched();
     const ano = this.anoAtual;
     if (form.invalid || this.assuntoSelecionado.length!==1 || !this.assuntos.some(a=>a.id===this.assuntoSelecionado[0]) || !ano || !this.materiaId || this.turmasSelecionadas.some(id => !this.turmasDisponiveis.some(t => t.value === id))) {
-      this.mensagem.set('Preencha os campos destacados para cadastrar a questão.');
+      this.mensagem.set('');this.erro.set('Preencha os campos destacados para cadastrar a questão.');
       return;
     }
     const q = this.questoes[0];

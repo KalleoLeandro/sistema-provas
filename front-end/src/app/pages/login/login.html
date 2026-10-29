@@ -46,7 +46,7 @@
                 </div>
                 @if(formulario.submitted&&formulario.invalid){<visual-aviso>{{ perfil==='aluno' ? 'Informe um CGM contendo
                     apenas números.' : 'Preencha seu login e sua senha.' }}</visual-aviso>}
-                @if(mensagem){<p role="status">{{ mensagem }}</p>}
+                @if(mensagem){<visual-aviso>{{ mensagem }}</visual-aviso>}
                 <button botaoVisual type="submit" class="enviar" [disabled]="ocupado">{{ ocupado ?
                     'Entrando…' : 'Entrar no portal' }}<span aria-hidden="true">→</span></button>
             </form>

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository @RequiredArgsConstructor
 public class ExecucaoProvaRepository {
- private final NamedParameterJdbcTemplate jdbc;
+ private final NamedParameterJdbcTemplate jdbc;private final tools.jackson.databind.ObjectMapper json;
  private Instant instant(java.sql.ResultSet rs,String field)throws java.sql.SQLException {var d=rs.getObject(field,LocalDateTime.class);return d==null?null:d.toInstant(ZoneOffset.UTC);}
  private LocalDateTime date(Instant value){return LocalDateTime.ofInstant(value,ZoneOffset.UTC);}
  private MapSqlParameterSource params(Long aluno,Long lib){return new MapSqlParameterSource().addValue("aluno",aluno).addValue("lib",lib);}
@@ -27,18 +27,23 @@ public class ExecucaoProvaRepository {
    JOIN turmas t ON t.id=l.turma_id JOIN materias m ON m.id=l.materia_id
    JOIN professores p ON p.id=l.professor_id AND p.ativo=TRUE
    WHERE l.id=:lib AND EXISTS(SELECT 1 FROM professores_materias_turmas pmt WHERE pmt.professor_id=l.professor_id AND pmt.materia_id=l.materia_id AND pmt.turma_id=l.turma_id AND pmt.ativo=TRUE)
-   """+(lock?" FOR SHARE":""),params(aluno,lib),(rs,n)->new ConfiguracaoInicioProva(rs.getLong("id"),rs.getLong("professor_id"),rs.getLong("materia_id"),rs.getLong("turma_id"),rs.getString("ensino"),rs.getInt("ano"),rs.getString("titulo"),rs.getString("materia"),instant(rs,"disponivel_em"),instant(rs,"encerra_em"),rs.getInt("duracao_minutos"),rs.getString("token_hash"))).stream().findFirst();
+   """+(lock?" FOR SHARE":""),params(aluno,lib),(rs,n)->new ConfiguracaoInicioProva(rs.getLong("id"),rs.getLong("professor_id"),rs.getLong("materia_id"),rs.getLong("turma_id"),rs.getString("ensino"),rs.getInt("ano"),rs.getString("titulo"),rs.getString("materia"),instant(rs,"disponivel_em"),instant(rs,"encerra_em"),rs.getInt("duracao_minutos"),rs.getString("token_hash"),rs.getString("composicao")==null?List.of():Arrays.asList(json.readValue(rs.getString("composicao"),br.com.provas.model.request.ComposicaoProvaRequest[].class)),rs.getBigDecimal("valor_total"),rs.getInt("quantidade_questoes"))).stream().findFirst();
  }
+ public java.math.BigDecimal attemptValue(Long id){return jdbc.query("SELECT COALESCE(SUM(peso),0) AS valor FROM provas_tentativas_questoes WHERE tentativa_id=:id",new MapSqlParameterSource().addValue("id",id),(rs,n)->rs.getBigDecimal("valor")).getFirst();}
+ public int attemptCount(Long id){return jdbc.query("SELECT COUNT(*) AS total FROM provas_tentativas_questoes WHERE tentativa_id=:id",new MapSqlParameterSource().addValue("id",id),(rs,n)->rs.getInt("total")).getFirst();}
  public List<Long> subjects(Long lib){return jdbc.query("SELECT assunto_id FROM provas_liberacoes_assuntos WHERE liberacao_id=:lib ORDER BY assunto_id",new MapSqlParameterSource().addValue("lib",lib),(rs,n)->rs.getLong("assunto_id"));}
  public List<QuestaoSorteio> candidates(ConfiguracaoInicioProva c){
   return jdbc.query("""
-   SELECT q.*,v.id AS versao_id FROM questoes q JOIN questoes_versoes v ON v.questao_id=q.id
+   SELECT q.*,v.id AS versao_id,
+     COALESCE((SELECT a.id FROM assuntos a JOIN provas_liberacoes_assuntos pla ON pla.assunto_id=a.id
+       WHERE pla.liberacao_id=:lib AND a.materia_id=:materia AND a.nome='Geral' LIMIT 1),q.assunto_id) AS assunto_sorteio
+   FROM questoes q JOIN questoes_versoes v ON v.questao_id=q.id
      AND v.numero=(SELECT MAX(v2.numero) FROM questoes_versoes v2 WHERE v2.questao_id=q.id)
    WHERE q.professor_id=:professor AND q.materia_id=:materia AND q.ensino=:ensino AND q.ano=:ano
      AND (q.abrangencia='ano' OR EXISTS(SELECT 1 FROM questoes_turmas qt WHERE qt.questao_id=q.id AND qt.turma_id=:turma))
    ORDER BY q.id FOR SHARE
    """,new MapSqlParameterSource().addValue("lib",c.id()).addValue("professor",c.professorId()).addValue("materia",c.materiaId()).addValue("ensino",c.ensino()).addValue("ano",c.ano()).addValue("turma",c.turmaId()),
-   (rs,n)->new QuestaoSorteio(rs.getLong("id"),rs.getLong("versao_id"),rs.getString("tipo"),rs.getBigDecimal("peso"),rs.getString("enunciado"),alternatives(rs),rs.getString("resposta_correta"),rs.getLong("assunto_id")));
+   (rs,n)->new QuestaoSorteio(rs.getLong("id"),rs.getLong("versao_id"),rs.getString("tipo"),rs.getBigDecimal("peso"),rs.getString("enunciado"),alternatives(rs),rs.getString("resposta_correta"),rs.getLong("assunto_sorteio")));
  }
  public TentativaProva create(Long aluno,ConfiguracaoInicioProva c,Instant inicio,Instant fim,List<QuestaoSorteio> questions){
   var p=params(aluno,c.id()).addValue("titulo",c.titulo()).addValue("materia",c.materia()).addValue("inicio",date(inicio)).addValue("fim",date(fim));var key=new GeneratedKeyHolder();

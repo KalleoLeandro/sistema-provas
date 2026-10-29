@@ -83,6 +83,11 @@ export class AuthService {
    * @returns Conclusão da saída ou da confirmação de que não há sessão.
    * @throws Erro da API quando não é possível concluir a saída.
    */
+  async trocarSenha(senhaAtual: string, novaSenha: string): Promise<void> {
+    const csrf = await this.csrf();
+    await firstValueFrom(this.http.post('/api/login/trocar-senha', {senhaAtual,novaSenha}, {headers:{[csrf.headerName]:csrf.token}}));
+    this.usuario.set(null);
+  }
   async logout(): Promise<void> {
     /*
      * Solicita a invalidação no servidor antes de limpar a identidade local,

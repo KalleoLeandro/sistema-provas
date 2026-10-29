@@ -60,3 +60,21 @@ describe('Ajustes de figuras no editor',()=>{
   expect(editor.getText()).toContain('Outra questão');expect(component.imageBox).toBeNull();expect(editor.getSemanticHTML()).toBe(saved);
  });
 });
+
+describe('Símbolos científicos no editor',()=>{
+ it('troca a categoria e insere símbolos de cálculo e química com opção de desfazer',()=>{
+  Object.defineProperty(Range.prototype,'getBoundingClientRect',{configurable:true,value:()=>({left:0,top:0,right:0,bottom:0,width:0,height:0})});
+  const fixture=TestBed.createComponent(RichTextEditorComponent);fixture.detectChanges();
+  const component=fixture.componentInstance;
+  const editor=Quill.find(fixture.nativeElement.querySelector('.ql-container')) as Quill;
+  const change=vi.fn();component.registerOnChange(change);
+  (fixture.nativeElement.querySelector('.rich-symbol-toggle') as HTMLButtonElement).click();fixture.detectChanges();
+  const category=(label:string)=>Array.from(fixture.nativeElement.querySelectorAll('.rich-symbol-categories button') as NodeListOf<HTMLButtonElement>).find(b=>b.textContent?.trim()===label)!;
+  category('Cálculo').click();fixture.detectChanges();
+  (fixture.nativeElement.querySelector('button[aria-label="Integral dupla"]') as HTMLButtonElement).click();
+  expect(editor.getText()).toContain('∬');expect(change).toHaveBeenCalled();
+  category('Química').click();fixture.detectChanges();
+  (fixture.nativeElement.querySelector('button[aria-label="Equilíbrio químico"]') as HTMLButtonElement).click();
+  expect(editor.getText()).toContain('⇌');editor.history.undo();expect(editor.getText()).not.toContain('⇌');expect(editor.getText()).toContain('∬');
+ });
+});

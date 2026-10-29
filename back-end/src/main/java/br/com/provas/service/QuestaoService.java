@@ -70,7 +70,6 @@ public class QuestaoService {
         if (!repository.hasActiveYear(professorId, request.materiaId(), request.ensino(), request.ano())) {
             throw new DefaultErrorException("Você não possui vínculo ativo com esta matéria neste ensino e ano.", HttpStatus.FORBIDDEN);
         }
-        /* O assunto é obrigatório e pertence à mesma matéria; a classificação nunca é texto livre. */
         if(request.assuntoId()==null||!repository.hasSubject(request.assuntoId(),request.materiaId()))throw new DefaultErrorException("Selecione um assunto da matéria escolhida.");
         /* Turmas específicas devem existir, não se repetir e pertencer ao mesmo ensino/ano. */
         if ("turmas".equals(request.abrangencia())) {

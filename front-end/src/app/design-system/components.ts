@@ -23,8 +23,11 @@ export class FieldComponent {
 }
 @Component({ selector: 'visual-cartao', template: '<ng-content />', styleUrl: './card.css', host: { '[class.compact]': 'density === "compact"' } })
 export class CardComponent { @Input() density: 'default' | 'compact' = 'default'; }
-@Component({ selector: 'visual-aviso', template: '<ng-content />', host: { role: 'alert' }, styleUrl: './alert.css' })
-export class AlertComponent { }
+@Component({ selector: 'visual-aviso', template: '<ng-content />', host: {
+  '[attr.role]': 'variant === "success" ? "status" : "alert"',
+  '[class.aviso-sucesso]': 'variant === "success"',
+}, styleUrl: './alert.css' })
+export class AlertComponent { @Input() variant: 'error' | 'success' = 'error'; }
 
 /** Destaca o nome que identifica um registro nas listas. */
 @Directive({ selector: 'th[nomeRegistro], td[nomeRegistro]', host: { class: 'registro-nome' } })

@@ -30,6 +30,7 @@ public class AssuntoService {
  @Transactional
  public AssuntoResponse create(Long professor,AssuntoRequest request){
   /* A chave única da matéria/nome protege criações simultâneas; nomes repetidos retornam o assunto existente. */
+  if ("Geral".equalsIgnoreCase(request.nome())) throw new DefaultErrorException("Geral deve ser usado apenas na libera\u00e7\u00e3o de provas.");
   authorize(professor,request.materiaId());return repository.save(request.materiaId(),request.nome());
  }
  /** @param professor identidade autenticada @param materia contexto autorizado */

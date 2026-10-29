@@ -2,9 +2,9 @@
  <div class="list-heading"><h2 id="corrigir-title">{{dados()&&dados()!.prova.pendentes===0?'Revisar correção':'Corrigir prova'}} <visual-info-tooltip text="Notas discursivas e feedbacks podem ser alterados mesmo após a prova estar corrigida. A pontuação deve ficar entre zero e o peso da questão. As objetivas mantêm a correção automática e questões não respondidas permanecem com zero. Notas e feedbacks ainda não são publicados para o aluno." /></h2><div class="form-actions"><a botaoVisual variant="secondary" routerLink="/provas" [queryParams]="{aba:'correcoes'}">Voltar às correções</a><button botaoVisual type="button" variant="secondary" [disabled]="loading()||saving()" (click)="load()">Atualizar</button></div></div>
  @if(erro()){<visual-aviso>{{erro()}}</visual-aviso>}@if(loading()){<p role="status">Carregando prova entregue…</p>}
  @if(dados();as d){
-  <visual-cartao density="compact"><h3>{{d.prova.titulo}}</h3><p><strong>{{d.prova.aluno}}</strong> · CGM {{d.prova.cgm}} · {{d.prova.ensino==='F'?'Fundamental':'Médio'}} — {{d.prova.ano}}º ano {{d.prova.letra}}</p><p>{{d.prova.materia}} · Entregue em {{d.prova.entregueEm|date:'dd/MM/yyyy HH:mm'}}</p><p><strong>{{d.prova.pendentes?'Nota parcial':'Nota total'}}: {{d.prova.notaParcial|number:'1.2-2':'pt'}} / 10</strong> · {{d.prova.pendentes}} discursiva(s) aguardando correção.</p></visual-cartao>
+  <visual-cartao density="compact"><h3>{{d.prova.titulo}}</h3><p><strong>{{d.prova.aluno}}</strong> · CGM {{d.prova.cgm}} · {{d.prova.ensino==='F'?'Fundamental':'Médio'}} — {{d.prova.ano}}º ano {{d.prova.letra}}</p><p>{{d.prova.materia}} · Entregue em {{d.prova.entregueEm|date:'dd/MM/yyyy HH:mm'}}</p><p><strong>{{d.prova.pendentes?'Nota parcial':'Nota total'}}: {{d.prova.notaParcial|number:'1.2-2':'pt'}}</strong> · Valor da prova: {{valorTotal|number:'1.2-2':'pt'}} · {{d.prova.pendentes}} discursiva(s) aguardando correção.</p></visual-cartao>
   <form class="form-visual" #form="ngForm" (ngSubmit)="save(form)" autocomplete="off">
-  @for(q of d.questoes;track q.numero){<visual-cartao><section class="correction-question" [attr.aria-labelledby]="'correcao-title-'+q.numero"><h3 [id]="'correcao-title-'+q.numero">Questão {{q.numero}} · {{q.tipo==='discursiva'?'Discursiva':'Objetiva'}} · Peso {{q.peso|number:'1.1-1':'pt'}}</h3><div class="conteudo-rico" [innerHTML]="q.enunciado"></div>
+  @for(q of d.questoes;track q.numero){<visual-cartao><section class="correction-question" [attr.aria-labelledby]="'correcao-title-'+q.numero"><h3 [id]="'correcao-title-'+q.numero">Questão {{q.numero}} · {{q.tipo==='discursiva'?'Discursiva':'Objetiva'}} · Peso {{q.peso|number:'1.0-2':'pt'}}</h3><div class="conteudo-rico" [innerHTML]="q.enunciado"></div>
    @if(q.tipo==='objetiva'){<div class="correction-alternatives">@for(letter of ['A','B','C','D','E'];track letter){@if(q.alternativas[letter]){<div class="correction-alternative" [class.correct-answer]="letter===q.respostaCorreta"><strong>{{letter}}</strong><div class="conteudo-rico" [innerHTML]="q.alternativas[letter]"></div>@if(letter===q.resposta){<span class="correction-label">Resposta do aluno</span>}@if(letter===q.respostaCorreta){<span class="correction-label">Gabarito</span>}</div>}}</div>}
    @else{<h4>Resposta do aluno</h4><p class="correction-answer">{{q.resposta||'Não respondida.'}}</p>}
    @if(!q.resposta){<p>Não respondida. Pontuação zero.</p>}
@@ -15,7 +15,7 @@
    </div>
   </section></visual-cartao>}
   @if(erro()){<visual-aviso>{{erro()}}</visual-aviso>}
-  @if(saved()){<p class="form-feedback" role="status">Correção da prova salva com sucesso.</p>}
+  @if(saved()){<visual-aviso variant="success">Correção da prova salva com sucesso.</visual-aviso>}
   <div class="form-actions"><button id="salvar-correcao" botaoVisual type="submit" [disabled]="saving()||!!form.invalid">{{saving()?'Salvando…':d.prova.pendentes?'Salvar correção':'Salvar alterações'}}</button></div>
   </form>
  }

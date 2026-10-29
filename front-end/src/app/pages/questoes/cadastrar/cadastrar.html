@@ -16,7 +16,7 @@
             @for (m of materiasDisponiveis; track m.id) { <option [ngValue]="m.id">{{ m.nome }}</option> }
           </select>
         </visual-campo>
-        <visual-campo rotulo="Assunto" identificador="questoes-assunto" orientacao="Busque assuntos parecidos ou crie um novo. Ao menos um assunto da matéria/ano/turma precisa de 4×0,5; 3×1,0; 2×1,5 e 1×2,0 para liberar a prova." [erro]="assuntoControl|validationMessage:form.submitted">
+        <visual-campo rotulo="Assunto" identificador="questoes-assunto" orientacao="Selecione ou crie um assunto específico para esta questão." [erro]="assuntoControl|validationMessage:form.submitted">
           <visual-chip-select inputId="questoes-assunto" name="assuntos" label="Assunto da questão" placeholder="Digite o assunto" [options]="opcoesAssuntos" [(ngModel)]="assuntoSelecionado" #assuntoControl="ngModel" required [maxSelected]="1" [fuzzySearch]="true" [allowCreate]="true" createLabel="Criar assunto" (createOption)="createAssunto($event)" [invalid]="!!(assuntoControl|validationMessage:form.submitted)" [disabled]="!materiaId||loadingAssuntos()||creatingAssunto()||saving()" />
           @if(creatingAssunto()){<p role="status">Criando assunto…</p>}
         </visual-campo>
@@ -55,10 +55,8 @@
               <option value="objetiva">Objetiva</option><option value="discursiva">Discursiva</option>
             </select>
           </visual-campo>
-          <visual-campo rotulo="Peso da questão" [identificador]="'peso-' + q.id">
-            <select campoVisual [id]="'peso-' + q.id" [name]="'peso-' + q.id" [ngModel]="q.peso" (ngModelChange)="updateQuestion(q.id, { peso: $event })" required [allowedValues]="pesos" [disabled]="saving()">
-              @for (peso of pesos; track peso) { <option [ngValue]="peso">{{ peso.toFixed(1).replace('.', ',') }}</option> }
-            </select>
+          <visual-campo rotulo="Peso da questão" [identificador]="'peso-' + q.id" [erro]="pesoControl | validationMessage:form.submitted">
+            <input campoVisual weightMask type="text" inputmode="decimal" [id]="'peso-' + q.id" [name]="'peso-' + q.id" [ngModel]="q.peso" (ngModelChange)="updateQuestion(q.id, { peso: $event })" #pesoControl="ngModel" required min="0.1" max="999999.9" [attr.aria-invalid]="(pesoControl | validationMessage:form.submitted) ? 'true' : null" [disabled]="saving()" />
           </visual-campo>
         </div>
         <div class="question-columns" [class.with-preview]="preview">
@@ -85,7 +83,7 @@
         </div>
       </visual-cartao>
     }
-    @if (mensagem()) { <p class="form-feedback" role="status">{{ mensagem() }}</p> }
+    @if (mensagem()) { <visual-aviso variant="success">{{ mensagem() }}</visual-aviso> }
     @if (editId) {
       <div class="form-actions">
         <a botaoVisual variant="secondary" routerLink="/questoes/listar">Cancelar</a>

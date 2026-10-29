@@ -16,6 +16,27 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class LoginServiceTest {
+    @Test void newOrResetAccountRequiresPasswordChange() {
+        when(professores.findByLogin("prof")).thenReturn(Optional.of(new Professor(1L,"Professor","prof","hash",true)));
+        when(encoder.matches("temporaria", "hash")).thenReturn(true);
+        when(professores.requiresPasswordChange(1L)).thenReturn(true);
+        assertTrue(service.login(new LoginRequest("prof","temporaria","professor")).trocarSenha());
+        when(professores.requiresPasswordChange(1L)).thenReturn(false);
+        assertFalse(service.current(new LoginResponse(1L,"Professor","prof","professor",true)).trocarSenha());
+    }
+
+    @Test void changePasswordChecksCurrentPasswordAndRejectsReuse() {
+        var usuario = new LoginResponse(1L,"Admin","admin","administrador",true);
+        when(administradores.findById(1L)).thenReturn(Optional.of(new UsuarioAdministrativo(1L,"Admin","admin","hash",true)));
+        assertThrows(DefaultErrorException.class, () -> service.changePassword(usuario,"errada","nova-senha"));
+        when(encoder.matches("temporaria","hash")).thenReturn(true);
+        assertThrows(DefaultErrorException.class, () -> service.changePassword(usuario,"temporaria","temporaria"));
+        verify(administradores,never()).changePassword(anyLong(),anyString(),anyString());
+        when(encoder.encode("nova-senha")).thenReturn("novo-hash");
+        when(administradores.changePassword(1L,"hash","novo-hash")).thenReturn(1);
+        service.changePassword(usuario,"temporaria","nova-senha");
+        verify(administradores).changePassword(1L,"hash","novo-hash");
+    }
     private final UsuarioAdministrativoRepository administradores = mock(UsuarioAdministrativoRepository.class);
     private final ProfessorRepository professores = mock(ProfessorRepository.class);
     private final PasswordEncoder encoder = mock(PasswordEncoder.class);

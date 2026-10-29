@@ -27,8 +27,8 @@ public class ExecucaoProvaService {
  @Transactional(readOnly=true)
  public RegrasProvaResponse rules(Long aluno,Long lib){
   /* Tentativas já existentes mantêm seus próprios título e prazo, mesmo após edição da liberação. */
-  var existing=repository.findAttempt(aluno,lib);if(existing.isPresent()){var a=existing.get();return new RegrasProvaResponse(lib,a.titulo(),a.materia(),(int)Math.max(1,Duration.between(a.iniciadaEm(),a.encerraEm()).toMinutes()),a.encerraEm(),true,a.submetidaEm()!=null);}
-  var c=available(aluno,lib,clock.instant());return new RegrasProvaResponse(lib,c.titulo(),c.materia(),c.duracaoMinutos(),c.encerraEm(),false,false);
+  var existing=repository.findAttempt(aluno,lib);if(existing.isPresent()){var a=existing.get();return new RegrasProvaResponse(lib,a.titulo(),a.materia(),(int)Math.max(1,Duration.between(a.iniciadaEm(),a.encerraEm()).toMinutes()),a.encerraEm(),true,a.submetidaEm()!=null,repository.attemptCount(a.id()),repository.attemptValue(a.id()));}
+  var c=available(aluno,lib,clock.instant());return new RegrasProvaResponse(lib,c.titulo(),c.materia(),c.duracaoMinutos(),c.encerraEm(),false,false,c.quantidadeQuestoes(),c.valorTotal());
  }
  /**
   * Sorteia uma vez e persiste o conteúdo; o bloqueio de início ocorre no Redis por aluno/liberação.
@@ -46,7 +46,7 @@ public class ExecucaoProvaService {
    if(repository.findAttempt(aluno,lib).isPresent())return get(aluno,lib);
    if(!Boolean.TRUE.equals(request.aceitouRegras()))throw new DefaultErrorException("Confirme a leitura das regras.");
    var c=available(aluno,lib,clock.instant(),true);if(c.tokenHash()==null||request.token()==null||!encoder.matches(request.token(),c.tokenHash()))throw new DefaultErrorException("Token de início inválido. Confira com o professor.",HttpStatus.FORBIDDEN);
-   var selected=QuestionDrawService.draw(repository.candidates(c),repository.subjects(c.id()));Instant now=clock.instant();
+   var selected=QuestionDrawService.draw(repository.candidates(c),c.composicao());Instant now=clock.instant();
    if(!now.isBefore(c.encerraEm())||!redis.ownsStart(aluno,lib,lease))throw new DefaultErrorException("Não foi possível confirmar o início. Tente novamente.",HttpStatus.CONFLICT);
    Instant end=now.plus(Duration.ofMinutes(c.duracaoMinutos()));if(end.isAfter(c.encerraEm()))end=c.encerraEm();
    var attempt=repository.create(aluno,c,now,end,selected);
@@ -120,15 +120,6 @@ public class ExecucaoProvaService {
   boolean submittedNow=false;if(state.selada()&&!state.persistida()){submittedNow=delivery.persist(aluno,lib,state);redis.finished(aluno,lib);}
   var questions=state.copia().questoes().stream().map(q->new QuestaoExecucaoResponse(q.numero(),q.tipo(),q.peso(),q.enunciado(),q.alternativas(),state.respostas().get(q.numero()),state.revisoes().get(q.numero()))).toList();
   var copy=state.copia();return new TentativaProvaResponse(lib,copy.titulo(),copy.materia(),copy.iniciadaEm(),copy.encerraEm(),clock.instant(),state.selada()?"submetida":"em_andamento",submittedNow,questions);
- }
- /**
-  * Escolhe dez questões sem repetição e restringe as posições de menor/maior peso.
-  * @param candidates banco autorizado da turma e matéria
-  * @return sequência fixa a ser copiada para a tentativa
-  */
- public List<QuestaoSorteio> draw(List<QuestaoSorteio> candidates){
-  /* A mesma regra valida os pesos e a cobertura no cadastro da liberação e no início da tentativa. */
-  return QuestionDrawService.draw(candidates,candidates.stream().map(QuestaoSorteio::assuntoId).distinct().toList());
  }
  /** @param aluno identidade autenticada @param lib liberação @param now instante atual @return configuração autorizada */
  private ConfiguracaoInicioProva available(Long aluno,Long lib,Instant now){return available(aluno,lib,now,false);}

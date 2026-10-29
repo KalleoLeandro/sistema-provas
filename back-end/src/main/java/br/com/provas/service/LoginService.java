@@ -78,7 +78,7 @@ public class LoginService {
             throw new DefaultErrorException("Credenciais inválidas.", HttpStatus.UNAUTHORIZED);
         }
         var conta = usuario.get();
-        return new LoginResponse(conta.id(), conta.nome(), conta.login(), request.perfil());
+        return current(new LoginResponse(conta.id(), conta.nome(), conta.login(), request.perfil()));
     }
 
     /**
@@ -102,4 +102,18 @@ public class LoginService {
         return "administrador".equals(usuario.perfil()) && repository.findByLogin(usuario.login())
             .filter(conta -> conta.id().equals(usuario.id()) && conta.ativo()).isPresent();
     }
+
+ public LoginResponse current(LoginResponse u) {
+  boolean pending="professor".equals(u.perfil()) ? professorRepository.requiresPasswordChange(u.id()) : "administrador".equals(u.perfil()) && repository.requiresPasswordChange(u.id());
+  return new LoginResponse(u.id(),u.nome(),u.login(),u.perfil(),pending);
+ }
+ public void changePassword(LoginResponse u,String atual,String nova) {
+  if ("aluno".equals(u.perfil())) throw new DefaultErrorException("Perfil inválido.",HttpStatus.FORBIDDEN);
+  String hash="professor".equals(u.perfil()) ? professorRepository.findById(u.id()).orElseThrow().senhaHash() : repository.findById(u.id()).orElseThrow().senhaHash();
+  if (!passwordEncoder.matches(atual,hash)) throw new DefaultErrorException("Senha atual incorreta.");
+  if (passwordEncoder.matches(nova,hash)) throw new DefaultErrorException("A nova senha deve ser diferente da senha atual.");
+  String encoded=passwordEncoder.encode(nova);
+  int count="professor".equals(u.perfil()) ? professorRepository.changePassword(u.id(),hash,encoded) : repository.changePassword(u.id(),hash,encoded);
+  if(count!=1) throw new DefaultErrorException("A conta foi alterada. Entre novamente.",HttpStatus.CONFLICT);
+ }
 }

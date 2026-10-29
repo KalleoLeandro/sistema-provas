@@ -28,7 +28,7 @@ public class QuestaoRepository {
             rs.getString("tipo"), rs.getBigDecimal("peso"), rs.getString("enunciado"), alternativas, rs.getString("resposta_correta"),rs.getLong("assunto_id"));
     };
 
-    public boolean hasSubject(Long assunto,Long materia){return !namedParameterJdbcTemplate.query("SELECT id FROM assuntos WHERE id=:assunto AND materia_id=:materia FOR SHARE",new MapSqlParameterSource().addValue("assunto",assunto).addValue("materia",materia),(rs,n)->rs.getLong("id")).isEmpty();}
+    public boolean hasSubject(Long assunto,Long materia){return !namedParameterJdbcTemplate.query("SELECT id FROM assuntos WHERE id=:assunto AND materia_id=:materia AND nome <> 'Geral' FOR SHARE",new MapSqlParameterSource().addValue("assunto",assunto).addValue("materia",materia),(rs,n)->rs.getLong("id")).isEmpty();}
     public String subjectName(Long id){if(id==null)return null;return namedParameterJdbcTemplate.query("SELECT nome FROM assuntos WHERE id=:id",new MapSqlParameterSource().addValue("id",id),(rs,n)->rs.getString("nome")).stream().findFirst().orElse(null);}
     public boolean hasActiveYear(Long professorId, Long materiaId, String ensino, Integer ano) {
         String sql = """
@@ -193,31 +193,22 @@ public class QuestaoRepository {
             rs.getString("ensino"), rs.getInt("ano"), rs.getString("letras"), rs.getString("abrangencia"), rs.getString("tipo"), rs.getBigDecimal("peso"), rs.getString("enunciado"),rs.getLong("assunto_id"),rs.getString("assunto"));
         return namedParameterJdbcTemplate.query(sql, new MapSqlParameterSource().addValue("professor_id", professorId), mapper);
     }
-    public List<QuantidadeQuestoesTurma> countByAssignedClass(Long professorId) {
-        String sql = """
-            WITH estoque AS (
-              SELECT m.id AS materia_id,m.nome AS materia,t.id AS turma_id,t.ensino,t.ano,t.letra,
-                q.assunto_id,a.nome AS assunto,
-                COALESCE(SUM(q.peso=0.5),0) AS peso05,COALESCE(SUM(q.peso=1.0),0) AS peso10,
-                COALESCE(SUM(q.peso=1.5),0) AS peso15,COALESCE(SUM(q.peso=2.0),0) AS peso20
-              FROM professores_materias_turmas pmt JOIN professores p ON p.id=pmt.professor_id AND p.ativo=TRUE
-              JOIN materias m ON m.id=pmt.materia_id JOIN turmas t ON t.id=pmt.turma_id
-              LEFT JOIN questoes q ON q.professor_id=pmt.professor_id AND q.materia_id=pmt.materia_id
-                AND q.ensino=t.ensino AND q.ano=t.ano
-                AND (q.abrangencia='ano' OR EXISTS(SELECT 1 FROM questoes_turmas qt WHERE qt.questao_id=q.id AND qt.turma_id=t.id))
-              LEFT JOIN assuntos a ON a.id=q.assunto_id
-              WHERE pmt.professor_id=:professor_id AND pmt.ativo=TRUE
-              GROUP BY m.id,m.nome,t.id,t.ensino,t.ano,t.letra,q.assunto_id,a.nome
-            ), prioridade AS (
-              SELECT estoque.*,ROW_NUMBER() OVER(PARTITION BY materia_id,turma_id ORDER BY
-                GREATEST(0,4-peso05)+GREATEST(0,3-peso10)+GREATEST(0,2-peso15)+GREATEST(0,1-peso20),assunto_id) AS ordem
-              FROM estoque
-            ) SELECT * FROM prioridade WHERE ordem=1 ORDER BY materia,ensino,ano,letra
+    public List<br.com.provas.model.entity.PendenciaComposicao> countMissingPlans(Long professorId){
+        String sql="""
+            SELECT l.id AS liberacao_id,l.titulo,m.id AS materia_id,m.nome AS materia,t.id AS turma_id,t.ensino,t.ano,t.letra,
+              a.id AS assunto_id,a.nome AS assunto,c.peso,c.quantidade AS minimo,COUNT(q.id) AS cadastradas
+            FROM provas_liberacoes l
+            JOIN professores_materias_turmas pmt ON pmt.professor_id=l.professor_id AND pmt.materia_id=l.materia_id AND pmt.turma_id=l.turma_id AND pmt.ativo=TRUE
+            JOIN professores p ON p.id=l.professor_id AND p.ativo=TRUE
+            JOIN materias m ON m.id=l.materia_id JOIN turmas t ON t.id=l.turma_id
+            JOIN JSON_TABLE(COALESCE(l.composicao,JSON_ARRAY()),'$[*]' COLUMNS(assunto_id BIGINT PATH '$.assuntoId',peso DECIMAL(8,2) PATH '$.peso',quantidade INT PATH '$.quantidade')) c
+            JOIN assuntos a ON a.id=c.assunto_id
+            LEFT JOIN questoes q ON q.professor_id=l.professor_id AND q.materia_id=l.materia_id AND (a.nome='Geral' OR q.assunto_id=c.assunto_id) AND q.peso=c.peso AND q.ensino=t.ensino AND q.ano=t.ano
+              AND (q.abrangencia='ano' OR EXISTS(SELECT 1 FROM questoes_turmas qt WHERE qt.questao_id=q.id AND qt.turma_id=t.id))
+            WHERE l.professor_id=:professor_id
+            GROUP BY l.id,l.titulo,m.id,m.nome,t.id,t.ensino,t.ano,t.letra,a.id,a.nome,c.peso,c.quantidade
+            HAVING COUNT(q.id)<c.quantidade ORDER BY l.id,a.nome,c.peso
             """;
-        RowMapper<QuantidadeQuestoesTurma> mapper = (rs,n) -> new QuantidadeQuestoesTurma(
-            rs.getLong("materia_id"),rs.getString("materia"),rs.getLong("turma_id"),rs.getString("ensino"),rs.getInt("ano"),rs.getString("letra"),
-            rs.getInt("peso05"),rs.getInt("peso10"),rs.getInt("peso15"),rs.getInt("peso20"),rs.getObject("assunto_id",Long.class),rs.getString("assunto"));
-        return namedParameterJdbcTemplate.query(sql,new MapSqlParameterSource().addValue("professor_id",professorId),mapper);
+        return namedParameterJdbcTemplate.query(sql,new MapSqlParameterSource().addValue("professor_id",professorId),(rs,n)->new br.com.provas.model.entity.PendenciaComposicao(rs.getLong("liberacao_id"),rs.getString("titulo"),rs.getLong("materia_id"),rs.getString("materia"),rs.getLong("turma_id"),rs.getString("ensino"),rs.getInt("ano"),rs.getString("letra"),rs.getLong("assunto_id"),rs.getString("assunto"),rs.getBigDecimal("peso"),rs.getInt("minimo"),rs.getInt("cadastradas")));
     }
-
 }

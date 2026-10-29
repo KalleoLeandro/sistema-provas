@@ -13,7 +13,7 @@
   </div>
   @if(busy()){<p role="status">Processando arquivo…</p>}
   @if(resultado();as r){
-    @if(r.importados){<p class="form-feedback" role="status">{{r.importados}} aluno(s) importado(s) com sucesso.</p>}
+    @if(r.importados){<visual-aviso variant="success">{{r.importados}} aluno(s) importado(s) com sucesso.</visual-aviso>}
     @else{<p role="status">{{r.total}} aluno(s) no arquivo · {{r.validos}} válido(s) · {{r.erros.length}} erro(s).</p>}
     @if(r.erros.length){
       <visual-aviso>Corrija os erros e selecione o arquivo novamente. Nenhum aluno foi importado.</visual-aviso>

@@ -17,12 +17,12 @@ public class DashboardRepository {
     private final NamedParameterJdbcTemplate jdbc;
     private static final String BASE = """
         WITH notas AS (
-          SELECT tentativa_id,COALESCE(SUM(pontuacao),0) AS nota,
+          SELECT tentativa_id,COALESCE(SUM(pontuacao),0) AS nota,SUM(peso) AS valor_total,
             SUM(CASE WHEN tipo='discursiva' AND NULLIF(TRIM(resposta),'') IS NOT NULL AND pontuacao IS NULL THEN 1 ELSE 0 END) AS pendentes
           FROM provas_tentativas_questoes GROUP BY tentativa_id
         ), avaliacoes AS (
           SELECT a.id AS aluno_id,l.turma_id,t.ensino,t.ano,t.letra,pt.id AS tentativa_id,pt.submetida_em,
-            COALESCE(n.pendentes,0) AS pendentes,COALESCE(n.nota,0) AS nota
+            COALESCE(n.pendentes,0) AS pendentes,COALESCE(n.nota,0)/NULLIF(n.valor_total,0)*10 AS nota
           FROM provas_liberacoes l JOIN turmas t ON t.id=l.turma_id
           JOIN alunos_2026 a ON a.turma_id=l.turma_id AND a.status IN ('M','R')
           LEFT JOIN provas_tentativas pt ON pt.liberacao_id=l.id AND pt.aluno_id=a.id

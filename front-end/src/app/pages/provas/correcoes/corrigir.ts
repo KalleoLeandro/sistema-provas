@@ -11,6 +11,7 @@ import { ProvaCorrecao,QuestaoCorrecao,RascunhoCorrecao } from '../../../models/
 export class CorrigirProvaComponent implements OnInit,OnDestroy {
  private readonly api=inject(ApiService);private readonly route=inject(ActivatedRoute);private readonly id=Number(this.route.snapshot.paramMap.get('id'));
  readonly dados=signal<ProvaCorrecao|null>(null);readonly loading=signal(false);readonly saving=signal(false);readonly erro=signal('');readonly saved=signal(false);
+ get valorTotal(){return this.dados()?.questoes.reduce((sum,q)=>sum+q.peso,0)??0;}
  drafts:Record<number,RascunhoCorrecao>={};private visit=0;
  ngOnInit(){void this.load();}ngOnDestroy(){this.visit++;this.drafts={};}
  @HostListener('window:pagehide') clear(){this.visit++;this.drafts={};this.dados.set(null);this.saving.set(false);this.loading.set(false);}

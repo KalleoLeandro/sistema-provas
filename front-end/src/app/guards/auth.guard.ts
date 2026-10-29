@@ -9,9 +9,10 @@ export const authGuard: CanActivateChildFn = async (route, state) => {
   try {
     const usuario = await auth.restore();
     if (!usuario) return router.createUrlTree(['/login']);
+    if (usuario.trocarSenha && state.url !== '/trocar-senha') return router.createUrlTree(['/trocar-senha']);
     const perfis = route.data['perfis'] as Perfil[] | undefined;
     if (perfis && !perfis.includes(usuario.perfil)) {
-      return router.createUrlTree([usuario.perfil === 'aluno' ? '/aluno/provas' : '/dashboard']);
+      return router.createUrlTree([usuario.trocarSenha ? '/trocar-senha' : usuario.perfil === 'aluno' ? '/aluno/provas' : '/dashboard']);
     }
     return true;
   } catch {
@@ -27,7 +28,7 @@ export const guestGuard: CanActivateFn = async () => {
   try {
     const usuario = await auth.restore();
     return usuario
-      ? router.createUrlTree([usuario.perfil === 'aluno' ? '/aluno/provas' : '/dashboard'])
+      ? router.createUrlTree([usuario.trocarSenha ? '/trocar-senha' : usuario.perfil === 'aluno' ? '/aluno/provas' : '/dashboard'])
       : true;
   } catch {
     return router.createUrlTree(['/indisponivel'], { queryParams: { retorno: '/dashboard' } });

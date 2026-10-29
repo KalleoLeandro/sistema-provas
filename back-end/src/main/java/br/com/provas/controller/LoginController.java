@@ -60,10 +60,15 @@ public class LoginController {
 
 	@GetMapping("/me")
 	public LoginResponse me(@AuthenticationPrincipal LoginResponse usuario) {
-		return usuario;
-	}
-
-	@PostMapping("/refresh")
+		return service.current(usuario);
+ }
+ @PostMapping("/trocar-senha")
+ public void trocarSenha(@AuthenticationPrincipal LoginResponse usuario, @Valid @RequestBody br.com.provas.model.request.TrocarSenhaRequest body, HttpServletRequest request) {
+  service.changePassword(usuario,body.senhaAtual(),body.novaSenha());
+  request.getSession(false).invalidate();
+  SecurityContextHolder.clearContext();
+ }
+ @PostMapping("/refresh")
 	public SessionResponse refresh(@AuthenticationPrincipal LoginResponse usuario, HttpServletRequest request) {
 		return sessionService.refresh(request.getSession(false), usuario.perfil());
 	}

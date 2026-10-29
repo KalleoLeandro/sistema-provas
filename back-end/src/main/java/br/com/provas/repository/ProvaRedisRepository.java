@@ -37,7 +37,7 @@ public class ProvaRedisRepository {
   local deadline=tonumber(redis.call('HGET',KEYS[1],'deadline'));local expired=now>=deadline
   if ARGV[2]=='1' and not expired then return -5 end
   if not expired and ARGV[1]~='1' then
-   for i=1,10 do if (redis.call('HGET',KEYS[1],'a:'..i) or ''):match('^%s*$') then return -4 end end
+   for i=1,tonumber(redis.call('HGET',KEYS[1],'qtd') or '10') do if (redis.call('HGET',KEYS[1],'a:'..i) or ''):match('^%s*$') then return -4 end end
   end
   if expired then now=deadline end
   redis.call('HSET',KEYS[1],'status','sealed','sent',now,'auto',expired and '1' or '0')
@@ -47,14 +47,15 @@ public class ProvaRedisRepository {
  public Optional<EstadoProvaRedis> find(Long aluno,Long lib){
   String k=key(aluno,lib),json=redis.opsForValue().get(k+":copy");if(json==null)return Optional.empty();
   var values=redis.<String,String>opsForHash().entries(k+":state");if(!values.containsKey("deadline"))return Optional.empty();
+  var copy=mapper.readValue(json,TentativaProvaResponse.class);
   var answers=new LinkedHashMap<Integer,String>();var revisions=new LinkedHashMap<Integer,Long>();
-  for(int i=1;i<=10;i++){answers.put(i,values.getOrDefault("a:"+i,""));revisions.put(i,Long.valueOf(values.getOrDefault("r:"+i,"0")));}
-  var copy=mapper.readValue(json,TentativaProvaResponse.class);String status=values.get("status");
+  for(int i=1;i<=copy.questoes().size();i++){answers.put(i,values.getOrDefault("a:"+i,""));revisions.put(i,Long.valueOf(values.getOrDefault("r:"+i,"0")));}
+  String status=values.get("status");
   return Optional.of(new EstadoProvaRedis(Long.valueOf(values.get("id")),copy,answers,revisions,!"open".equals(status),"finished".equals(status),values.containsKey("sent")?Instant.ofEpochMilli(Long.parseLong(values.get("sent"))):null,"1".equals(values.get("auto"))));
  }
  public void initialize(TentativaProva attempt,TentativaProvaResponse copy){
   String k=key(attempt.alunoId(),attempt.liberacaoId());redis.opsForValue().setIfAbsent(k+":copy",mapper.writeValueAsString(copy));
-  var fields=new ArrayList<String>(List.of("id",attempt.id().toString(),"deadline",Long.toString(attempt.encerraEm().toEpochMilli()),"status",attempt.submetidaEm()==null?"open":"finished"));
+  var fields=new ArrayList<String>(List.of("qtd",Integer.toString(copy.questoes().size()),"id",attempt.id().toString(),"deadline",Long.toString(attempt.encerraEm().toEpochMilli()),"status",attempt.submetidaEm()==null?"open":"finished"));
   if(attempt.submetidaEm()!=null){fields.add("sent");fields.add(Long.toString(attempt.submetidaEm().toEpochMilli()));}
   for(var q:copy.questoes()){fields.add("a:"+q.numero());fields.add(q.resposta()==null?"":q.resposta());fields.add("r:"+q.numero());fields.add(Long.toString(q.revisao()));}
   redis.execute(INITIALIZE,List.of(k+":state"),fields.toArray());

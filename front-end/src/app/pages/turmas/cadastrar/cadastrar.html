@@ -57,7 +57,7 @@
         <visual-aviso>{{ erro() }}</visual-aviso>
       }
       @if (mensagem()) {
-        <p class="form-feedback" role="status">{{ mensagem() }}</p>
+        <visual-aviso variant="success">{{ mensagem() }}</visual-aviso>
       }
       @if(id){<div class="form-actions"><a botaoVisual variant="secondary" routerLink="/cadastro/turmas/listar">Cancelar</a><button botaoVisual type="submit" [disabled]="busy()||!!form.invalid">Salvar alterações</button></div>}@else{
       <visual-form-actions

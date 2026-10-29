@@ -1,1 +1,2 @@
-:host{display:block;padding:12px 16px;border:1px solid var(--cor-erro-borda);background:var(--cor-erro-fundo);color:var(--cor-erro);border-radius:var(--raio-padrao);font-size:14px;line-height:1.5}
+:host{display:block;width:fit-content;max-width:100%;box-sizing:border-box;overflow-wrap:anywhere;padding:12px 16px;border:1px solid var(--cor-erro-borda);background:var(--cor-erro-fundo);color:var(--cor-erro);border-radius:var(--raio-padrao);font-size:14px;line-height:1.5}
+:host(.aviso-sucesso){border-color:var(--cor-sucesso);background:var(--cor-sucesso-fundo);color:var(--cor-sucesso)}

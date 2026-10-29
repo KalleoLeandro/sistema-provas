@@ -136,4 +136,6 @@ describe('Cadastro múltiplo de questões', () => {
     expect(post).not.toHaveBeenCalled(); expect(navigate).toHaveBeenCalledWith('/questoes/listar');
   });
 
+
+  it('aplica máscara de peso com uma casa decimal',async()=>{const {fixture,form}=await validForm();const id=fixture.componentInstance.questoes[0].id;const input=fixture.nativeElement.querySelector('input[id^=peso-]') as HTMLInputElement;input.value='1,25';input.dispatchEvent(new Event('input',{bubbles:true}));await fixture.whenStable();expect(input.value).toBe('1,2');input.dispatchEvent(new Event('blur'));expect(input.value).toBe('1,2');await fixture.componentInstance.save(form,true);expect(post).toHaveBeenCalledWith('/questoes',expect.objectContaining({peso:1.2}));expect(fixture.nativeElement.querySelector('input[weightMask][id^=peso-]')).toBeTruthy();});
 });

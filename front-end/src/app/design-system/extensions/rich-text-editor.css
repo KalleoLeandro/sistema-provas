@@ -37,3 +37,7 @@
 
 .visual-rich-editor .rich-root-degree { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
 .visual-rich-editor .rich-root-degree input { width: 50px; min-height: 36px; border: 1px solid var(--cor-borda); border-radius: 6px; padding: 4px 6px; color: var(--cor-texto); background: var(--cor-fundo); }
+
+.visual-rich-editor .rich-symbol-categories { display:flex; flex-wrap:wrap; gap:6px; flex-basis:100%; padding-bottom:8px; border-bottom:1px solid var(--cor-borda); margin-bottom:4px; }
+.visual-rich-editor .rich-symbol-categories button { font-size:13px; }
+.visual-rich-editor .rich-symbol-categories button[aria-pressed="true"] { border-color:var(--cor-primaria); color:var(--cor-primaria); font-weight:600; }

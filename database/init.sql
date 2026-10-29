@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS usuarios_administrativos (
   nome VARCHAR(120) NOT NULL,
   login VARCHAR(120) NOT NULL,
   senha_hash VARCHAR(255) NOT NULL,
+  trocar_senha BOOLEAN NOT NULL DEFAULT TRUE,
   ativo BOOLEAN NOT NULL DEFAULT TRUE,
   master BOOLEAN NOT NULL DEFAULT FALSE,
   criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -84,6 +85,7 @@ CREATE TABLE IF NOT EXISTS professores (
   nome VARCHAR(120) NOT NULL,
   login VARCHAR(120) NOT NULL,
   senha_hash VARCHAR(255) NOT NULL,
+  trocar_senha BOOLEAN NOT NULL DEFAULT TRUE,
   ativo BOOLEAN NOT NULL DEFAULT TRUE,
   criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -290,3 +292,13 @@ UPDATE questoes_versoes q JOIN assuntos a ON a.materia_id=q.materia_id AND a.nom
 INSERT INTO provas_liberacoes_assuntos(liberacao_id,assunto_id) SELECT l.id,a.id FROM provas_liberacoes l JOIN assuntos a ON a.materia_id=l.materia_id AND a.nome='Geral';
 ALTER TABLE questoes MODIFY assunto_id BIGINT UNSIGNED NOT NULL,ADD CONSTRAINT fk_questao_assunto FOREIGN KEY(assunto_id,materia_id) REFERENCES assuntos(id,materia_id),ADD INDEX ix_questao_sorteio(professor_id,materia_id,ensino,ano,assunto_id,peso);
 ALTER TABLE questoes_versoes MODIFY assunto_id BIGINT UNSIGNED NOT NULL,ADD CONSTRAINT fk_versao_assunto FOREIGN KEY(assunto_id,materia_id) REFERENCES assuntos(id,materia_id);
+
+-- Pesos livres e configuração variável das provas.
+ALTER TABLE questoes MODIFY peso DECIMAL(8,2) NOT NULL;
+ALTER TABLE questoes_versoes MODIFY peso DECIMAL(8,2) NOT NULL;
+ALTER TABLE provas_tentativas_questoes MODIFY peso DECIMAL(8,2) NOT NULL,MODIFY pontuacao DECIMAL(8,2) NULL;
+ALTER TABLE provas_liberacoes ADD valor_total DECIMAL(11,2) NOT NULL DEFAULT 10,ADD quantidade_questoes SMALLINT UNSIGNED NOT NULL DEFAULT 10,ADD configuracao JSON NULL,ADD composicao JSON NULL;
+
+ALTER TABLE provas_tentativas_questoes DROP CHECK ck_tentativa_numero,ADD CONSTRAINT ck_tentativa_numero CHECK(numero BETWEEN 1 AND 200);
+
+ALTER TABLE provas_liberacoes ADD CONSTRAINT ck_liberacoes_quantidade CHECK(quantidade_questoes BETWEEN 3 AND 200),ADD CONSTRAINT ck_liberacoes_valor CHECK(valor_total>0);
